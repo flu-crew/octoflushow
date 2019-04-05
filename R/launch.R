@@ -2,5 +2,5 @@
 #'
 #' @export
 launch_app <- function(){
-  shiny::runApp(system.file("app", package='swinesurvey'))
+  shiny::runApp(system.file("app", package='wilbur'))
 }
