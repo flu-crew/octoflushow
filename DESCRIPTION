@@ -1,0 +1,13 @@
+Package: swineshine
+Title: A Shiny app for the swine surveillence data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Zebulun",
+           family = "Arendsee",
+           role = c("aut", "cre"),
+           email = "zebulun.arendsee@usda.gov")
+Description: Lets you see and search stuff
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
