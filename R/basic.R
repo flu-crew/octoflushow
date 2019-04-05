@@ -86,7 +86,7 @@ plot_basic <- function(d){
   subtype_palette <- c("#d7191c","#fdae61","#ffffbf","#abd9e9","#2C7FB8","#e0f3f8","#2c7bb6","#2c7bb6","#2c7bb6","#2c7bb6","#2c7bb6")
 
   d$ByMonth=d$Date
-  day(d$ByMonth)=1
+  lubridate::day(d$ByMonth)=1
 
   # Prepping ggplot input data (Current Version)
   summary.data = d %>%
@@ -94,8 +94,10 @@ plot_basic <- function(d){
       .$H1 = gsub(",.*","",.$H1)
       .
     } %>%
-    dplyr::group_by(., ByMonth, H1) %>%                                              # Group by Month and H1 clade (extend this to any segment H3, N1, N2, etc)
-    dplyr::summarise(n=n(),tot=nrow(.), per = round(n() / nrow(.)*100, digits = 2))  # Calculate summary statistics
+    dplyr::group_by(., ByMonth, H1) %>% # Group by Month and H1 clade (extend this to any segment H3, N1, N2, etc)
+    dplyr::summarise(n=dplyr::n(),
+                     tot=nrow(.),
+                     per = round(dplyr::n() / nrow(.)*100, digits = 2))  # Calculate summary statistics
 
   # example barchart
   ggplot2::ggplot(summary.data, ggplot2::aes(x=ByMonth, y=n, fill=H1)) +
