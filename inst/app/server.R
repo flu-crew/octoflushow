@@ -18,7 +18,7 @@ shinyServer(function(input, output) {
   output$downloadFigure <- downloadHandler(
     filename = function() {"swine-survey-plot.pdf"},
     content = function(file) {
-      ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=6)
+      ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
     }
   )
 })

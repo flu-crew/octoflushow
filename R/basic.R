@@ -141,14 +141,40 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
                      tot=nrow(.),
                      per=round(dplyr::n() / nrow(.)*100, digits = 2))  # Calculate summary statistics
 
-  ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
+  summary.data$Date <- as.POSIXct(summary.data$Date)
+
+  title_suffix <- if(byMonth){ "month" } else { "day" } 
+
+  unscaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position="stack") +
-    ggplot2::theme_bw() +
+    # ggplot2::theme_bw() +
+    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", title_suffix)) +
     ggplot2::scale_fill_manual(values=segment_palette) +
+    # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
     ggplot2::theme(
       axis.text.x     = ggplot2::element_text(angle=90, size=10, vjust=0.5),
-      legend.title    = ggplot2::element_blank(),
+      legend.title    = element_blank(),
+      legend.position = "none", # no legend since it will be the same as the scaled fig
+      strip.text      = ggplot2::element_text(size=12),
+    ) +
+    labs(x="", y="Number of Swine Isolates") # also fix the x and y axis labels...
+
+  scaled <- ggplot(summary.data, aes(x=Date, y=n, fill=Segment)) +
+    geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
+    # ggplot2::theme_bw() +
+    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", title_suffix)) +
+    # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
+    scale_fill_manual(values=segment_palette)+
+    theme(
+      axis.text.x     = element_text(angle=90, size=10,vjust=0.5),
+      legend.title    = element_blank(),
       legend.position = "bottom",
-      strip.text.x    = ggplot2::element_text(size=14)
-    )
+      strip.text      = element_text(size=12)
+    ) +
+    labs(x="", y="Swine Isolates by %") # also fix the x and y axis labels...
+
+  legend <- cowplot::get_legend(scaled)
+  scaled <- scaled + theme(legend.position = "none")
+
+  cowplot::plot_grid(unscaled, scaled, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
 }
