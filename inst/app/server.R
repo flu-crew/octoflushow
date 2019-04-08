@@ -10,6 +10,6 @@ shinyServer(function(input, output) {
   })
 
   output$basic_plot <- renderPlot({
-    wilbur::plot_basic(d_rct())
+    wilbur::plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
   })
 })
