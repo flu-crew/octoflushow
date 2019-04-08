@@ -4,10 +4,14 @@
 \alias{plot_basic}
 \title{Make a basic barplot of the data}
 \usage{
-plot_basic(d)
+plot_basic(d, segment = "H1", byMonth = TRUE)
 }
 \arguments{
 \item{d}{data.frame swine surveillance data (i.e., output or \code{load_current})}
+
+\item{segment}{The influenze segment that will be plotted [H1,H3,N1,N3,PB2,PB1,PA,NP,M,NS]}
+
+\item{byMonth}{Should be plot be by month (if FALSE, then it will be by day)}
 }
 \value{
 ggplot object

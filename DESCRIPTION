@@ -22,6 +22,7 @@ Imports:
     ggplot2,
     magrittr,
     readxl,
+    reshape2,
     shiny,
     lubridate,
     zoo
