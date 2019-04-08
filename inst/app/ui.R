@@ -24,12 +24,12 @@ shinyUI(pageWithSidebar(
       choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
       inline   = TRUE,
       selected = "H1"
-    ),
-    downloadButton("downloadFigure", "Download Figure")
+    )
   ),
 
   # Show a plot of the generated distribution
   mainPanel(
-    plotOutput("basic_plot")
+    plotOutput("basic_plot"),
+    downloadButton("downloadFigure", "Download Figure")
   )
 ))
