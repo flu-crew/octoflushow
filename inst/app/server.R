@@ -9,7 +9,16 @@ shinyServer(function(input, output) {
     subset(d, Date >= input$dateRange[1] & Date <= input$dateRange[2])
   })
 
-  output$basic_plot <- renderPlot({
+  basic_plot_rct <- reactive({
     wilbur::plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
   })
+
+  output$basic_plot <- renderPlot({ print(basic_plot_rct()) })
+
+  output$downloadFigure <- downloadHandler(
+    filename = function() {"swine-survey-plot.pdf"},
+    content = function(file) {
+      ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=6)
+    }
+  )
 })
