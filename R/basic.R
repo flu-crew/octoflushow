@@ -185,28 +185,28 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
     ggplot2::theme(
       axis.text.x     = ggplot2::element_text(angle=90, size=10, vjust=0.5),
-      legend.title    = element_blank(),
+      legend.title    = ggplot2::element_blank(),
       legend.position = "none", # no legend since it will be the same as the scaled fig
       strip.text      = ggplot2::element_text(size=12),
     ) +
-    labs(x="", y="Number of Swine Isolates") # also fix the x and y axis labels...
+    ggplot2::labs(x="", y="Number of Swine Isolates") # also fix the x and y axis labels...
 
-  scaled <- ggplot(summary.data, aes(x=Date, y=n, fill=Segment)) +
-    geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
+  scaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
+    ggplot2::geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
     # ggplot2::theme_bw() +
     ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", title_suffix)) +
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
-    scale_fill_manual(values=segment_palette)+
-    theme(
-      axis.text.x     = element_text(angle=90, size=10,vjust=0.5),
-      legend.title    = element_blank(),
+    ggplot2::scale_fill_manual(values=segment_palette)+
+    ggplot2::theme(
+      axis.text.x     = ggplot2::element_text(angle=90, size=10,vjust=0.5),
+      legend.title    = ggplot2::element_blank(),
       legend.position = "bottom",
-      strip.text      = element_text(size=12)
+      strip.text      = ggplot2::element_text(size=12)
     ) +
-    labs(x="", y="Swine Isolates by %") # also fix the x and y axis labels...
+    ggplot2::labs(x="", y="Swine Isolates by %") # also fix the x and y axis labels...
 
   legend <- cowplot::get_legend(scaled)
-  scaled <- scaled + theme(legend.position = "none")
+  scaled <- scaled + ggplot2::theme(legend.position = "none")
 
   cowplot::plot_grid(unscaled, scaled, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
 }
@@ -218,23 +218,23 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
 # Make sure all states are there, rename states to regions for plotting maps
 prepStateNames <- function(state_str){
   state_str = as.character(state_str) %>% {
-    . = case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
-                  .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
-                  .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",  
-                  .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",  
-                  .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",  
-                  .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",  
-                  .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",  
-                  .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",  
-                  .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",  
-                  .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",  
-                  .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico", 
-                  .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",  
-                  .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",  
-                  .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota", 
-                  .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",  
-                  .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",  
-                  .=="WI"~"wisconsin", .=="WV"~"west virginia", .=="WY"~"wyoming")
+    . = dplyr::case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
+                         .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
+                         .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",  
+                         .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",  
+                         .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",  
+                         .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",  
+                         .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",  
+                         .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",  
+                         .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",  
+                         .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",  
+                         .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico", 
+                         .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",  
+                         .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",  
+                         .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota", 
+                         .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",  
+                         .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",  
+                         .=="WI"~"wisconsin", .=="WV"~"west virginia", .=="WY"~"wyoming")
   } %>% factor(.,
                levels=c("alaska","alabama","arkansas","arizona","california","colorado","connecticut",
                         "district of columbia","delaware","florida","georgia","hawaii","iowa","idaho",
@@ -262,8 +262,8 @@ facetMaps <- function(df, segment){
   cdata <- df %>% subset(.,State!="NoState" ) %>%
     subset(. ,!is.na(.[[segment]])) %>%
     dplyr::mutate(region=prepStateNames(State)) %>%
-    dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
-    melt(id="region") 
+    reshape2::dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
+    reshape2::melt(id="region") 
 
   data_geo <- cdata %>%
     merge(states,., by="region",all.x=T) %>%
