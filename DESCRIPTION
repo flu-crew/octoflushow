@@ -23,6 +23,7 @@ Imports:
     DT,
     ggplot2,
     magrittr,
+    maps,
     readxl,
     reshape2,
     scales,

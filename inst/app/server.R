@@ -9,16 +9,36 @@ shinyServer(function(input, output) {
     subset(d, Date >= input$dateRange[1] & Date <= input$dateRange[2])
   })
 
-  basic_plot_rct <- reactive({
-    wilbur::plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
+  output$selected_plot <- renderPlot({
+    if(input$plotChoice == "state"){
+      print(state_plot_rct())
+    } else {
+      print(basic_plot_rct())
+    }
   })
 
-  output$basic_plot <- renderPlot({ print(basic_plot_rct()) })
+  basic_plot_rct <- reactive({
+    plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
+  })
 
-  output$downloadFigure <- downloadHandler(
-    filename = function() {"swine-survey-plot.pdf"},
-    content = function(file) {
-      ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
+  state_plot_rct <- reactive({
+    facetMaps(d_rct(), segment=input$segmentChoice)
+  })
+
+  output$download_selected_plot <- downloadHandler(
+    filename = function() {
+      if(input$plotChoice == "state"){
+        "swine-survey-state_plot.pdf"
+      } else {
+        "swine-survey-basic_plot.pdf"
+      }
+    },
+    content = function(file){
+      if(input$plotChoice == "state"){
+        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width=8, height=6)
+      } else {
+        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
+      }
     }
   )
 

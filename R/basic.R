@@ -78,6 +78,33 @@ load_current <- function(){
   my.data
 }
 
+clean_data <- function(d, remove_mixed=TRUE){
+  if(remove_mixed){
+    # e.g., ("unknown,TRIG" -> "unknown")
+    d$H1  <- gsub(",.*", "", d$H1)
+    d$H3  <- gsub(",.*", "", d$H3)
+    d$N1  <- gsub(",.*", "", d$N1)
+    d$N2  <- gsub(",.*", "", d$N2)
+    d$PB2 <- gsub(",.*", "", d$PB2)
+    d$PB1 <- gsub(",.*", "", d$PB1)
+    d$PA  <- gsub(",.*", "", d$PA)
+    d$NP  <- gsub(",.*", "", d$NP)
+    d$M   <- gsub(",.*", "", d$M)
+    d$NS  <- gsub(",.*", "", d$NS)
+  }
+
+  d
+}
+
+order_data_factors <- function(d){
+  H3_order <- c("2010.1","2010.2","other-human","I","II","III","IV","IV-A","IV-B","IV-C","IV-D","IV-E","IV-F","No_data")
+  N1_order <- c("Classical","Pandemic","Human_seasonal","MN99","No_data")
+  d$H1 <- factor(d$H1)
+  d$H3 <- factor(d$H3, ordered=TRUE, levels=H3_order)
+  d$N1 <- factor(d$N1, ordered=TRUE, levels=N1_order)
+  d
+}
+
 #' Make a basic barplot of the data
 #'
 #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
@@ -129,6 +156,8 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
   # The input data must have a Date column
   stopifnot("Date" %in% names(d))
 
+  d <- order_data_factors(clean_data(d))
+
   if(byMonth){
     lubridate::day(d$Date) <- 1
   }
@@ -137,22 +166,6 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
   m <- d[, c("Date", segment)]
   names(m)[2] <- "Segment"
   m <- subset(m, !is.na(Segment))
-  # e.g., ("unknown,TRIG" -> "unknown")
-  m$Segment <- gsub(",.*", "", m$Segment)
-
-  # --- segment-specific prep -----------------------
-  if(segment == "H1"){
-    m$Segment <- factor(m$Segment)
-  }
-  else if(segment == "H3"){
-    H3_order <- c("2010.1","2010.2","other-human","I","II","III","IV","IV-A","IV-B","IV-C","IV-D","IV-E","IV-F","No_data")
-    m$Segment <- factor(m$Segment, ordered=TRUE, levels=H3_order)
-  }
-  else if(segment == "N1"){
-    N1_order <- c("Classical","Pandemic","Human_seasonal","MN99","No_data")
-    m$Segment <- factor(m$Segment, ordered=TRUE, levels=N1_order)
-  }
-  # -------------------------------------------------
 
   summary.data <- m %>%
     dplyr::group_by(Date, Segment) %>%
@@ -196,4 +209,79 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
   scaled <- scaled + theme(legend.position = "none")
 
   cowplot::plot_grid(unscaled, scaled, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
+}
+
+
+# ===== State plots
+# state stuff starts here...
+
+# Make sure all states are there, rename states to regions for plotting maps
+prepStateNames <- function(state_str){
+  state_str = as.character(state_str) %>% {
+    . = case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
+                  .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
+                  .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",  
+                  .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",  
+                  .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",  
+                  .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",  
+                  .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",  
+                  .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",  
+                  .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",  
+                  .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",  
+                  .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico", 
+                  .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",  
+                  .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",  
+                  .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota", 
+                  .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",  
+                  .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",  
+                  .=="WI"~"wisconsin", .=="WV"~"west virginia", .=="WY"~"wyoming")
+  } %>% factor(.,
+               levels=c("alaska","alabama","arkansas","arizona","california","colorado","connecticut",
+                        "district of columbia","delaware","florida","georgia","hawaii","iowa","idaho",
+                        "illinois","indiana","kansas","kentucky","louisiana","massachusetts","maryland",
+                        "maine","michigan","minnesota","missouri","mississippi","montana","north carolina",
+                        "north dakota","nebraska","new hampshire","new jersey","new mexico","nevada",
+                        "new york","ohio","oklahoma","oregon","pennsylvania","rhode island","south carolina",
+                        "south dakota","tennessee","texas","utah","virginia","vermont","washington","wisconsin",
+                        "west virginia","wyoming"))
+  return(state_str)
+}
+
+#' Make state map
+#'
+#' @param df the input surveyllance data
+#' @param segment the column to facet by
+#' @export
+facetMaps <- function(df, segment){
+  df <- order_data_factors(clean_data(df))
+
+  # get states long and lat values
+  states <- ggplot2::map_data("state")
+
+  # add info
+  cdata <- df %>% subset(.,State!="NoState" ) %>%
+    subset(. ,!is.na(.[[segment]])) %>%
+    dplyr::mutate(region=prepStateNames(State)) %>%
+    dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
+    melt(id="region") 
+
+  data_geo <- cdata %>%
+    merge(states,., by="region",all.x=T) %>%
+    dplyr::arrange(order)
+
+  # Labels
+  snames <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y)
+  snames <- merge(snames, cdata, by="region")
+
+  # do not label zeros
+  snames$value[snames$value=="0"]=""
+
+  #plot, viridae color palette?
+  ggplot2::ggplot() + 
+    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=log(value)),color="lightgrey") + 
+    ggplot2::scale_fill_gradient2(low="white", mid = "#43a2ca",high="#0868ac", midpoint = 3, guide="colorbar") +
+    ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=value)) +
+    ggplot2::theme_void() + ggplot2::theme(legend.position = "none",text=ggplot2::element_text(size=28)) +
+    ggplot2::facet_wrap(~variable) +
+    ggplot2::coord_fixed(1.3)
 }
