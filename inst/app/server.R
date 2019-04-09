@@ -21,4 +21,25 @@ shinyServer(function(input, output) {
       ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
     }
   )
+
+  output$raw_data_table <- DT::renderDataTable(
+    d,
+    filter="top",
+    rownames=FALSE,
+    style="bootstrap",
+    selection=list(
+      mode="single",
+      target="column",
+      selected=0
+    ),
+    extensions = c("Buttons", "ColReorder"),
+    options = list(
+      dom = 'RCT<"clear">lfrtip',
+      buttons = I('colvis'),
+      autoWidth=FALSE,
+      orderMulti=TRUE,
+      searching=TRUE,
+      search.regex=TRUE
+    )
+  )
 })

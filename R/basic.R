@@ -56,6 +56,25 @@ load_current <- function(){
   my.data$NP <- my.data$NP %>% fixIGnames(.)
   my.data$M <- my.data$M %>% fixIGnames(.)
   my.data$NS <- my.data$NS %>% fixIGnames(.)
+
+
+  my.data$State <- factor(my.data$State)
+  my.data$Subtype <- factor(my.data$Subtype)
+  my.data$US_Clade <- factor(my.data$US_Clade)
+  my.data$GL_Clade <- factor(my.data$GL_Clade)
+  my.data$check <- factor(my.data$check)
+
+  my.data$H1 <- factor(my.data$H1)
+  my.data$H3 <- factor(my.data$H3)
+  my.data$N1 <- factor(my.data$N1)
+  my.data$N2 <- factor(my.data$N2)
+  my.data$PB2 <- factor(my.data$PB2)
+  my.data$PB1 <- factor(my.data$PB1)
+  my.data$PA <- factor(my.data$PA)
+  my.data$NP <- factor(my.data$NP)
+  my.data$M <- factor(my.data$M)
+  my.data$NS <- factor(my.data$NS)
+
   my.data
 }
 
