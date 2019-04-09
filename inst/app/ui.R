@@ -3,8 +3,8 @@ library(shiny)
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
     "Raw Data",
-    downloadButton("downloadData", "Download Data"),
-    DT::dataTableOutput("raw_data_table")
+    DT::dataTableOutput("raw_data_table"),
+    downloadButton("downloadData", "Download Data")
   ),
   tabPanel(
     "Basic plots",
