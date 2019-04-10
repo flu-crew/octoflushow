@@ -36,7 +36,7 @@ shinyUI(navbarPage("Swine Surveillance App",
       mainPanel(
         plotOutput("selected_plot")
       )
-    )
-  ),
-  DT::dataTableOutput("raw_data_table")
+    ),
+    DT::dataTableOutput("raw_data_table")
+  )
 ))
