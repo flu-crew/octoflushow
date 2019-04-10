@@ -2,11 +2,6 @@ library(shiny)
 
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
-    "Raw Data",
-    DT::dataTableOutput("raw_data_table"),
-    downloadButton("downloadData", "Download Data")
-  ),
-  tabPanel(
     "Basic plots",
     sidebarLayout(
       sidebarPanel(
@@ -28,11 +23,20 @@ shinyUI(navbarPage("Swine Surveillance App",
           choices = list("basic", "state"),
           inline = TRUE,
           selected = "basic"
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_selected_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("downloadData", "Download Data")
         )
       ),
       mainPanel(
-        plotOutput("selected_plot"),
-        downloadButton("download_selected_plot", "Download Figure")
+        plotOutput("selected_plot")
       )
-  ))
+    )
+  ),
+  DT::dataTableOutput("raw_data_table")
 ))
