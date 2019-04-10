@@ -6,7 +6,8 @@ d <- wilbur::load_current()
 shinyServer(function(input, output) {
 
   d_rct <- reactive({
-    subset(d, Date >= input$dateRange[1] & Date <= input$dateRange[2])
+      row_indices <- input$raw_data_table_rows_all
+      d[row_indices, ]
   })
 
   output$selected_plot <- renderPlot({
@@ -16,6 +17,7 @@ shinyServer(function(input, output) {
       print(basic_plot_rct())
     }
   })
+
 
   basic_plot_rct <- reactive({
     plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
