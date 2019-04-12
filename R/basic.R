@@ -109,10 +109,12 @@ order_data_factors <- function(d){
 #'
 #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
 #' @param segment The influenze segment that will be plotted [H1,H3,N1,N3,PB2,PB1,PA,NP,M,NS]
-#' @param byMonth Should be plot be by month (if FALSE, then it will be by day)
+#' @param floorDateBy An argument that is passed to
+#' \code{lubridate::floor_date} specifying how to group dates (e.g., "month",
+#' "week", "3 months", "year")
 #' @export
 #' @return ggplot object
-plot_basic <- function(d, segment="H1", byMonth=TRUE){
+plot_basic <- function(d, segment="H1", floorDateBy="month"){
   # ===== Basic Counting and plotting
   # ==== Colors and Order of names
   # Stacked bar chart for phylocluster by month
@@ -158,9 +160,7 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
 
   d <- order_data_factors(clean_data(d))
 
-  if(byMonth){
-    lubridate::day(d$Date) <- 1
-  }
+  d$Date <- lubridate::floor_date(d$Date, floorDateBy)
 
   # Get user-provided segment
   m <- d[, c("Date", segment)]
@@ -175,12 +175,10 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
 
   summary.data$Date <- as.POSIXct(summary.data$Date)
 
-  title_suffix <- if(byMonth){ "month" } else { "day" } 
-
   unscaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position="stack") +
     # ggplot2::theme_bw() +
-    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", title_suffix)) +
+    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
     ggplot2::scale_fill_manual(values=segment_palette) +
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
     ggplot2::theme(
@@ -194,7 +192,7 @@ plot_basic <- function(d, segment="H1", byMonth=TRUE){
   scaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
     # ggplot2::theme_bw() +
-    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", title_suffix)) +
+    ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
     ggplot2::scale_fill_manual(values=segment_palette)+
     ggplot2::theme(

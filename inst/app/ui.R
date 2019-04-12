@@ -5,10 +5,12 @@ shinyUI(navbarPage("Swine Surveillance App",
     "Basic plots",
     sidebarLayout(
       sidebarPanel(
-        checkboxInput(
-          "byMonth",
-          label = "Plot by month",
-          value = TRUE
+        radioButtons(
+          "floorDateBy",
+          label = "Plot dates by",
+          choices = list("day", "week", "month", "quarter", "year"),
+          inline = TRUE,
+          selected = "month"
         ),
         radioButtons(
           "segmentChoice",

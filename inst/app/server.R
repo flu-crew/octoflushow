@@ -20,7 +20,7 @@ shinyServer(function(input, output) {
 
 
   basic_plot_rct <- reactive({
-    plot_basic(d_rct(), byMonth=input$byMonth, segment=input$segmentChoice)
+    plot_basic(d_rct(), floorDateBy=input$floorDateBy, segment=input$segmentChoice)
   })
 
   state_plot_rct <- reactive({
