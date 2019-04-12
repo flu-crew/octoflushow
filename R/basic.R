@@ -58,22 +58,22 @@ load_current <- function(){
   my.data$NS <- my.data$NS %>% fixIGnames(.)
 
 
-  my.data$State <- factor(my.data$State)
-  my.data$Subtype <- factor(my.data$Subtype)
-  my.data$US_Clade <- factor(my.data$US_Clade)
-  my.data$GL_Clade <- factor(my.data$GL_Clade)
-  my.data$check <- factor(my.data$check)
+  my.data$State <- droplevels(factor(my.data$State))
+  my.data$Subtype <- droplevels(factor(my.data$Subtype))
+  my.data$US_Clade <- droplevels(factor(my.data$US_Clade))
+  my.data$GL_Clade <- droplevels(factor(my.data$GL_Clade))
+  my.data$check <- droplevels(factor(my.data$check))
 
-  my.data$H1 <- factor(my.data$H1)
-  my.data$H3 <- factor(my.data$H3)
-  my.data$N1 <- factor(my.data$N1)
-  my.data$N2 <- factor(my.data$N2)
-  my.data$PB2 <- factor(my.data$PB2)
-  my.data$PB1 <- factor(my.data$PB1)
-  my.data$PA <- factor(my.data$PA)
-  my.data$NP <- factor(my.data$NP)
-  my.data$M <- factor(my.data$M)
-  my.data$NS <- factor(my.data$NS)
+  my.data$H1 <- droplevels(factor(my.data$H1))
+  my.data$H3 <- droplevels(factor(my.data$H3))
+  my.data$N1 <- droplevels(factor(my.data$N1))
+  my.data$N2 <- droplevels(factor(my.data$N2))
+  my.data$PB2 <- droplevels(factor(my.data$PB2))
+  my.data$PB1 <- droplevels(factor(my.data$PB1))
+  my.data$PA <- droplevels(factor(my.data$PA))
+  my.data$NP <- droplevels(factor(my.data$NP))
+  my.data$M <- droplevels(factor(my.data$M))
+  my.data$NS <- droplevels(factor(my.data$NS))
 
   my.data
 }
@@ -99,9 +99,9 @@ clean_data <- function(d, remove_mixed=TRUE){
 order_data_factors <- function(d){
   H3_order <- c("2010.1","2010.2","other-human","I","II","III","IV","IV-A","IV-B","IV-C","IV-D","IV-E","IV-F","No_data")
   N1_order <- c("Classical","Pandemic","Human_seasonal","MN99","No_data")
-  d$H1 <- factor(d$H1)
-  d$H3 <- factor(d$H3, ordered=TRUE, levels=H3_order)
-  d$N1 <- factor(d$N1, ordered=TRUE, levels=N1_order)
+  d$H1 <- droplevels(factor(d$H1))
+  d$H3 <- droplevels(factor(d$H3, ordered=TRUE, levels=H3_order))
+  d$N1 <- droplevels(factor(d$N1, ordered=TRUE, levels=N1_order))
   d
 }
 
