@@ -1,3 +1,14 @@
+# # TODO: finish this function for importing new files
+# #' Load a new swine surveillance report
+# #'
+# #' @param filename The name of an excel file
+# #' @param sheet The sheet in the excel file that containsq
+# #' @export
+# load_new_file <- function(filename sheet=1){
+#   my.data <- readxl::read_excel(infile, sheet = sheet, col_types = "text")
+#
+# }
+
 #' Load the current swine surveillance data
 #'
 #' @export
