@@ -129,38 +129,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
   # ===== Basic Counting and plotting
   # ==== Colors and Order of names
   # Stacked bar chart for phylocluster by month
-
-  # NOTE: currently the subtype palette is not used
-  subtype_palette <- c("#d7191c","#fdae61","#ffffbf","#abd9e9","#2C7FB8","#e0f3f8","#2c7bb6","#2c7bb6","#2c7bb6","#2c7bb6","#2c7bb6")
-  internalgene_palette <- c("TRIG"="#C2A5CF","PDM"="#762A83","unknown"="#800000","TX98"="#C7EAE5")
-  segment_palette <- switch(
-    segment,
-    H1 = c("alpha"="#543005", "beta"="#8c510a", "gamma"="#80cdc1",
-           "gamma2"="#35978f", "delta1"="#bf812d", "delta1a"="#dfc27d",
-           "delta1b"="#f6e8c3", "delta2"="#c7eae5", "pandemic"="#01665e",
-           "gamma2-beta-like"="#60b0f4", "No_data"="#EDF8B1"),
-    H3 = c("2010.1"="#999999", "2010.2"="#996633", "other-human"="#F90005",
-           "I"="#542788", "II"="#d73027", "III"="#2166AC", "IV"="#E69F00",
-           "IV-A"="#56B4E9", "IV-B"="#009E73", "IV-C"="#F0E442",
-           "IV-D"="#0072B2", "IV-E"="#D55E00", "IV-F"="#CC79A7",
-           "No_data"="#EDF8B1"),
-    N1 = c("Classical"="#FEB24C", "Pandemic"="#F03B20",
-           "Human_seasonal"="#BD2D2B", "MN99"="#91BFDB", "No_data"="#EDF881"),
-    N2 = c("1998"="#7FCDBB", "98"="#7FCDBB", "98A" ="#78c8b4",
-           "98A1"="#1b7837", "98A2"="#9970ab", "98B"="#82d2be",
-           "98B1"="#5aae61", "98B2"="#762a83", "2002"="#2C7FB8",
-           "02"="#2C7FB8", "02A" ="#2878b4", "02A1"="#d6604d",
-           "02A2"="#b2182b", "02B"="#3282be", "02B1"="#d1e5f0",
-           "02B2"="#fddbc7", "Human-like"="#1F38FF", "Human_N2"="#969696",
-           "Human-to-swine_2016"="#1F38FF", "Human-like_2010.2"="#996633",
-           "2016"="#996633", "TX98"="#C7EAE5", "No_data"="#EDF8B1"),
-    PB2 = internalgene_palette,
-    PB1 = internalgene_palette,
-    PA = internalgene_palette,
-    NP = internalgene_palette,
-    M = internalgene_palette,
-    NS = internalgene_palette
-  )
+  segment_palette <- strain_palette[[segment]]
 
   # Die if the segment is not correctly named
   stopifnot(segment %in% c("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"))
