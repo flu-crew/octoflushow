@@ -1,12 +1,7 @@
-h3_test_tree <- function(){
-  tre <- system.file("app-data", "H3.tre", package="wilbur")
-  treeio::as.treedata(treeio::read.tree(tre))
-}
-
-plot_tree <- function(tre, ...){
-  ggplot2::ggplot(tre, ggplot2::aes(x,y)) +
-    ggtree::geom_tree() +
-    ggtree::theme_tree()
+string_to_dataframe <- function(const){
+  x <- strsplit(const, "") 
+  x[is.na(x)] <- NULL
+  matrix(unlist(x), ncol=6, byrow=TRUE)
 }
 
 #' Extract the strain name from a vector of strings
@@ -67,3 +62,5 @@ add_tip_data_by_strain_name <- function(tre, dat, by="Strain"){
   tre@data <- tibble::as_data_frame(d)
   tre
 }
+
+

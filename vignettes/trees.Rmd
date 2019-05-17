@@ -1,0 +1,51 @@
+---
+title: "trees"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{trees}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(wilbur)
+```
+
+```{r load_tree}
+dat <- load_current() # this should contain all the entries in the H3 file ...
+tre <- system.file("app-data", "H3.tre", package="wilbur") %>%
+  treeio::read.tree() %>%
+  phangorn::midpoint() %>%
+  treeio::as.treedata()
+tre <- add_tip_data_by_strain_name(tre, dat)
+```
+
+```{r tree1}
+tre@data$host <- sub("[^|]+\\|A/([^/]+)/.*", "\\1", tre@data$header)
+ggtree::ggtree(tre) +
+  ggtree::geom_tree() +
+  ggtree::theme_tree() +
+  ggtree::geom_tiplab(ggplot2::aes(label=header), size=2) +
+  ggtree::geom_tippoint(ggplot2::aes(color=host)) +
+  # rectangles
+  ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "2010.2")$node)) +
+  ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV")$node)) +
+  ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-B")$node)) +
+  ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-E", fill="grey")$node)) +
+  # labels
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "2010.1")$node), offset=0.030, label="2010.1") +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "2010.2")$node), offset=0.030, label="2010.2") +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "I")$node),      offset=0.030, label="I")      +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV")$node),     offset=0.030, label="IV")     +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-A")$node),   offset=0.030, label="IV-A")   +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-B")$node),   offset=0.030, label="IV-B")   +
+  ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-E")$node),   offset=0.030, label="IV-E")   +
+  ggplot2::theme(legend.position=c(0.1, 0.8))
+```
