@@ -24,16 +24,14 @@ tre <- system.file("app-data", "H3.tre", package="wilbur") %>%
   treeio::read.tree() %>%
   phangorn::midpoint() %>%
   treeio::as.treedata()
-tre <- add_tip_data_by_strain_name(tre, dat)
+tre <- add_data(tre, dat, by="Strain", fun=extract_strain_name)
 ```
 
 ```{r tree1}
-tre@data$host <- sub("[^|]+\\|A/([^/]+)/.*", "\\1", tre@data$header)
 ggtree::ggtree(tre) +
   ggtree::geom_tree() +
   ggtree::theme_tree() +
-  ggtree::geom_tiplab(ggplot2::aes(label=header), size=2) +
-  ggtree::geom_tippoint(ggplot2::aes(color=host)) +
+  ggtree::geom_tiplab(ggplot2::aes(label=Strain), size=2) +
   # rectangles
   ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "2010.2")$node)) +
   ggtree::geom_hilight(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV")$node)) +
@@ -48,4 +46,40 @@ ggtree::ggtree(tre) +
   ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-B")$node),   offset=0.030, label="IV-B")   +
   ggtree::geom_cladelabel(node=ggtree::MRCA(tre, subset(tre@data, H3 == "IV-E")$node),   offset=0.030, label="IV-E")   +
   ggplot2::theme(legend.position=c(0.1, 0.8))
+```
+
+## H1
+
+```{r h1tree}
+h1_tre <- load_tree(system.file("app-data", "H1.tre", package="wilbur"))
+dat <- load_current()
+
+fun.tre <- function(x){
+  sub(pattern="REF|", replacement="", x) %>%
+    sub(perl=TRUE, pattern="([^|]+\\|[^|]+).*", replacement="\\1")
+}
+
+fun.dat <- function(gbid, strain){
+  paste0(gbid, "|", strain)
+}
+
+h1_tre <- add_data(
+  h1_tre,
+  dat,
+  by=c("H_Genbank", "Strain"), # pass these two columns to fun.dat
+  fun.dat=fun.dat,             # paste the values together separated by '|'
+  fun.tre=fun.tre              # extract '<genbank>|<strain>'
+)
+
+tre <- group_by_nested_clade(tre=h1_tre, by="H1", to="clade", na.rm=TRUE)
+
+palette <- strain_palette$H1
+tre@data$PB2 <- factor(sub(",.*", "", tre@data$PB2))
+ggplot2::ggplot(tre, ggplot2::aes(x,y)) +
+  ggtree::geom_tree(ggplot2::aes(color = clade)) +
+  ggplot2::scale_color_manual(values=palette) +
+  ggnewscale::new_scale_color() +
+  ggtree::geom_tiplab(ggplot2::aes(subset=!is.na(PB2), label=name, color=PB2), size=1) +
+  ggplot2::scale_color_manual(values=c("black", "orange", "blue")) +
+  wilbur_theme()
 ```
