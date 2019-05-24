@@ -88,9 +88,6 @@ add_data <- function(
 
   dat$node <- match(do.call(fun.dat, unname(as.list(dat[, by]))), fun.tre(by.x))
   treedat <- dplyr::left_join(tre@data, dat, by="node")
-  if(all("node" %in% names(tre@data))){
-    treedat <- dplyr::left_join(treedat, tre@data, by="node")
-  }
   tre@data <- treedat
 
   return(tre)
@@ -124,25 +121,4 @@ group_by_nested_clade <- function(tre, by, to, na.rm=TRUE){
     tre@data[[to]][tidytree::offspring(tre@phylo, mrcas[[n]], tiponly=FALSE, self_include=TRUE)] <- n
   }
   tre
-}
-
-plot_tree_2color <- function(){
-  
-}
-
-#' Default tree theme for wilbur figures
-#' 
-#' @return ggplot2 theme
-wilbur_theme <- function(){
-  ggplot2::theme_classic() +
-    ggplot2::theme(
-      axis.line.x = ggplot2::element_blank(),
-      axis.text.x = ggplot2::element_blank(),
-      axis.ticks.x = ggplot2::element_blank(),
-      axis.line.y = ggplot2::element_blank(),
-      axis.text.y = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
-      axis.title.x = ggplot2::element_blank(),
-      axis.title.y = ggplot2::element_blank()
-    )
 }

@@ -129,7 +129,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
   # ===== Basic Counting and plotting
   # ==== Colors and Order of names
   # Stacked bar chart for phylocluster by month
-  segment_palette <- strain_palette[[segment]]
 
   # Die if the segment is not correctly named
   stopifnot(segment %in% c("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"))
@@ -137,6 +136,9 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
   stopifnot(segment %in% names(d))
   # The input data must have a Date column
   stopifnot("Date" %in% names(d))
+
+  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+  segment_palette <- config$colors[[segment]] %>% unlist %>% unname
 
   d <- order_data_factors(clean_data(d))
 
