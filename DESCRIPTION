@@ -19,6 +19,7 @@ Description: Lets you see and search stuff.
 License: MIT + file LICENSE
 Imports:
     ggtree,
+    glue,
     treeio,
     tidytree,
     cowplot,
@@ -34,6 +35,7 @@ Imports:
     shiny,
     tibble,
     lubridate,
+    viridis,
     writexl,
     yaml,
     zoo
