@@ -1,0 +1,270 @@
+---
+title: "quarterly"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{trees}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  fig.width=6,
+  fig.height=3.5,
+  size="footnotesize",
+  fig.align='center',
+  cache=FALSE,
+  echo=FALSE
+)
+```
+
+
+
+```{r}
+# ===== Variables
+time_period <- "Apr 2017 to Mar 2019"
+cur_quarter <- "19Q2"
+prior_quarter<-"19Q1"
+quarter<-"Q2"
+yearrange_lo = 2017L
+yearrange_hi = 2019L
+yearrange = paste(yearrange_lo, "-", yearrange_hi)
+quarterrange<-c("17Q3","17Q4","18Q1","18Q2","18Q3","18Q4","19Q1","19Q2")
+priorrange<-c("17Q2","17Q3","17Q4","18Q1","18Q2","18Q3","18Q4","19Q1")
+pQ=quarterrange[c(1:4)]
+cQ=quarterrange[c(5:8)]
+dif_title=paste("Gene Constellations (Current [Apr 2018 - Mar 2019] - Prior [Apr 2017 - Mar 2018])",sep="")
+
+infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
+segments <- c("H1", "H2", "H3", "N1", "N2", "M", "NP", "NS", "PA", "PB1", "PB2")
+segment_trees <- list(
+    "H1"="H1.tre",
+    "H2"="H2.tre",
+    "H3"="H3.tre",
+    "N1"="N1.tre",
+    "N2"="N2.tre",
+    "M"="M.tre",
+    "NP"="NP.tre",
+    "NS"="NS.tre",
+    "PA"="PA.tre",
+    "PB1"="PB1.tre",
+    "PB2"="PB2.tre"
+  )
+sheet <- "Data"
+```
+
+```{r, message=FALSE, warning=FALSE}
+# ===== Libraries
+library(readr)
+library(lubridate)
+library(ggplot2) 
+library(reshape2)
+library(RColorBrewer)
+library(scales)
+library(grid)
+library(gridExtra)
+library(zoo)
+library(dplyr)
+library(readxl)
+library(kableExtra)
+library(magrittr)
+library(wilbur)
+config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+```
+
+```{r}
+# ===== Read and clean the data
+#wb <- loadWorkbook(file = infile)
+#my.data <- readWorkbook(infile, sheet = sheet)
+my.data <- read_excel(infile, sheet = sheet, col_types = "text")
+
+# ===== Date, monthYear, year
+my.data$Date <- my.data$Date %>%
+  as.numeric(.) %>%
+  as.Date(., origin = "1899-12-30")
+
+# regular quarter
+my.data$Collection_Q <- my.data$Date %>% 
+ {paste(year(.), quarter(.), sep = "Q")} 
+
+# ===== Fix quarter being off by one
+# Federal Quarter Function (move forward by one quarter)
+fedquarter <- function(dates){
+  qtr <- dates %>% 
+  {paste(year(.), quarter(.) + 1,   # Increase by 1
+         sep = "Q")}
+  qtr[grep("Q5", qtr)] <- dates[grep("Q5", qtr)] %>%
+  {paste(year(.) + 1, "1",          # Fix Q5 to Q1
+         sep = "Q")}
+  qtr <- qtr %>% substr(., 3, length(.)) # yyQq
+  return(qtr)
+}
+
+my.data$Collection_Q <- my.data$Date %>% 
+  fedquarter(.)
+
+# ======================================== Add Regions
+region1 <- c("ME","VT","NH","MA","CT","RI","NY", "PA","NJ","DE","MD","DC","VA","WV","NC","SC","TN","AL","GA","FL")
+region2 <- c("MN","IA","WI","IL","IN","KY","OH","MI")
+region3 <- c("MO","AR","MS","LA","OK","TX")
+region4 <- c("ID","MT","WY","ND","SD","NE","KS")
+region5 <- c("WA","OR","CA","NV","UT","AZ","CO","NM")
+
+my.data <- my.data %>%
+  mutate(region=case_when(State %in% region1 ~ "Region1",
+                          State %in% region2 ~ "Region2",
+                          State %in% region3 ~ "Region3",
+                          State %in% region4 ~ "Region4",
+                          State %in% region5 ~ "Region5"))
+
+my.data$new_isolates <- ifelse(my.data$Date > paste0(yearrange_hi-1, "-01-01"), paste(yearrange_hi, "Strains"), "Older strains")
+# ======================================== Clean clade names
+# Standardize Names
+
+fixH1names <- function(h1){
+  h1 <- h1 %>%
+    gsub(",.*","",.) %>%
+    replace(., .=="pdm", "pandemic")
+  return(h1)
+}
+
+fixH3names<-function(h3){
+  h3 <- h3 %>%
+    gsub(",.*","",.) %>%
+    replace(., .=="human-like_2010" | .=="human-like_2010.1" | .=="Human-like_2010.1", "2010.1") %>%
+    replace(., .=="human-like_2016" | .=="human-like_2010.2" | .=="Human-like_2010.2", "2010.2") %>%
+    replace(., .=="Other-human", "other-human") %>%
+    gsub("Cluster_", "", .) %>%
+    gsub("IV", "IV-", .) %>%
+    gsub("--", "-", .) %>%
+    replace(., .=="IV-", "IV")
+  return(h3)
+}
+
+fixN1names<-function(n1){
+  n1 <- n1 %>%
+    gsub(",.*","",.) %>%
+    replace(., .=="pandemic", "Pandemic") %>%
+    replace(., .=="classical", "Classical")
+  return(n1)
+}
+
+fixN2names<-function(n2){
+  n2 <- n2 %>% 
+    gsub(",.*","",.) %>%
+    replace(., .=="02" | .=="02A_1" | .=="02A_2" | .=="02B_1" | .=="02B_2" |.=="2002A" | .=="2002B", "2002") %>%
+    replace(., .=="98" | .=="98A_1" | .=="98A_2" | .=="98B_1" | .=="98B_2" |.=="1998A" | .=="1998B", "1998") %>%
+    replace(., .=="02" | .=="02A1" | .=="02A2" | .=="02B1" | .=="02B2" |.=="2002A" | .=="2002B", "2002") %>%
+    replace(., .=="98" | .=="98A1" | .=="98A2" | .=="98B1" | .=="98B2" |.=="1998A" | .=="1998B", "1998")
+  return(n2)
+}
+
+fixIGnames<-function(ig){
+  ig<-ig %>%
+    gsub(",.*","",.) %>%
+    replace(., .=="VTX98", "TX98")
+  return(ig)
+}
+
+fixSubtypenames<-function(subtype){
+  subtype <- subtype %>% 
+    gsub(",.*","",.)
+  return(subtype)
+}
+
+my.data$H1 <- my.data$H1 %>% fixH1names(.)
+my.data$H3 <- my.data$H3 %>% fixH3names(.)
+my.data$N1 <- my.data$N1 %>% fixN1names(.)
+my.data$N2 <- my.data$N2 %>% fixN2names(.)
+
+my.data$PB2 <- my.data$PB2 %>% fixIGnames(.)
+my.data$PB1 <- my.data$PB1 %>% fixIGnames(.)
+my.data$PA <- my.data$PA %>% fixIGnames(.)
+my.data$NP <- my.data$NP %>% fixIGnames(.)
+my.data$M <- my.data$M %>% fixIGnames(.)
+my.data$NS <- my.data$NS %>% fixIGnames(.)
+
+my.data$Subtype <- my.data$Subtype %>% fixSubtypenames(.)
+
+#prior.my.data <- my.data %>% subset(., Collection_Q %in% priorrange)  # use this for the constellations
+my.data <- my.data %>% subset(., Collection_Q %in% quarterrange)
+```
+
+```{r}
+make_quaterly_tree <- function(seg){
+  # get genbank column name from segment name (e.g., PB1_Genbank or H_Genbank)
+  gb_column=paste0(sub("([HN])\\d+$", "\\1", seg, perl=TRUE), "_Genbank")
+  segfile = system.file("app-data", paste0(seg, ".tre"), package="wilbur")
+  
+  tre <- load_tree(segfile)
+
+  fun.tre <- function(x){
+    sub(pattern="REF|", replacement="", x) %>%
+      sub(perl=TRUE, pattern="([^|]+\\|[^|]+).*", replacement="\\1")
+  }
+
+  fun.dat <- function(gbid, strain){
+    paste0(gbid, "|", strain)
+  }
+
+  tre <- add_data(
+    tre,
+    my.data,
+    by=c(gb_column, "Strain"), # pass these two columns to fun.dat
+    fun.dat=fun.dat,             # paste the values together separated by '|'
+    fun.tre=fun.tre              # extract '<genbank>|<strain>'
+  )
+
+  tre <- group_by_nested_clade(tre=tre, by=seg, to="clade", na.rm=TRUE)
+
+  tre@data <- dplyr::rename(tre@data, BRANCHES=clade, NAMES=new_isolates)
+
+  palette <- unname(unlist(config$colors[[seg]]))
+  ggplot(tre, aes(x,y)) +
+    ggplot2::ggtitle(paste(seg, "Gene -", time_period)) +
+    ggtree::geom_tiplab(aes(label=name, color=NAMES), size=1) +
+    scale_color_manual(
+      breaks=c(paste(yearrange_hi, "Strains")),
+      values=c("orange", "black")
+    ) +
+    #ggtree::geom_treescale() +
+    ggplot2::guides(color = guide_legend(override.aes = list(size=5))) +
+    ggnewscale::new_scale_color() +
+    ggtree::geom_tree(aes(color = BRANCHES), size=0.2) +
+    scale_color_manual(values=palette) +
+    ggplot2::guides(color = guide_legend(override.aes = list(size=5))) +
+    wilbur_theme() +
+    ggplot2::theme(
+      legend.position=c(0.12,0.7),
+      plot.title = element_text(hjust = 0.5)
+    )
+}
+```
+
+```{r}
+make_quaterly_tree("H1")
+```
+```{r}
+make_quaterly_tree("H3")
+```
+```{r}
+make_quaterly_tree("N1")
+```
+```{r}
+make_quaterly_tree("N2")
+```
+```{r}
+make_quaterly_tree("PB2")
+```
+```{r}
+make_quaterly_tree("PB1")
+```
+```{r}
+make_quaterly_tree("PA")
+```
+```{r}
+make_quaterly_tree("M")
+```
+```{r}
+make_quaterly_tree("NS")
+```

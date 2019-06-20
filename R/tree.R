@@ -127,7 +127,10 @@ group_by_nested_clade <- function(tre, by, to, na.rm=TRUE){
   }
   # get the node ID of the most recent common ancestor for all members of each clade
   mrcas <- lapply(factors, function(x){ggtree::MRCA(tre, tre@data$node[which(tre@data[[by]] == x)])})
+  # set MRCA to the root node (the MRCA function returns NULL if root is included in the list of nodes)
+  mrcas <- lapply(mrcas, function(x) if(is.null(x)) tidytree::rootnode(tre@phylo) else x)
   names(mrcas) <- factors
+  
   # get clade names ordered by decreasing depth in the tree
   depths <- sapply(factors, function(x){length(tidytree::ancestor(tre@phylo, mrcas[[x]]))})
   names(depths) <- factors
