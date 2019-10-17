@@ -2,7 +2,10 @@ colors:
   H1:
     alpha: "#543005"
     beta: "#8c510a"
-    gamma: "#80cdc1"
+    # gamma: "#80cdc1" 
+    gamma.1: "#80cdc1"
+    gamma.2: "#70cdc1" # FIXME: this is arbitrary
+    gamma.3: "#60cdc1" # FIXME: this is arbitrary
     gamma2: "#35978f"
     delta1: "#bf812d"
     delta1a: "#dfc27d"

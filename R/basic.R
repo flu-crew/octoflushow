@@ -17,6 +17,9 @@ load_current <- function(){
   sheet <- "Data"
   my.data <- readxl::read_excel(infile, sheet = sheet, col_types = "text")
 
+  # ===== Remove the single weird H4 strain
+  my.data <- subset(my.data, (is.na(H3) || H3 != "H4"))
+
   # ===== Date type, only run once
   my.data$Date <- my.data$Date %>%
     as.numeric %>%
@@ -103,16 +106,13 @@ clean_data <- function(d, remove_mixed=TRUE){
     d$M   <- gsub(",.*", "", d$M)
     d$NS  <- gsub(",.*", "", d$NS)
   }
-
   d
 }
 
-order_data_factors <- function(d){
-  H3_order <- c("2010.1","2010.2","other-human","I","II","III","IV","IV-A","IV-B","IV-C","IV-D","IV-E","IV-F","No_data")
-  N1_order <- c("Classical","Pandemic","Human_seasonal","MN99","No_data")
-  d$H1 <- droplevels(factor(d$H1))
-  d$H3 <- droplevels(factor(d$H3, ordered=TRUE, levels=H3_order))
-  d$N1 <- droplevels(factor(d$N1, ordered=TRUE, levels=N1_order))
+order_data_factors <- function(d, config){
+  d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1))
+  d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3))
+  d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1))
   d
 }
 
@@ -138,9 +138,9 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
   stopifnot("Date" %in% names(d))
 
   config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
-  segment_palette <- config$colors[[segment]] %>% unlist %>% unname
+  segment_palette <- config$color[[segment]]
 
-  d <- order_data_factors(clean_data(d))
+  d <- order_data_factors(clean_data(d), config)
 
   d$Date <- lubridate::floor_date(d$Date, floorDateBy)
 
@@ -163,6 +163,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
     ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
     ggplot2::scale_fill_manual(values=segment_palette) +
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
+    ggplot2::scale_x_datetime(labels = scales::date_format("%Y"), breaks = scales::date_breaks("years")) +
     ggplot2::theme(
       axis.text.x     = ggplot2::element_text(angle=90, size=10, vjust=0.5),
       legend.title    = ggplot2::element_blank(),
@@ -175,7 +176,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
     ggplot2::geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
     # ggplot2::theme_bw() +
     ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
-    # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
+    ggplot2::scale_x_datetime(labels = scales::date_format("%Y"), breaks = scales::date_breaks("years")) +
     ggplot2::scale_fill_manual(values=segment_palette)+
     ggplot2::theme(
       axis.text.x     = ggplot2::element_text(angle=90, size=10,vjust=0.5),
@@ -233,7 +234,8 @@ prepStateNames <- function(state_str){
 #' @param segment the column to facet by
 #' @export
 facetMaps <- function(df, segment){
-  df <- order_data_factors(clean_data(df))
+  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+  df <- order_data_factors(clean_data(df), config)
 
   # get states long and lat values
   states <- ggplot2::map_data("state")
