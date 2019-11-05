@@ -125,8 +125,18 @@ group_by_nested_clade <- function(tre, by, to, na.rm=TRUE){
   } else {
     as.character(unique(tre@data[[by]]))
   }
+
+  idss <- lapply(factors, function(factor){ which(tre@data[[by]] == factor) })
+  names(idss) <- factors
+
+  # remove any clades that have a single representative. MRCA is defined only
+  # for 2 or more tips.
+  idss <- Filter(function(x){length(x) > 1}, idss)
+  factors <- names(idss)
+
   # get the node ID of the most recent common ancestor for all members of each clade
-  mrcas <- lapply(factors, function(x){ggtree::MRCA(tre, tre@data$node[which(tre@data[[by]] == x)])})
+  mrcas <- lapply(idss, function(x){tidetree::MRCA(tre, tre@data$node[x])})
+
   # set MRCA to the root node (the MRCA function returns NULL if root is included in the list of nodes)
   mrcas <- lapply(mrcas, function(x) if(is.null(x)) tidytree::rootnode(tre@phylo) else x)
   names(mrcas) <- factors
