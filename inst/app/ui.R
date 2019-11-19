@@ -4,7 +4,7 @@ shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
     "Basic plots",
     sidebarLayout(
-      sidebarPanel(
+     sidebarPanel(
         radioButtons(
           "floorDateBy",
           label = "Plot dates by",
@@ -36,7 +36,8 @@ shinyUI(navbarPage("Swine Surveillance App",
         )
       ),
       mainPanel(
-        plotOutput("selected_plot")
+        plotOutput("selected_plot"),
+	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('selected_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('selected_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
       )
     ),
     DT::dataTableOutput("raw_data_table")

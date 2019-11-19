@@ -37,9 +37,11 @@ shinyServer(function(input, output) {
     },
     content = function(file){
       if(input$plotChoice == "state"){
-        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width=8, height=6)
+#        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width=8, height=6)
+        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width/72, height=input$shiny_height/72)
       } else {
-        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
+#        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
+        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
       }
     }
   )
