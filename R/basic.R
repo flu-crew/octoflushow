@@ -27,7 +27,8 @@ load_current <- function(){
 
   # ===== Standardize Names
   fixH1names <- function(h1){
-    replace(h1, h1=="pdm", "pandemic")
+      h1 %>% replace(., .=="pdm", "pandemic") %>%
+      replace(., .=="gamma.1" | .=="gamma.2" | .=="gamma.3" , "gamma")
   }
 
   fixH3names<-function(h3){
@@ -51,8 +52,8 @@ load_current <- function(){
     n2 %>% 
       replace(., .=="02" | .=="02A_1" | .=="02A_2" | .=="02B_1" | .=="02B_2" |.=="2002A" | .=="2002B", "2002") %>%
       replace(., .=="98" | .=="98A_1" | .=="98A_2" | .=="98B_1" | .=="98B_2" |.=="1998A" | .=="1998B", "1998") %>%
-      replace(., .=="02" | .=="02A1" | .=="02A2" | .=="02B1" | .=="02B2" |.=="2002A" | .=="2002B", "2002") %>%
-      replace(., .=="98" | .=="98A1" | .=="98A2" | .=="98B1" | .=="98B2" |.=="1998A" | .=="1998B", "1998")
+      replace(., .=="02A1" | .=="02A2" | .=="02B1" | .=="02B2" |.=="02A" | .=="02B", "2002") %>%
+      replace(., .=="98A1" | .=="98A2" | .=="98B1" | .=="98B2" |.=="98A" | .=="98B", "1998")
   }
 
   fixIGnames<-function(ig){
