@@ -10,7 +10,7 @@ shinyUI(navbarPage("Swine Surveillance App",
           label = "Plot dates by",
           choices = list("day", "week", "month", "quarter", "year"),
           inline = TRUE,
-          selected = "month"
+          selected = "quarter"
         ),
         radioButtons(
           "segmentChoice",
@@ -37,6 +37,7 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("selected_plot"),
+	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('selected_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('selected_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
 	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('selected_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('selected_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
       )
     ),
