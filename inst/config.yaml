@@ -7,13 +7,13 @@ colors:
     gamma.2: "#70cdc1" # FIXME: this is arbitrary
     gamma.3: "#60cdc1" # FIXME: this is arbitrary
     gamma2: "#35978f"
+    pandemic: "#01665e"
+    gamma2-beta-like: "#8c000a"
     delta1: "#bf812d"
     delta1a: "#dfc27d"
     delta1b: "#f6e8c3"
     delta2: "#c7eae5"
-    pandemic: "#01665e"
-    gamma2-beta-like: "#8c000a"
-    No_data: "#EDF8B1"
+#    No_data: "#EDF8B1"
   H3: 
     2010.1: "#999999"
     2010.2: "#996633"
@@ -28,13 +28,13 @@ colors:
     IV-D: "#0072B2"
     IV-E: "#D55E00"
     IV-F: "#CC79A7"
-    No_data: "#EDF8B1"
+#    No_data: "#EDF8B1"
   N1:
     Classical: "#FEB24C"
     Pandemic: "#F03B20"
     Human_seasonal: "#BD2D2B"
     MN99: "#91BFDB"
-    No_data: "#EDF881"
+#    No_data: "#EDF881"
   N2:
     1998: "#7FCDBB"
     98: "#7FCDBB"
@@ -62,7 +62,7 @@ colors:
     Human-like_2010.2: "#996633"
     2016: "#996633"
     TX98: "#C7EAE5"
-    No_data: "#EDF8B1"
+#    No_data: "#EDF8B1"
   PB2:
     TRIG: "#C2A5CF"
     PDM: "#762A83"

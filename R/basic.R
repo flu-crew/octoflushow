@@ -53,7 +53,8 @@ load_current <- function(){
       replace(., .=="02" | .=="02A_1" | .=="02A_2" | .=="02B_1" | .=="02B_2" |.=="2002A" | .=="2002B", "2002") %>%
       replace(., .=="98" | .=="98A_1" | .=="98A_2" | .=="98B_1" | .=="98B_2" |.=="1998A" | .=="1998B", "1998") %>%
       replace(., .=="02A1" | .=="02A2" | .=="02B1" | .=="02B2" |.=="02A" | .=="02B", "2002") %>%
-      replace(., .=="98A1" | .=="98A2" | .=="98B1" | .=="98B2" |.=="98A" | .=="98B", "1998")
+      replace(., .=="98A1" | .=="98A2" | .=="98B1" | .=="98B2" |.=="98A" | .=="98B", "1998") %>%
+      replace(., .=="2002B,2002" | .=="2002,2002B", "2002")
   }
 
   fixIGnames<-function(ig){
@@ -77,7 +78,6 @@ load_current <- function(){
   my.data$Subtype <- droplevels(factor(my.data$Subtype))
   my.data$US_Clade <- droplevels(factor(my.data$US_Clade))
   my.data$GL_Clade <- droplevels(factor(my.data$GL_Clade))
-  my.data$check <- droplevels(factor(my.data$check))
 
   my.data$H1 <- droplevels(factor(my.data$H1))
   my.data$H3 <- droplevels(factor(my.data$H3))
@@ -160,7 +160,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
 
   unscaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position="stack") +
-    # ggplot2::theme_bw() +
+    ggplot2::theme_bw() +
     ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
     ggplot2::scale_fill_manual(values=segment_palette) +
     # ggplot2::scale_x_datetime(labels = scales::date_format("%m-%Y"), breaks = scales::date_breaks("months")) +
@@ -175,7 +175,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
 
   scaled <- ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position="fill") +    # duplicate, and change "stack" to "fill"
-    # ggplot2::theme_bw() +
+    ggplot2::theme_bw() +
     ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
     ggplot2::scale_x_datetime(labels = scales::date_format("%Y"), breaks = scales::date_breaks("years")) +
     ggplot2::scale_fill_manual(values=segment_palette)+
@@ -185,6 +185,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month"){
       legend.position = "bottom",
       strip.text      = ggplot2::element_text(size=12)
     ) +
+    ggplot2::scale_y_continuous(breaks = c(0,0.25,0.5,0.75,1), labels = c("0%","25%","50%","75%","100%")) +
     ggplot2::labs(x="", y="Swine Isolates by %") # also fix the x and y axis labels...
 
   legend <- cowplot::get_legend(scaled)
@@ -236,7 +237,7 @@ prepStateNames <- function(state_str){
 #' @export
 facetMaps <- function(df, segment){
   config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
-  df <- order_data_factors(clean_data(df), config)
+  df <- order_data_factors(clean_data(df), config) %>% droplevels(.)
 
   # get states long and lat values
   states <- ggplot2::map_data("state")
@@ -265,6 +266,6 @@ facetMaps <- function(df, segment){
     ggplot2::scale_fill_gradient2(low="white", mid = "#43a2ca",high="#0868ac", midpoint = 3, guide="colorbar") +
     ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=value)) +
     ggplot2::theme_void() + ggplot2::theme(legend.position = "none",text=ggplot2::element_text(size=28)) +
-    ggplot2::facet_wrap(~variable) +
+    ggplot2::facet_wrap(~variable, drop=TRUE) +
     ggplot2::coord_fixed(1.3)
 }
