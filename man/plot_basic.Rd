@@ -4,7 +4,8 @@
 \alias{plot_basic}
 \title{Make a basic barplot of the data}
 \usage{
-plot_basic(d, segment = "H1", floorDateBy = "month")
+plot_basic(d, segment = "H1", floorDateBy = "month",
+  dateFormat = "\%Y", dateBreaks = "years", xlim = NULL)
 }
 \arguments{
 \item{d}{data.frame swine surveillance data (i.e., output or \code{load_current})}
@@ -14,6 +15,10 @@ plot_basic(d, segment = "H1", floorDateBy = "month")
 \item{floorDateBy}{An argument that is passed to
 \code{lubridate::floor_date} specifying how to group dates (e.g., "month",
 "week", "3 months", "year")}
+
+\item{dateFormat}{A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")}
+
+\item{dateBreaks}{Date to break by (e.g., "years", or "months")}
 }
 \value{
 ggplot object
