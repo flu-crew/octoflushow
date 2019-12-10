@@ -46,18 +46,6 @@ shinyServer(function(input, output) {
     }
   )
 
-  output$downloadData <- downloadHandler(
-    filename = 'swine-surveillance-data.xlsx',
-    content = function(file) {
-      # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
-      # <output id>_rows_all gets all selected rows on all pages
-      # <output id>_rows_current gets only the selected rows on the current page 
-      row_indices <- input$raw_data_table_rows_all
-      selected_data <- d[row_indices, ]
-      writexl::write_xlsx(selected_data, path=file)
-    }
-  )
-
   d_col_rct <- reactive({
       d[, input$selected_columns]
   })
@@ -74,8 +62,8 @@ shinyServer(function(input, output) {
     ),
     extensions = c("Buttons", "ColReorder"),
     options = list(
-      dom = 'RCT<"clear">lfrtip',
-      buttons = I('colvis'),
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
       autoWidth=FALSE,
       orderMulti=TRUE,
       searching=TRUE,
