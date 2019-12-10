@@ -1,14 +1,35 @@
 library(shiny)
+library(wilbur)
+
+infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
+sheet <- "Data"
+choices <- colnames(readxl::read_excel(infile, sheet = sheet, col_types = "text", n_max=3))
+names(choices) <- choices
 
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
-    "Basic plots",
+    "Data",
+    sidebarLayout(
+      sidebarPanel(
+        checkboxGroupInput("selected_columns", "Select columns", choices=choices, selected=choices),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("downloadData", "Download Data")
+        )
+      ),
+      mainPanel(
+        DT::dataTableOutput("raw_data_table")
+      )
+    )
+  ),
+  tabPanel(
+    "Clades by time",
     sidebarLayout(
      sidebarPanel(
         radioButtons(
           "floorDateBy",
           label = "Plot dates by",
-          choices = list("day", "week", "month", "quarter", "year"),
+          choices = list("month", "quarter", "year"),
           inline = TRUE,
           selected = "quarter"
         ),
@@ -19,28 +40,32 @@ shinyUI(navbarPage("Swine Surveillance App",
           inline   = TRUE,
           selected = "H1"
         ),
-        radioButtons(
-          "plotChoice",
-          label = "What do you want to plot?", 
-          choices = list("basic", "state"),
-          inline = TRUE,
-          selected = "basic"
-        ),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
-          downloadButton("download_selected_plot", "Download Figure")
-        ),
-        div(
-          style="display:inline-block;vertical-align:top; width:150px;",
-          downloadButton("downloadData", "Download Data")
+          downloadButton("download_time_plot", "Download Figure")
         )
       ),
       mainPanel(
-        plotOutput("selected_plot"),
-	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('selected_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('selected_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
-	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('selected_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('selected_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+        plotOutput("time_plot"),
+	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('time_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('time_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
+	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('time_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('time_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
       )
-    ),
-    DT::dataTableOutput("raw_data_table")
+    )
+  ),
+  tabPanel(
+    "Clades by state",
+    sidebarLayout(
+     sidebarPanel(
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_state_plot", "Download Figure")
+        )
+      ),
+      mainPanel(
+        plotOutput("state_plot"),
+	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
+	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+      )
+    )
   )
 ))

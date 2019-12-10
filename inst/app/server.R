@@ -10,12 +10,12 @@ shinyServer(function(input, output) {
       d[row_indices, ]
   })
 
-  output$selected_plot <- renderPlot({
-    if(input$plotChoice == "state"){
-      print(state_plot_rct())
-    } else {
+  output$time_plot <- renderPlot({
       print(basic_plot_rct())
-    }
+  })
+
+  output$state_plot <- renderPlot({
+      print(state_plot_rct())
   })
 
 
@@ -27,7 +27,7 @@ shinyServer(function(input, output) {
     facetMaps(d_rct(), segment=input$segmentChoice)
   })
 
-  output$download_selected_plot <- downloadHandler(
+  output$download_time_plot <- downloadHandler(
     filename = function() {
       if(input$plotChoice == "state"){
         "swine-survey-state_plot.pdf"
@@ -58,8 +58,12 @@ shinyServer(function(input, output) {
     }
   )
 
+  d_col_rct <- reactive({
+      d[, input$selected_columns]
+  })
+
   output$raw_data_table <- DT::renderDataTable(
-    d,
+    d_col_rct(),
     filter="top",
     rownames=FALSE,
     style="bootstrap",
