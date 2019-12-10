@@ -83,5 +83,23 @@ shinyUI(navbarPage("Swine Surveillance App",
 	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
       )
     )
+  ),
+  tabPanel(
+    "Clades by heatmap",
+    sidebarLayout(
+      sidebarPanel(
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_heatmap_plot", "Download Figure")
+        )
+      ),
+      mainPanel(
+        plotOutput("heatmap_plot")#,
+#        tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
+#        tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+      )
+    ),
+    h1("asdf")
   )
+  
 ))

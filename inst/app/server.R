@@ -17,6 +17,10 @@ shinyServer(function(input, output) {
   output$state_plot <- renderPlot({
       print(state_plot_rct())
   })
+  
+  output$heatmap_plot <- renderPlot({
+    print(heatmap_plot_rct())
+  })
 
 
   basic_plot_rct <- reactive({
@@ -26,25 +30,32 @@ shinyServer(function(input, output) {
   state_plot_rct <- reactive({
     facetMaps(d_rct(), segment=input$segmentChoice)
   })
+  
+  heatmap_plot_rct <- reactive({
+    plot_heatmap(d_rct())
+  })
 
   output$download_time_plot <- downloadHandler(
-    filename = function() {
-      if(input$plotChoice == "state"){
-        "swine-survey-state_plot.pdf"
-      } else {
-        "swine-survey-basic_plot.pdf"
-      }
-    },
+    filename = function(){"swine-survey-basic_plot.pdf"},
     content = function(file){
-      if(input$plotChoice == "state"){
-#        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width=8, height=6)
-        ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width/72, height=input$shiny_height/72)
-      } else {
-#        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width=8, height=12)
         ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
-      }
     }
   )
+  
+  output$download_state_plot <- downloadHandler(
+    filename = function(){"swine-survey-state_plot.pdf"},
+    content = function(file){
+      ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
+    }
+  )
+  
+  output$download_heatmap_plot <- downloadHandler(
+    filename = function(){"swine-survey-heatmap_plot.pdf"},
+    content = function(file){
+      ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
+    }
+  )
+  
 
   output$downloadData <- downloadHandler(
     filename = 'swine-surveillance-data.xlsx',

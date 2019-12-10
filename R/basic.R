@@ -266,3 +266,56 @@ facetMaps <- function(df, segment){
     ggplot2::facet_wrap(~variable, drop=TRUE) +
     ggplot2::coord_fixed(1.3)
 }
+
+#' Make a HA NA Heatmap of the data
+#'
+#' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
+#' @export
+#' @return ggplot object
+plot_heatmap <- function(d){
+  # ===== Basic Counting and plotting
+  cdata <- d %>%
+    dplyr::select(H1, H3, N1, N2) %>%     # only looking at HANA heatmap
+    dplyr::mutate(
+      HAtype=dplyr::case_when(!is.na(H1)~paste("H1",H1, sep="."),
+                              !is.na(H3)~paste("H3",H3, sep=".")),
+      NAtype=dplyr::case_when(!is.na(N1)~paste("N1",N1, sep="."),
+                              !is.na(N2)~paste("N2",N2, sep="."))
+    ) %>%
+    dplyr::select(HAtype, NAtype) %>%
+    subset(!is.na(HAtype) & !is.na(NAtype)) %>%
+    dplyr::group_by(HAtype, NAtype) %>%
+    dplyr::summarise(
+      n=dplyr::n()
+    ) %>%
+    dplyr::ungroup(.) %>%
+    reshape2::dcast(., HAtype ~ NAtype, fill=0, value.var = "n") %>%
+    reshape2::melt(.) %>% 
+    dplyr::mutate(
+      NAtype=variable,
+      n=value,
+      variable=NULL,
+      value=NULL
+    ) %>% {
+      .$tot = sum(.$n)
+      .
+    } %>% 
+    dplyr::mutate(
+      percent= (n/tot * 100) %>% round(., digits=1),
+      tot=NULL
+    )
+  
+  mid.value <- (min(cdata$percent) + max(cdata$percent)) / 2
+  tot <- sum(cdata$n)
+  
+  (p <- cdata %>% ggplot2::ggplot(., ggplot2::aes(y=HAtype, x=NAtype, fill=percent)) +
+      ggplot2::geom_tile(color="black")+
+      ggplot2::geom_text(ggplot2::aes(label=percent))+
+      ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", midpoint=mid.value, 
+                                    high = "#0868ac", space = "Lab", guide = "colorbar")+
+      ggplot2::theme_minimal()+
+      ggplot2::labs(x="NA type", y="HA type", title=paste("Percentage of HA and NA combinations (n=",tot,")", sep=""))+
+      ggplot2::theme(legend.position = "bottom")
+  )
+  return(p)
+}
