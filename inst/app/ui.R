@@ -1,24 +1,40 @@
 library(shiny)
+library(shinyBS)
 library(wilbur)
 
 infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
 sheet <- "Data"
 choices <- colnames(readxl::read_excel(infile, sheet = sheet, col_types = "text", n_max=3))
 names(choices) <- choices
+selected <- c("Barcode", "Date", "State", "Subtype", "Strain", "Constellation")
+stopifnot(all(selected %in% choices))
 
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
     "Data",
-    sidebarLayout(
-      sidebarPanel(
-        checkboxGroupInput("selected_columns", "Select columns", choices=choices, selected=choices),
-        div(
-          style="display:inline-block;vertical-align:top; width:150px;",
-          downloadButton("downloadData", "Download Data")
-        )
+    fluidPage(
+      fluidRow(
+        column(7),
+        column(2, actionButton("go", "Select Columns")),
+        column(2, downloadButton("downloadData", "Download Data"))
       ),
-      mainPanel(
-        DT::dataTableOutput("raw_data_table")
+      fluidRow(
+        column(12,
+          DT::dataTableOutput("raw_data_table"),
+          bsModal(
+            "modalSelectColumns",
+            "Select Columns",
+            "go",
+            size = "large",
+            checkboxGroupInput(
+              "selected_columns",
+              "Select columns",
+              choices=choices,
+              selected=selected,
+              inline=TRUE
+            )
+          )
+        )
       )
     )
   ),
