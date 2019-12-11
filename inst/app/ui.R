@@ -9,6 +9,28 @@ names(choices) <- choices
 selected <- c("Barcode", "Date", "State", "Subtype", "Strain", "Constellation")
 stopifnot(all(selected %in% choices))
 
+resize_init <- function(elementID){
+  js <- sprintf("
+    $(document).on('shiny:sessioninitialized',function(event){
+      var clientWidth_%s = document.getElementById('%s').clientWidth;
+      var clientHeight_%s = document.getElementById('%s').clientHeight;
+      Shiny.setInputValue('shiny_width_%s', clientWidth_%s);
+      Shiny.setInputValue('shiny_height_%s', clientHeight_%s);
+    })", elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID)
+  tags$script(js)
+}
+
+resize_on_change <- function(elementID){
+  js <- sprintf("
+    jQuery(window).resize(function(event){
+      var clientWidth_%s = document.getElementById('%s').clientWidth;
+      var clientHeight_%s = document.getElementById('%s').clientHeight;
+      Shiny.setInputValue('shiny_width_%s', clientWidth_%s);
+      Shiny.setInputValue('shiny_height_%s', clientHeight_%s);
+    })", elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID)
+  tags$script(js)
+}
+
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
     "Data",
@@ -62,8 +84,8 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("time_plot"),
-	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('time_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('time_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
-	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('time_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('time_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+        resize_init("time_plot"),
+        resize_on_change("time_plot")
       )
     )
   ),
@@ -78,8 +100,8 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("state_plot"),
-	tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
-	tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+        resize_init("state_plot"),
+        resize_on_change("state_plot")
       )
     )
   ),
@@ -93,12 +115,10 @@ shinyUI(navbarPage("Swine Surveillance App",
         )
       ),
       mainPanel(
-        plotOutput("heatmap_plot")#,
-#        tags$script("$(document).on('shiny:sessioninitialized',function(event){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})"),
-#        tags$script("jQuery(window).resize(function(){var clientWidth = document.getElementById('state_plot').clientWidth;console.log(clientWidth);var clientHeight = document.getElementById('state_plot').clientHeight; Shiny.onInputChange('shiny_width',clientWidth); Shiny.onInputChange('shiny_height',clientHeight);})")
+        plotOutput("heatmap_plot"),
+        resize_init("heatmap_plot"),
+        resize_on_change("heatmap_plot")
       )
-    ),
-    h1("asdf")
+    )
   )
-  
 ))

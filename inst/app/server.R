@@ -38,21 +38,22 @@ shinyServer(function(input, output) {
   output$download_time_plot <- downloadHandler(
     filename = function(){"swine-survey-basic_plot.pdf"},
     content = function(file){
-        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
+        cat("shiny_height_basic_plot: <", input$shiny_height_basic_plot, ">\n")
+        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width_basic_plot/72, height = input$shiny_height_basic_plot/72)
     }
   )
   
   output$download_state_plot <- downloadHandler(
     filename = function(){"swine-survey-state_plot.pdf"},
     content = function(file){
-      ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
+      ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width_state_plot/72, height = input$shiny_height_state_plot/72)
     }
   )
   
   output$download_heatmap_plot <- downloadHandler(
     filename = function(){"swine-survey-heatmap_plot.pdf"},
     content = function(file){
-      ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width/72, height = input$shiny_height/72)
+      ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width_heatmap_plot/72, height = input$shiny_height_heatmap_plot/72)
     }
   )
   
