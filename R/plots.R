@@ -2,9 +2,9 @@
 config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
 
 order_data_factors <- function(d, config){
-  d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1))
-  d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3))
-  d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1))
+  if("H1" %in% names(d)) {d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1)) %>% droplevels(.) }
+  if("H3" %in% names(d)) {d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3)) %>% droplevels(.) }
+  if("N1" %in% names(d)) {d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1)) %>% droplevels(.) }
   d
 }
 
@@ -34,7 +34,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   segment_palette <- config$color[[segment]]
 
   d <- order_data_factors(clean_data(d), config) # JC: for some reason we're cleaning again?
-#  d <- order_data_factors(d, config)  # JC: okay I understand why, but we should only clean the segment needed
   
   if(floorDateBy=="quarter"){
     floorDateBy="3 months"
@@ -56,12 +55,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     xlim <- lubridate::as_datetime(c(min(d$Date), max(d$Date)))
   }
 
-  # Get user-provided segment
-  
-  #m <- d[, c("Date", segment)]
-  #names(m)[2] <- "Segment"
-  #m <- subset(m, !is.na(Segment))
-
   summary.data <- cd %>% # m
     dplyr::group_by(Date, Segment) %>%
     dplyr::summarise(n=dplyr::n(),
@@ -70,8 +63,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     dplyr::ungroup(.) %>% dplyr::mutate(
       Date=lubridate::as_datetime(Date) %>% as.POSIXct(., format="%Y-%m-%d")
     )
-
-  #summary.data$Date <- as.POSIXct(summary.data$Date)
 
   plotit <- function(position, ylab){
     ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
@@ -100,49 +91,17 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   cowplot::plot_grid(unscaled, scaled, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
 }
 
-#' Round dates to floor month values
-#' 
-#' @param date A date
-#' @return The date where days set to 1.
-#' @examples
-#' roundByMonth(as.Date(c("2019-10-27", "2017-01-12")))
-roundByMonth <- function(date){
-  lubridate::day(date) = 1
-  date
-}
-
-#' Round dates to floor year values
-#' 
-#' @param date A date
-#' @return The date where days set to 1, and month set to January.
-#' @examples
-#' roundByYear(as.Date(c("2019-10-27", "2017-01-12")))
-roundByYear <- function(date){
-  lubridate::day(date) = 1
-  lubridate::month(date) = 1
-  date
-}
-
-#' Round dates to floor year values
-#' 
-#' @param date A date
-#' @return The date where days set to 1, and month set to January/April/July/October.
-#' @examples
-#' roundByYear(as.Date(c("2019-10-27", "2017-01-12")))
-roundByYear <- function(date){
-  m = lubridate::month(date)
-  m/3
-
-  lubridate::day(date) = 1
-  lubridate::month(date) = 1
-  date
-}
-
 # ===== State plots
 # state stuff starts here...
 
-# Make sure all states are there, rename states to regions for plotting maps
-prepStateNames <- function(state_str){
+#' Make sure all states are there, rename states to regions for plotting maps
+#'
+#' @param state_str State two letter codes as strings
+#' @return Returns the state names as full names
+#' @examples 
+#' abbr2state(c("AK", "AL", "IA"))
+#' @export
+abbr2state <- function(state_str){
   state_str = as.character(state_str) %>% {
     . = dplyr::case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
                          .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
@@ -173,22 +132,23 @@ prepStateNames <- function(state_str){
   return(state_str)
 }
 
+# get states long and lat values
+states <- ggplot2::map_data("state")
+
 #' Make state map
 #'
 #' @param df the input surveyllance data
 #' @param segment the column to facet by
 #' @export
 facetMaps <- function(df, segment){
-  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
-  df <- order_data_factors(clean_data(df), config) %>% droplevels(.)
-
-  # get states long and lat values
-  states <- ggplot2::map_data("state")
+#  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+#  df <- order_data_factors(clean_data(df), config) %>% droplevels(.)
+  df <- order_data_factors(df, config) #%>% droplevels(.)
 
   # add info
   cdata <- df %>% subset(.,State!="NoState" ) %>%
     subset(. ,!is.na(.[[segment]])) %>%
-    dplyr::mutate(region=prepStateNames(State)) %>%
+#    dplyr::mutate(region=abbr2state(State)) %>%
     reshape2::dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
     reshape2::melt(id="region") 
 

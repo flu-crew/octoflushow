@@ -5,13 +5,14 @@
 #' @export
 load_file <- function(filename, sheet=1){
   my.data <- readxl::read_excel(filename, sheet = sheet, col_types = "text") %>% 
-    clean_data(.)
+    clean_data(.) %>%
+    dplyr::mutate(region=abbr2state(state_str = State))   # necessary for the state map
   
   # ===== Convert Excell dates to R dates, Date only run once
   my.data$Date <- my.data$Date %>%
     as.numeric %>%
-    zoo::as.Date(origin = "1899-12-30")
-  
+    zoo::as.Date(origin = "1899-12-30") 
+
   return(my.data)
 }
 
@@ -33,8 +34,6 @@ load_current <- function(){
 clean_data <- function(d, remove_mixed=TRUE){
 
   my.data = d
-
-  
 
   # ===== Remove the single weird H4 strain
   # my.data <- subset(my.data, (is.na(H3) || H3 != "H4"))
