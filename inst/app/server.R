@@ -24,11 +24,11 @@ shinyServer(function(input, output) {
 
 
   basic_plot_rct <- reactive({
-    plot_basic(d_rct(), floorDateBy=input$floorDateBy, segment=input$segmentChoice)
+    plot_basic(d_rct(), floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   state_plot_rct <- reactive({
-    facetMaps(d_rct(), segment=input$segmentChoice)
+    facetMaps(d_rct(), segment=input$segmentChoiceState)
   })
   
   heatmap_plot_rct <- reactive({

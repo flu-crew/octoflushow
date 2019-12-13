@@ -71,7 +71,7 @@ shinyUI(navbarPage("Swine Surveillance App",
           selected = "quarter"
         ),
         radioButtons(
-          "segmentChoice",
+          "segmentChoiceBar",
           label    = "Segment",
           choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
           inline   = TRUE,
@@ -93,6 +93,13 @@ shinyUI(navbarPage("Swine Surveillance App",
     "Clades by state",
     sidebarLayout(
      sidebarPanel(
+       radioButtons(
+         "segmentChoiceState",
+         label    = "Segment",
+         choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
+         inline   = TRUE,
+         selected = "H1"
+       ),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_state_plot", "Download Figure")
