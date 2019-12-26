@@ -84,6 +84,25 @@ clean_data <- function(d, remove_mixed = TRUE) {
   d
 }
 
+#' Return regular or federal quarters
+#' @param dates Vector of date values
+#' @param fed True for returning federal quarters (19Q1 -> 19Q2)
+#' @return Return a vector of quarters from the dates YYQ1 - YYQ4
+#' @export
+
+date2quarter <- function(dates, fed = FALSE){
+  temp <- data.frame(dates = dates, 
+                     Year=lubridate::year(dates), 
+                     Quarter = lubridate::quarter(dates))
+  if(fed){
+    temp$Quarter = temp$Quarter+1
+    temp$Year[temp$Quarter>4] = temp$Year[temp$Quarter>4] +1
+    temp$Quarter[temp$Quarter>4] = 1
+  }
+  temp$qtr = paste(temp$Year, temp$Quarter, sep="Q") %>% substr(., 3,6)
+  return(temp$qtr)
+}
+
 # ==== Private functions
 # ===== Standardize clade names
 fixH1names <- function(h1) {
