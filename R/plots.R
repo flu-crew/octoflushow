@@ -233,3 +233,44 @@ plot_heatmap <- function(d){
   )
   return(p)
 }
+
+#' Make a count plot from a column
+#'
+#' @param df data.frame swine surveillance data (i.e., output or \code{load_current})
+#' @param x_string The influenze segment that will be plotted [H1,H3,N1,N3,PB2,PB1,PA,NP,M,NS]
+#' @param titletext The title of the plot
+#' @export
+#' @return ggplot object
+countplot <- function(df, x_string, titletext) {
+  titletext <- paste(titletext, " (n=", nrow(df), ")", sep = "")
+  p <- ggplot2::ggplot(df, ggplot2::aes_string(x = x_string)) + ggplot2::geom_bar(ggplot2::aes(fill = I("royalblue"))) +
+    ggplot2::labs(title = titletext) +
+    ggplot2::theme_bw() +
+    ggplot2::geom_text(stat = "count", ggplot2::aes(label = ..count..), vjust = -0.25) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 20, hjust = 1)) +
+    ggplot2::scale_y_continuous(expand=ggplot2::expand_scale(mult=c(0,0.1)))
+  return(p)
+}
+
+#' Bar charts for H1, H3, N1, N2, depends on countplot function
+#'
+#' @param df data.frame swine surveillance data (i.e., output or \code{load_current})
+#' @param timespan_str The title of the plot
+#' @export
+#' @return ggplot object
+quadcountplot <- function(df, timespan_str) {
+  aa <- df %>%
+    subset(!is.na(H1)) %>% # Subset to H1 Data
+    countplot(., "H1", paste(timespan_str, "H1")) # Plot barchart (df, column name, title string)
+  bb <- df %>%
+    subset(!is.na(H3)) %>%
+    countplot(., "H3", paste(timespan_str, "H3"))
+  cc <- df %>%
+    subset(!is.na(N1)) %>%
+    countplot(., "N1", paste(timespan_str, "N1"))
+  dd <- df %>%
+    subset(!is.na(N2)) %>%
+    countplot(., "N2", paste(timespan_str, "N2"))
+  p <- cowplot::plot_grid(aa, bb, cc, dd, nrow = 2)
+  return(p)
+}
