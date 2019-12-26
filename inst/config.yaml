@@ -99,3 +99,10 @@ colors:
     unknown: "#800000"
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
+  Subtype:
+    H1N1: "#D7191C"
+    H1N2: "#FDAE61"
+    H3: "#FFFFBF"
+    H3N1: "#ABD9E9"
+    H3N2: "#2C7FB8"
+    mixed: "#E0F3F8"
