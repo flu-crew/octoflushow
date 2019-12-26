@@ -1,6 +1,14 @@
 # ==== Global Variables
 config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
 
+#' Return the segment palette for the plots
+#' @param seg H1, H3, N1, N2, PB2, PB1, PA, NP, M, NS
+#' @return Return a named vector of hex colors
+#' @export
+get_palette <- function(seg="H1"){
+  return(unlist(config$colors[[seg]]))
+}
+
 order_data_factors <- function(d, config){
   if("H1" %in% names(d)) {d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1)) %>% droplevels(.) }
   if("H3" %in% names(d)) {d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3)) %>% droplevels(.) }
