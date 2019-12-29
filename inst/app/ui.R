@@ -9,25 +9,17 @@ names(choices) <- choices
 selected <- c("Barcode", "Date", "State", "Subtype", "Strain", "Constellation")
 stopifnot(all(selected %in% choices))
 
-resize_init <- function(elementID){
-  js <- sprintf("
-    $(document).on('shiny:sessioninitialized',function(event){
-      var clientWidth_%s = document.getElementById('%s').clientWidth;
-      var clientHeight_%s = document.getElementById('%s').clientHeight;
-      Shiny.setInputValue('shiny_width_%s', clientWidth_%s);
-      Shiny.setInputValue('shiny_height_%s', clientHeight_%s);
-    })", elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID)
-  tags$script(js)
-}
-
 resize_on_change <- function(elementID){
   js <- sprintf("
-    jQuery(window).resize(function(event){
+    $(document).on('shiny:visualchange',function(event){
       var clientWidth_%s = document.getElementById('%s').clientWidth;
       var clientHeight_%s = document.getElementById('%s').clientHeight;
       Shiny.setInputValue('shiny_width_%s', clientWidth_%s);
       Shiny.setInputValue('shiny_height_%s', clientHeight_%s);
-    })", elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID)
+      console.log('on visual change');
+      console.log(clientWidth_%s);
+      console.log(clientHeight_%s);
+    })", elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID, elementID)
   tags$script(js)
 }
 
@@ -84,7 +76,6 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("time_plot"),
-        resize_init("time_plot"),
         resize_on_change("time_plot")
       )
     )
@@ -107,7 +98,6 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("state_plot"),
-        resize_init("state_plot"),
         resize_on_change("state_plot")
       )
     )
@@ -123,7 +113,6 @@ shinyUI(navbarPage("Swine Surveillance App",
       ),
       mainPanel(
         plotOutput("heatmap_plot"),
-        resize_init("heatmap_plot"),
         resize_on_change("heatmap_plot")
       )
     )

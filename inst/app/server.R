@@ -36,10 +36,9 @@ shinyServer(function(input, output) {
   })
 
   output$download_time_plot <- downloadHandler(
-    filename = function(){"swine-survey-basic_plot.pdf"},
+    filename = function(){"swine-survey-time_plot.pdf"},
     content = function(file){
-        cat("shiny_height_basic_plot: <", input$shiny_height_basic_plot, ">\n")
-        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width_basic_plot/72, height = input$shiny_height_basic_plot/72)
+        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
     }
   )
   
