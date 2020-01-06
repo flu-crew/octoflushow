@@ -25,6 +25,16 @@ resize_on_change <- function(elementID){
 
 shinyUI(navbarPage("Swine Surveillance App",
   tabPanel(
+    "Landing page",
+    fluidPage(
+      h1("THIS IS HOW YOU DO THING 1")
+      h1("THIS IS HOW YOU DO THING 2")
+      h1("THIS IS HOW YOU DO THING 3")
+      h1("EXAMPLE FIGURE!!!!!!!")
+      h1("CLICK HERE TO SEE A QUARTERLY REPORT !!!! :)")
+    )
+  ),
+  tabPanel(
     "Data",
     fluidPage(
       fluidRow(
