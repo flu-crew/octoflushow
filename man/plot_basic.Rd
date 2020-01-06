@@ -4,14 +4,8 @@
 \alias{plot_basic}
 \title{Make a basic barplot of the data}
 \usage{
-plot_basic(
-  d,
-  segment = "H1",
-  floorDateBy = "month",
-  dateFormat = "\%Y",
-  dateBreaks = "years",
-  xlim = NULL
-)
+plot_basic(d, segment = "H1", floorDateBy = "month",
+  dateFormat = "\%Y", dateBreaks = "years", xlim = NULL)
 }
 \arguments{
 \item{d}{data.frame swine surveillance data (i.e., output or \code{load_current})}

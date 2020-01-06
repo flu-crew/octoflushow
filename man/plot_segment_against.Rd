@@ -4,16 +4,10 @@
 \alias{plot_segment_against}
 \title{Make tree with branches colored by clade and names by some column}
 \usage{
-plot_segment_against(
-  segment,
-  colname,
-  tre = NULL,
-  f = NULL,
+plot_segment_against(segment, colname, tre = NULL, f = NULL,
   subset_with = function(x) {     rep(TRUE, nrow(x@data)) },
   ggpalette = viridis::scale_color_viridis(discrete = TRUE),
-  output_nexus_filename = NULL,
-  ...
-)
+  output_nexus_filename = NULL, ...)
 }
 \arguments{
 \item{segment}{string The name of a flu segment (e.g., H1, H3, M)}

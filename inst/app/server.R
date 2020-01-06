@@ -55,7 +55,18 @@ shinyServer(function(input, output) {
       ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width_heatmap_plot/72, height = input$shiny_height_heatmap_plot/72)
     }
   )
-  
+
+  output$downloadData <- downloadHandler(
+    filename = 'swine-surveillance-data.xlsx',
+    content = function(file) {
+      # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
+      # <output id>_rows_all gets all selected rows on all pages
+      # <output id>_rows_current gets only the selected rows on the current page
+      row_indices <- input$raw_data_table_rows_all
+      selected_data <- d[row_indices, ]
+      writexl::write_xlsx(selected_data, path=file)
+    }
+  )
 
   d_col_rct <- reactive({
       d[, input$selected_columns]

@@ -28,8 +28,9 @@ shinyUI(navbarPage("Swine Surveillance App",
     "Data",
     fluidPage(
       fluidRow(
-        column(7),
+        column(5),
         column(2, actionButton("go", "Select Columns")),
+        column(2, downloadButton("downloadData", "Download Data")) 
       ),
       fluidRow(
         column(12,
