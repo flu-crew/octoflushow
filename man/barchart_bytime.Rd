@@ -6,10 +6,10 @@
 \usage{
 barchart_bytime(
   df,
-  palette = wilbur::get_palette("H1"),
-  title = "",
   value = "n",
   variable = "H1",
+  palette = wilbur::get_palette(variable),
+  title = "",
   bartype = "stack",
   minDate = NULL,
   maxDate = NULL,
@@ -20,13 +20,13 @@ barchart_bytime(
 \arguments{
 \item{df}{is the dataframe of clades and counts by date, an count_bytime output}
 
-\item{palette}{is the named array of hex colors by clade}
-
-\item{title}{is the title of the plot}
-
 \item{value}{contains the counts}
 
 \item{variable}{contains the clade names}
+
+\item{palette}{is the named array of hex colors by clade}
+
+\item{title}{is the title of the plot}
 
 \item{bartype}{is either "stack" or "fill"}
 

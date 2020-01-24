@@ -284,9 +284,8 @@ quadcountplot <- function(df, timespan_str) {
 #' @param bartype is either "stack" or "fill"
 #' @param fed is either T or F if should use federal quarters
 #' @export
-barchart_bytime <- function(df, palette=wilbur::get_palette("H1"), 
+barchart_bytime <- function(df, value="n", variable="H1", palette=wilbur::get_palette(variable), 
                             title="", 
-                            value="n", variable="H1", 
                             bartype="stack",
                             minDate=NULL, maxDate=NULL, # not used right now
                             tunit="month",
@@ -297,13 +296,7 @@ barchart_bytime <- function(df, palette=wilbur::get_palette("H1"),
     wilbur::date2quarter(ddf, fed=fed)
   }
   
-  # if(is.null(minDate)){
-  #   minDate = min(df$Date)
-  # }
-  # if(is.null(maxDate)){
-  #   maxDate = max(df$Date)
-  # }
-  # bar_chart_limits=c(minDate, maxDate)
+  df[[variable]]=df[[variable]] %>% as.character(.) %>% factor(., levels=names(palette))
   
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
     ggplot2::geom_bar(stat = "identity", position = bartype) +
