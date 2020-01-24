@@ -248,7 +248,7 @@ countplot <- function(df, x_string, titletext) {
     ggplot2::theme_bw() +
     ggplot2::geom_text(stat = "count", ggplot2::aes(label = ..count..), vjust = -0.25) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 20, hjust = 1)) +
-    ggplot2::scale_y_continuous(expand=ggplot2::expand_scale(mult=c(0,0.1)))
+    ggplot2::scale_y_continuous(expand=ggplot2::expand_scale(mult=c(0,0.3)))
   return(p)
 }
 
@@ -272,5 +272,57 @@ quadcountplot <- function(df, timespan_str) {
     subset(!is.na(N2)) %>%
     countplot(., "N2", paste(timespan_str, "N2"))
   p <- cowplot::plot_grid(aa, bb, cc, dd, nrow = 2)
+  return(p)
+}
+
+#' Plot barchart
+#' @param df is the dataframe of clades and counts by date, an count_bytime output
+#' @param palette is the named array of hex colors by clade
+#' @param title is the title of the plot
+#' @param value contains the counts
+#' @param variable contains the clade names
+#' @param bartype is either "stack" or "fill"
+#' @param fed is either T or F if should use federal quarters
+#' @export
+barchart_bytime <- function(df, value="n", variable="H1", palette=wilbur::get_palette(variable), 
+                            title="", 
+                            bartype="stack",
+                            minDate=NULL, maxDate=NULL, # not used right now
+                            tunit="month",
+                            fed=F) {
+  
+  # local format of federal quarter
+  format_Q <- function(ddf){
+    wilbur::date2quarter(ddf, fed=fed)
+  }
+  
+  df[[variable]]=df[[variable]] %>% as.character(.) %>% factor(., levels=names(palette))
+  
+  p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
+    ggplot2::geom_bar(stat = "identity", position = bartype) +
+    ggplot2::scale_fill_manual(values = palette) +
+    ggplot2::labs(y="Number of Swine Isolates", x="", title=title) +
+    ggplot2::theme_bw() + 
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 10, vjust = 0.5),
+                   legend.title = ggplot2::element_blank(), legend.position = "bottom")
+  if(tunit=="month"){
+    p <- p + ggplot2::scale_x_date(
+      labels = scales::date_format("%b-%y"),
+      date_breaks = "1 month"
+    ) 
+  }
+  if(tunit=="quarter"){
+    p <- p +
+      ggplot2::scale_x_date(
+        labels = format_Q,
+        breaks = unique(df$Date)
+      )
+  }
+  #    ggplot2::expand_limits(x = bar_chart_limits)
+  
+  if(bartype=="fill"){
+    p <- p+ ggplot2::scale_y_continuous(labels = scales::percent)+
+      ggplot2::labs(y="Swine Isolates by %", x="", title=title)
+  }
   return(p)
 }
