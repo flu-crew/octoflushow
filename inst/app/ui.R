@@ -7,7 +7,7 @@ infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
 sheet <- "Data"
 choices <- colnames(readxl::read_excel(infile, sheet = sheet, col_types = "text", n_max=3))
 names(choices) <- choices
-selected <- c("Barcode", "Date", "State", "Subtype", "Strain", "Constellation")
+selected <- c("Barcode", "Date", "State", "Subtype", "Strain","H1","H3","N1","N2", "Constellation")
 stopifnot(all(selected %in% choices))
 
 resize_on_change <- function(elementID){
