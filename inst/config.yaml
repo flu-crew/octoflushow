@@ -13,6 +13,7 @@ colors:
     delta1a: "#dfc27d"
     delta1b: "#f6e8c3"
     delta2: "#c7eae5"
+    H4: "#FF0000"
 #    No_data: "#EDF8B1"
   H3: 
     2010.1: "#999999"
@@ -28,12 +29,14 @@ colors:
     IV-D: "#0072B2"
     IV-E: "#D55E00"
     IV-F: "#CC79A7"
+    H4: "#FF0000"
 #    No_data: "#EDF8B1"
   N1:
     Classical: "#FEB24C"
     Pandemic: "#F03B20"
     Human_seasonal: "#BD2D2B"
     MN99: "#91BFDB"
+    N6: "#FF0000"
 #    No_data: "#EDF881"
   N2:
     1998: "#7FCDBB"
@@ -62,6 +65,8 @@ colors:
     Human-like: "#1F38FF"
     Human_N2: "#969696"
     TX98: "#C7EAE5"
+    N6: "#FF0000"
+    unknown: "#800000"
 #    No_data: "#EDF8B1"
   PB2:
     PDM: "#762A83"
@@ -112,3 +117,4 @@ colors:
     H3N1: "#ABD9E9"
     H3N2: "#2C7FB8"
     mixed: "#E0F3F8"
+    H4N6: "#FF0000"
