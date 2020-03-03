@@ -84,12 +84,14 @@ shinyServer(function(input, output) {
     ),
     extensions = c("Buttons", "ColReorder"),
     options = list(
-      dom = 'Bfrtip',
+      dom = 'Blfrtip',
       buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
       autoWidth=FALSE,
       orderMulti=TRUE,
       searching=TRUE,
-      search.regex=TRUE
+      search.regex=TRUE,
+      lengthMenu=list(c(10,25,50,100,100), c('10','25', '50', '100', '1000')),
+      pageLength=25
     )
   )
 })
