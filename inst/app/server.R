@@ -21,7 +21,10 @@ shinyServer(function(input, output) {
   output$heatmap_plot <- renderPlot({
     print(heatmap_plot_rct())
   })
-
+  
+  output$constellation_plot <- renderPlot({
+    print(constellation_plot_rct())
+  })
 
   basic_plot_rct <- reactive({
     plot_basic(d_rct(), floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
@@ -33,6 +36,10 @@ shinyServer(function(input, output) {
   
   heatmap_plot_rct <- reactive({
     plot_heatmap(d_rct())
+  })
+  
+  constellation_plot_rct <- reactive({
+    plot_constellation(d_rct())
   })
 
   output$download_time_plot <- downloadHandler(
@@ -53,6 +60,13 @@ shinyServer(function(input, output) {
     filename = function(){"swine-survey-heatmap_plot.pdf"},
     content = function(file){
       ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width_heatmap_plot/72, height = input$shiny_height_heatmap_plot/72)
+    }
+  )
+  
+  output$download_constellation_plot <- downloadHandler(
+    filename = function(){"swine-survey-constellation_plot.pdf"},
+    content = function(file){
+      ggplot2::ggsave(file, constellation_plot_rct(), device="pdf", width = input$shiny_width_constellation_plot/72, height = input$shiny_height_constellation_plot/72)
     }
   )
 

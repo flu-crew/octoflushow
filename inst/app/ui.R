@@ -108,6 +108,7 @@ shinyUI(navbarPage("octoFLU show",
       )
     )
   ),
+
   tabPanel(
     "Clades by state",
     sidebarLayout(
@@ -130,6 +131,7 @@ shinyUI(navbarPage("octoFLU show",
       )
     )
   ),
+
   tabPanel(
     "Clades by heatmap",
     sidebarLayout(
@@ -144,5 +146,21 @@ shinyUI(navbarPage("octoFLU show",
         resize_on_change("heatmap_plot")
       )
     )
+  ),
+
+tabPanel(
+  "Constellation heatmap",
+  sidebarLayout(
+    sidebarPanel(
+      div(
+        style="display:inline-block;vertical-align:top; width:150px;",
+        downloadButton("download_constellation_plot", "Download Figure")
+      )
+    ),
+    mainPanel(
+      plotOutput("constellation_plot"),
+      resize_on_change("constellation_plot")
+    )
   )
+)
 ))

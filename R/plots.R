@@ -234,6 +234,118 @@ plot_heatmap <- function(d){
   return(p)
 }
 
+#' Make a Gene Constellation Heatmap of the data
+#'
+#' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
+#' @export
+#' @return ggplot object
+plot_constellation <- function(d){
+  data <- d %>%
+    subset(!grepl("-", Constellation)) %>%
+    subset(!grepl(",", Subtype)) %>%
+    subset(Subtype!="mixed") %>%
+    subset(Subtype!="H4N6")
+  
+  # Get counts
+  # ===== Get the counts
+  (tots <- nrow(data))
+  
+  hhdata <- prepGConstData(data)
+  
+  xlabel <- "HA and NA Phylogenetic Clade Pairs"
+  ylabel <- "Gene constellations"
+  title <- paste("Gene Constellations (n=", tots, ")", sep = "")
+  
+  p<-hhdata %>% ggplot2::ggplot(., 
+                                ggplot2::aes(x = labels, y = Constellation, 
+                                             fill = log(nn))) +
+    ggplot2::geom_tile(color = "black") +
+    ggplot2::scale_fill_gradient2(
+      low = "white", mid = "#43a2ca",
+      high = "#0868ac", na.value = "white",
+      midpoint = mean(log(hhdata$nn))
+    ) +
+    ggplot2::geom_text(ggplot2::aes(label = n)) +
+    ggplot2::labs(
+      title = title,
+      x = xlabel,
+      y = ylabel
+    ) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(
+      legend.position = "none",
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      plot.margin = grid::unit(rep(0, 4), "lines"),
+      axis.text.y = ggplot2::element_text(family = "mono")
+    ) +
+    ggplot2::facet_grid(. ~ Subtype, space = "free", scales = "free")
+  # Add background lines
+  for (yint in c(-1:length(unique(hhdata$Constellation))+1)) { # number of unique constellations
+    p <- p + ggplot2::geom_hline(yintercept = yint + 0.5, size = 0.25, color = "gray")
+  }
+  for (xint in c(-1:length(unique(hhdata$labels))+1)) { # number of unique ha/na pairings
+    p <- p + ggplot2::geom_vline(xintercept = xint + 0.5, size = 0.25, color = "gray")
+  }
+  return(p)
+  
+}
+
+# ===== prepConstellationData
+prepGConstData <- function(data){
+  cdata <- data %>%
+    dplyr::mutate(                              # change name for heatmap
+      N1 = gsub("Pandemic", "pdm", N1), 
+      N1 = gsub("Classical", "classical", N1),
+      H3 = gsub("Cluster_", "", H3),
+      H3 = gsub("Human-like", "hu-like", H3)
+    ) %>%
+    dplyr::mutate(                              # create a HAtype and NAtype column
+      H = dplyr::case_when(!is.na(H1) ~ H1,
+                           !is.na(H3) ~ H3),
+      N = dplyr::case_when(!is.na(N1) ~ N1,
+                           !is.na(N2) ~ N2)
+    )
+  
+  # Get counts
+  # ===== Get the counts
+  (tots <- nrow(cdata))
+  
+  hdata <- cdata %>%
+    dplyr::group_by(Subtype, H, N, Constellation) %>%
+    dplyr::summarise(
+      n = (dplyr::n()/tots*100) %>% round(., digits=1),
+      nn = n
+    ) %>%
+    dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
+    dplyr::ungroup(.)
+  
+  totdata <- cdata %>%
+    dplyr::group_by(Constellation) %>%
+    dplyr::summarise(
+      Subtype="total",
+      H="total",
+      N="total",
+      n = (dplyr::n()/tots*100) %>% round(., digits=1),
+      nn = n/3,
+      nn = dplyr::case_when(nn<0.5 ~ 0.5,
+                            1==1 ~ nn),
+      labels="total"
+    ) %>%
+    dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
+    dplyr::ungroup(.)
+  
+  subtype_order <- c("total", "H1N1", "H1N2", "H3N1", "H3N2", "mixed")
+  
+  hhdata <- rbind(hdata, totdata) %>%
+    dplyr::mutate(
+      labels=dplyr::case_when(H=="total" ~ "total",
+                              1==1 ~ paste(H, N, sep=".")),
+      Subtype=factor(Subtype, subtype_order)
+    )
+  
+  return(hhdata)
+}
+
 #' Make a count plot from a column
 #'
 #' @param df data.frame swine surveillance data (i.e., output or \code{load_current})
