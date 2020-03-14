@@ -75,7 +75,12 @@ shinyUI(navbarPage("octoFLU show",
       h2("Clades by state"),
       p("Regional patterns of clades represented in a ggmap. Select a segment (H1, H3, PB2, ... NS) of interest and the map is faceted by phylogenetic clade with isolate counts."),
       h2("Clades by heatmap"),
-      p("Hemagglutinin (HA) and neuraminidase (NA) patterns represented in a heatmap. HA clades are represented by rows while NA clades are represented by columns. Heatmap can be used to determine most common HA-NA clade pairing for a particular data filter.")
+      p("Hemagglutinin (HA) and neuraminidase (NA) patterns represented in a heatmap. HA clades are represented by rows while NA clades are represented by columns. Heatmap can be used to determine most common HA-NA clade pairing for a particular data filter."),
+  h2("Constellation heatmap"),
+  p("Internal gene constellation patterns of subtypes where T=TRIG, P=Pandemic, and V=LAIV-related. Strains with mixed subtypes or mixed internal constellations were filtered out. The heatmap can be used to determine the most common Gene Constellation from the left Totals column."),
+  h3("Acknowledgements:"),
+  p("We were supported by USDA-ARS, USDA-APHIS, and by an NIH-National Institute of Allergy and Infectious Diseases (NIAID) interagency agreement associated with CRIP (Center of Research in Influenza Pathogenesis), an NIAID-funded Center of Excellence in Influenza Research and Surveillance (CEIRS, HHSN272201400008C). We are grateful to the pork producers, swine veterinarians, and laboratories for participating in the USDA Influenza Virus Surveillance System for swine. This research used resources provided by the SCINet project of the USDA Agricultural Research Service, ARS project number 0500-00093-001-00-D.")
+
     )
   ),
 
