@@ -5,9 +5,9 @@
 The source code for the app is available on github and can be installed with `devtools`:
 
 ```
-devtools::install_github("flu-crew/octoFLU_show", auth_token="yourtokenhere")
+devtools::install_github("flu-crew/octoflushow", auth_token="yourtokenhere")
 
-octoFLU_show::launch_app()
+octoflushow::launch_app()
 ```
 
 or 
@@ -15,13 +15,13 @@ or
 ```
 devtools::document()
 devtools::install()
-octoFLU_show::launch_app()
+octoflushow::launch_app()
 ```
 
 ## AWS site
 
 ```
-cd octoFLU_show   # This might be in home folder or /srv/ folder somewhere
+cd octoflushow   # This might be in home folder or /srv/ folder somewhere
 git pull
 sudo R
 ```
@@ -32,7 +32,7 @@ devtools::install()
 # When it asks if you want to update packages, choose "none" (3).
 
 # Check if it installed correctly
-octoFLU_show::launch_app()
+octoflushow::launch_app()
 #ctrl-d to stop 
 ```
 
