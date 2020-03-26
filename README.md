@@ -1,13 +1,13 @@
-# wilbur
+# octoFLU Show
 
 ## Installation
 
 The source code for the app is available on github and can be installed with `devtools`:
 
 ```
-devtools::install_github("arendsee/wilbur", auth_token="yourtokenhere")
+devtools::install_github("flu-crew/octoFLU_show", auth_token="yourtokenhere")
 
-wilbur::launch_app()
+octoFLU_show::launch_app()
 ```
 
 or 
@@ -15,13 +15,13 @@ or
 ```
 devtools::document()
 devtools::install()
-wilbur::launch_app()
+octoFLU_show::launch_app()
 ```
 
 ## AWS site
 
 ```
-cd wilbur   # This might be in home folder or /srv/ folder somewhere
+cd octoFLU_show   # This might be in home folder or /srv/ folder somewhere
 git pull
 sudo R
 ```
@@ -32,7 +32,7 @@ devtools::install()
 # When it asks if you want to update packages, choose "none" (3).
 
 # Check if it installed correctly
-wilbur::launch_app()
+octoFLU_show::launch_app()
 #ctrl-d to stop 
 ```
 

@@ -20,7 +20,7 @@ load_file <- function(filename, sheet = 1) {
 #'
 #' @export
 load_current <- function() {
-  infile <- system.file("app-data", "A0_Master_List.xlsx", package = "wilbur")
+  infile <- system.file("app-data", "A0_Master_List.xlsx", package = "octoflushow")
   sheet <- "Data"
   my.data <- load_file(infile, sheet = sheet)
 

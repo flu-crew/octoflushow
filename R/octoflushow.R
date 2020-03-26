@@ -7,6 +7,6 @@ NULL
 magrittr::`%>%`
 NULL
 
-#' wilbur: a Shiny app for visualizing swine influenza surveillance data
+#' octoflushow: a Shiny app for visualizing swine influenza surveillance data
 #'
 #' To launch the app, just call \code{launch_app()}

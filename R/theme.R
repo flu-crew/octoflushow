@@ -1,8 +1,8 @@
-#' Default tree theme for wilbur figures
+#' Default tree theme for octoflu figures
 #' 
 #' @return ggplot2 theme
 #' @export
-wilbur_theme <- function(){
+octoflu_theme <- function(){
   ggplot2::theme_classic() +
     ggplot2::theme(
       axis.line.x = ggplot2::element_blank(),

@@ -1,9 +1,9 @@
 library(shiny)
 library(shinyBS)
-library(wilbur)
+library(octoflushow)
 #library(png)
 
-infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
+infile <- system.file("app-data", "A0_Master_List.xlsx", package="octoflushow")
 sheet <- "Data"
 choices <- colnames(readxl::read_excel(infile, sheet = sheet, col_types = "text", n_max=3))
 names(choices) <- choices
@@ -24,7 +24,7 @@ resize_on_change <- function(elementID){
   tags$script(js)
 }
 
-#logofile <- system.file("app-data", "logo.png", package="wilbur")
+#logofile <- system.file("app-data", "logo.png", package="octoflushow")
 
 shinyUI(navbarPage("octoFLU show",
   tabPanel(

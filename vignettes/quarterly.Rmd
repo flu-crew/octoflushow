@@ -35,7 +35,7 @@ pQ=quarterrange[c(1:4)]
 cQ=quarterrange[c(5:8)]
 dif_title=paste("Gene Constellations (Current [Apr 2018 - Mar 2019] - Prior [Apr 2017 - Mar 2018])",sep="")
 
-infile <- system.file("app-data", "A0_Master_List.xlsx", package="wilbur")
+infile <- system.file("app-data", "A0_Master_List.xlsx", package="octoflushow")
 segments <- c("H1", "H2", "H3", "N1", "N2", "M", "NP", "NS", "PA", "PB1", "PB2")
 segment_trees <- list(
     "H1"="H1.tre",
@@ -68,23 +68,23 @@ library(dplyr)
 library(readxl)
 library(kableExtra)
 library(magrittr)
-library(wilbur)
-config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+library(octoflushow)
+config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
 ```
 
 ```{r}
 # ===== Read and clean the data
 #wb <- loadWorkbook(file = infile)
-#my.data <- readWorkbook(infile, sheet = sheet)
-my.data <- read_excel(infile, sheet = sheet, col_types = "text")
+#my_data <- readWorkbook(infile, sheet = sheet)
+my_data <- read_excel(infile, sheet = sheet, col_types = "text")
 
 # ===== Date, monthYear, year
-my.data$Date <- my.data$Date %>%
+my_data$Date <- my_data$Date %>%
   as.numeric(.) %>%
   as.Date(., origin = "1899-12-30")
 
 # regular quarter
-my.data$Collection_Q <- my.data$Date %>% 
+my_data$Collection_Q <- my_data$Date %>% 
  {paste(year(.), quarter(.), sep = "Q")} 
 
 # ===== Fix quarter being off by one
@@ -100,7 +100,7 @@ fedquarter <- function(dates){
   return(qtr)
 }
 
-my.data$Collection_Q <- my.data$Date %>% 
+my_data$Collection_Q <- my_data$Date %>% 
   fedquarter(.)
 
 # ======================================== Add Regions
@@ -110,14 +110,14 @@ region3 <- c("MO","AR","MS","LA","OK","TX")
 region4 <- c("ID","MT","WY","ND","SD","NE","KS")
 region5 <- c("WA","OR","CA","NV","UT","AZ","CO","NM")
 
-my.data <- my.data %>%
+my_data <- my_data %>%
   mutate(region=case_when(State %in% region1 ~ "Region1",
                           State %in% region2 ~ "Region2",
                           State %in% region3 ~ "Region3",
                           State %in% region4 ~ "Region4",
                           State %in% region5 ~ "Region5"))
 
-my.data$new_isolates <- ifelse(my.data$Date > paste0(yearrange_hi-1, "-01-01"), paste(yearrange_hi, "Strains"), "Older strains")
+my_data$new_isolates <- ifelse(my_data$Date > paste0(yearrange_hi-1, "-01-01"), paste(yearrange_hi, "Strains"), "Older strains")
 # ======================================== Clean clade names
 # Standardize Names
 
@@ -172,29 +172,29 @@ fixSubtypenames<-function(subtype){
   return(subtype)
 }
 
-my.data$H1 <- my.data$H1 %>% fixH1names(.)
-my.data$H3 <- my.data$H3 %>% fixH3names(.)
-my.data$N1 <- my.data$N1 %>% fixN1names(.)
-my.data$N2 <- my.data$N2 %>% fixN2names(.)
+my_data$H1 <- my_data$H1 %>% fixH1names(.)
+my_data$H3 <- my_data$H3 %>% fixH3names(.)
+my_data$N1 <- my_data$N1 %>% fixN1names(.)
+my_data$N2 <- my_data$N2 %>% fixN2names(.)
 
-my.data$PB2 <- my.data$PB2 %>% fixIGnames(.)
-my.data$PB1 <- my.data$PB1 %>% fixIGnames(.)
-my.data$PA <- my.data$PA %>% fixIGnames(.)
-my.data$NP <- my.data$NP %>% fixIGnames(.)
-my.data$M <- my.data$M %>% fixIGnames(.)
-my.data$NS <- my.data$NS %>% fixIGnames(.)
+my_data$PB2 <- my_data$PB2 %>% fixIGnames(.)
+my_data$PB1 <- my_data$PB1 %>% fixIGnames(.)
+my_data$PA <- my_data$PA %>% fixIGnames(.)
+my_data$NP <- my_data$NP %>% fixIGnames(.)
+my_data$M <- my_data$M %>% fixIGnames(.)
+my_data$NS <- my_data$NS %>% fixIGnames(.)
 
-my.data$Subtype <- my.data$Subtype %>% fixSubtypenames(.)
+my_data$Subtype <- my_data$Subtype %>% fixSubtypenames(.)
 
-#prior.my.data <- my.data %>% subset(., Collection_Q %in% priorrange)  # use this for the constellations
-my.data <- my.data %>% subset(., Collection_Q %in% quarterrange)
+#prior.my_data <- my_data %>% subset(., Collection_Q %in% priorrange)  # use this for the constellations
+my_data <- my_data %>% subset(., Collection_Q %in% quarterrange)
 ```
 
 ```{r}
 make_quaterly_tree <- function(seg){
   # get genbank column name from segment name (e.g., PB1_Genbank or H_Genbank)
   gb_column=paste0(sub("([HN])\\d+$", "\\1", seg, perl=TRUE), "_Genbank")
-  segfile = system.file("app-data", paste0(seg, ".tre"), package="wilbur")
+  segfile = system.file("app-data", paste0(seg, ".tre"), package="octoflushow")
   
   tre <- load_tree(segfile)
 
@@ -209,7 +209,7 @@ make_quaterly_tree <- function(seg){
 
   tre <- add_data(
     tre,
-    my.data,
+    my_data,
     by=c(gb_column, "Strain"), # pass these two columns to fun.dat
     fun.dat=fun.dat,             # paste the values together separated by '|'
     fun.tre=fun.tre              # extract '<genbank>|<strain>'
@@ -233,7 +233,7 @@ make_quaterly_tree <- function(seg){
     ggtree::geom_tree(aes(color = BRANCHES), size=0.2) +
     scale_color_manual(values=palette) +
     ggplot2::guides(color = guide_legend(override.aes = list(size=5))) +
-    wilbur_theme() +
+    octoflu_theme() +
     ggplot2::theme(
       legend.position=c(0.12,0.7),
       plot.title = element_text(hjust = 0.5)

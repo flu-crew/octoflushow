@@ -1,5 +1,5 @@
 # ==== Global Variables
-config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
 
 #' Return the segment palette for the plots
 #' @param seg H1, H3, N1, N2, PB2, PB1, PA, NP, M, NS
@@ -63,7 +63,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     xlim <- lubridate::as_datetime(c(min(d$Date), max(d$Date)))
   }
 
-  summary.data <- cd %>% # m
+  summary_data <- cd %>% # m
     dplyr::group_by(Date, Segment) %>%
     dplyr::summarise(n=dplyr::n(),
                      tot=nrow(.),
@@ -73,7 +73,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     )
 
   plotit <- function(position, ylab){
-    ggplot2::ggplot(summary.data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
+    ggplot2::ggplot(summary_data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
     ggplot2::geom_bar(stat="identity", position=position) +
       ggplot2::theme_bw() +
       ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
@@ -149,7 +149,7 @@ states <- ggplot2::map_data("state")
 #' @param segment the column to facet by
 #' @export
 facetMaps <- function(df, segment){
-#  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+#  config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
 #  df <- order_data_factors(clean_data(df), config) %>% droplevels(.)
   df <- order_data_factors(df, config) #%>% droplevels(.)
 
@@ -240,7 +240,7 @@ plot_heatmap <- function(d){
 #' @export
 #' @return ggplot object
 plot_constellation <- function(d){
-  data <- d %>%
+  cdata <- d %>%
     subset(!grepl("-", Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
     subset(Subtype!="mixed") %>%
@@ -248,9 +248,9 @@ plot_constellation <- function(d){
   
   # Get counts
   # ===== Get the counts
-  (tots <- nrow(data))
+  (tots <- nrow(cdata))
   
-  hhdata <- prepGConstData(data)
+  hhdata <- prepGConstData(cdata)
   
   xlabel <- "HA and NA Phylogenetic Clade Pairs"
   ylabel <- "Gene constellations"
@@ -291,8 +291,8 @@ plot_constellation <- function(d){
 }
 
 # ===== prepConstellationData
-prepGConstData <- function(data){
-  cdata <- data %>%
+prepGConstData <- function(d){
+  cdata <- d %>%
     dplyr::mutate(                              # change name for heatmap
       N1 = gsub("Pandemic", "pdm", N1), 
       N1 = gsub("Classical", "classical", N1),
@@ -396,7 +396,7 @@ quadcountplot <- function(df, timespan_str) {
 #' @param bartype is either "stack" or "fill"
 #' @param fed is either T or F if should use federal quarters
 #' @export
-barchart_bytime <- function(df, value="n", variable="H1", palette=wilbur::get_palette(variable), 
+barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::get_palette(variable), 
                             title="", 
                             bartype="stack",
                             minDate=NULL, maxDate=NULL, # not used right now
@@ -405,7 +405,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=wilbur::get_pa
   
   # local format of federal quarter
   format_Q <- function(ddf){
-    wilbur::date2quarter(ddf, fed=fed)
+    octoflushow::date2quarter(ddf, fed=fed)
   }
   
   df[[variable]]=df[[variable]] %>% as.character(.) %>% factor(., levels=names(palette))

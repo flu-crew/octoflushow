@@ -156,6 +156,9 @@ group_by_nested_clade <- function(tre, by, to, na.rm=TRUE){
   tre
 }
 
+#' Load a tree with segment info
+#'
+#' @export
 load_segment_tree <- function(
   segment,
   filename=NULL,
@@ -167,7 +170,7 @@ load_segment_tree <- function(
   fun.dat=function(gbid, strain){ paste0(gbid, "|", strain) }
 ){
   if(is.null(filename)){
-    filename <- system.file("app-data", paste0(segment, ".tre"), package="wilbur")
+    filename <- system.file("app-data", paste0(segment, ".tre"), package="octoflushow")
   }
   if(! file.exists(filename)){
     stop("Could not find tree file '", filename, "'")
@@ -235,7 +238,7 @@ plot_segment_against <- function(
   output_nexus_filename=NULL,
   ...
 ){
-  config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+  config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
   segment_palette <- unname(unlist(config$colors[[segment]]))
 
   if(all(class(ggpalette) == "character")){
@@ -257,13 +260,13 @@ plot_segment_against <- function(
     colname
   }
 
-  g <- ggplot2::ggplot(tre, ggplot2::aes(x,y)) +
+  g <- ggtree::ggtree(tre, ggplot2::aes(x,y)) +
     ggtree::geom_tree(ggplot2::aes(color = clade)) +
     ggplot2::scale_color_manual(values=segment_palette) +
     ggnewscale::new_scale_color() +
     ggtree::geom_tiplab(aes(subset=subset_with(tre), label=name, color=!!sym(colname)), size=1) +
     ggpalette +
-    wilbur_theme()
+    octoflu_theme()
 
   if(!is.null(output_nexus_filename)){
 

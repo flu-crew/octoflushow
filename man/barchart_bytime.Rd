@@ -8,7 +8,7 @@ barchart_bytime(
   df,
   value = "n",
   variable = "H1",
-  palette = wilbur::get_palette(variable),
+  palette = octoflushow::get_palette(variable),
   title = "",
   bartype = "stack",
   minDate = NULL,

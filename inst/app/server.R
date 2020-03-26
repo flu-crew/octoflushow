@@ -1,7 +1,7 @@
 library(shiny)
-library(wilbur)
+library(octoflushow)
 
-d <- wilbur::load_current()
+d <- octoflushow::load_current()
 
 shinyServer(function(input, output) {
 

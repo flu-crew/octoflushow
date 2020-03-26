@@ -15,15 +15,15 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(wilbur)
+library(octoflushow)
 library(ggplot2)
-config <- yaml::read_yaml(system.file("config.yaml", package="wilbur"))
+config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
 ```
 
 ## H1
 
 ```{r h1tree}
-h1_tre <- load_tree(system.file("app-data", "H1.tre", package="wilbur"))
+h1_tre <- load_tree(system.file("app-data", "H1.tre", package="octoflushow"))
 dat <- load_current()
 
 fun.tre <- function(x){
@@ -53,5 +53,5 @@ ggplot(tre, aes(x,y)) +
   ggnewscale::new_scale_color() +
   ggtree::geom_tiplab(aes(subset=!is.na(PB2), label=name, color=PB2), size=1) +
   scale_color_manual(values=c("black", "orange", "blue")) +
-  wilbur_theme()
+  octoflu_theme()
 ```

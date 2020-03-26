@@ -1,4 +1,4 @@
-Package: wilbur 
+Package: octoflushow 
 Title: A Shiny app for the swine surveillence data
 Version: 0.0.0.9000
 Authors@R: c( 
@@ -6,14 +6,14 @@ Authors@R: c(
                family = "Arendsee",
                role = c("aut", "cre"),
                email = "zebulun.arendsee@usda.gov"),
-        person(given = "Tavis",
-               family = "Anderson",
-               role = "aut",
-               email = "tavis.anderson@ars.usda.gov"),
         person(given = "Jennifer",
                family = "Chang",
                role = "aut",
-               email = "jennifer.chang@ars.usda.gov")
+               email = "jennifer.chang@ars.usda.gov"),
+        person(given = "Tavis",
+               family = "Anderson",
+               role = "aut",
+               email = "tavis.anderson@ars.usda.gov") 
     )
 Description: Lets you see and search stuff.
 License: MIT + file LICENSE
@@ -46,7 +46,7 @@ Imports:
     zoo
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Suggests: 
     knitr,
     rmarkdown,
