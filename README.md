@@ -46,7 +46,26 @@ Check the website address see if site is working.
 
 ## AWS Initial Setup
 
-* Ubuntu defaults to R v3.4 but you will need >v3.5 for several R packages to install. Follow steps here [Ubuntu packages for R](http://lib.stat.cmu.edu/R/CRAN/bin/linux/ubuntu/)
+* Ubuntu defaults to R v3.4 but you will need >v3.5 for several R packages to install. So follow instructions here [Ubuntu packages for R](http://lib.stat.cmu.edu/R/CRAN/bin/linux/ubuntu/)
+
+  ```
+  cd /etc/apt
+  sudo emacs sources.list
+  ```
+  
+  Add the following line, or the appropriated deb command from 
+  
+  ```
+  deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+  ```
+  
+  After saving `sources.list`, you'll need to run the following to fetch the latest R version.
+  
+  ```
+  sudo apt-get update
+  sudo apt-get install-rbase
+  sudo apt-get install r-base-dev
+  ```
 
 * Start at step 4 of this tutorial [How to host a r-shiny app on aws cloud in 7 steps](https://towardsdatascience.com/how-to-host-a-r-shiny-app-on-aws-cloud-in-7-simple-steps-5595e7885722)
 
