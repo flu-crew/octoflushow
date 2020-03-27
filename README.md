@@ -63,7 +63,7 @@ Check the website address see if site is working.
   
   ```
   sudo apt-get update
-  sudo apt-get install-rbase
+  sudo apt-get install r-base
   sudo apt-get install r-base-dev
   ```
 
