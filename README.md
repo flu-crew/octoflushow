@@ -49,8 +49,8 @@ Check the website address see if site is working.
 * Ubuntu defaults to R v3.4 but you will need >v3.5 for several R packages to install. So follow instructions here [Ubuntu packages for R](http://lib.stat.cmu.edu/R/CRAN/bin/linux/ubuntu/)
 
   ```
-  cd /etc/apt
-  sudo emacs sources.list
+  cd /etc/apt/sources.list_d      # <= add any sources.list command here instead
+  sudo emacs latestRversion.list
   ```
   
   Add the following line, or the appropriated deb command from 
@@ -62,6 +62,7 @@ Check the website address see if site is working.
   After saving `sources.list`, you'll need to run the following to fetch the latest R version.
   
   ```
+  # ! === You will also need to get the R public key from the R website, go to how to install R in ubuntu
   sudo apt-get update
   sudo apt-get install r-base
   sudo apt-get install r-base-dev
