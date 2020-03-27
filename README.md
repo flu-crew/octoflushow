@@ -69,6 +69,20 @@ Check the website address see if site is working.
 
 * Start at step 4 of this tutorial [How to host a r-shiny app on aws cloud in 7 steps](https://towardsdatascience.com/how-to-host-a-r-shiny-app-on-aws-cloud-in-7-simple-steps-5595e7885722)
 
+  ```
+  # Install R shiny package    =====   Altho better to just start R, and install pkgs using the install.packages("shiny") command
+  sudo su — -c “R -e \”install.packages(‘shiny’, repos = ‘http://cran.rstudio.com/')\""     
+  
+  # Install shiny server
+  wget https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.4.4.807-amd64.deb
+  sudo dpkg -i shiny-server-1.4.4.807-amd64.deb
+  cd /srv/shiny-server                                  # <= put your shiny app here
+  
+  # Start shiny server
+  sudo systemctl start shiny-server      
+  sudo systemctl status shiny-server                   # check if it's running  
+  ```
+
 * Set up a username password account using this tutorial [htpasswd](https://httpd.apache.org/docs/2.4/programs/htpasswd.html)
 
    ```
