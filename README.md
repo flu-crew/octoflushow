@@ -93,6 +93,15 @@ Check the website address see if site is working.
    less .htpasswd                                      # check file to make sure username has been added
    ```
    
+   If you've changed `000-default.conf` to reference a different password location (`/etc/apache2/.htpasswd`):
+   
+   ```
+   cd /etc/apache2
+   sudo htpasswd -c /etc/apache2/.htpasswd [username]      # 1st time, otherwise this will overwrite existing users
+   sudo htpasswd /etc/apache2/.htpasswd [username]         # To add more users
+   less .htpasswd                                          # check file to make sure username has been added
+   ```
+   
  * Setup shiny server, or at least reroute the ports to some form of  `https://yourwebsite.com/projectname/`
  
    ```
