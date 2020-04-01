@@ -4,10 +4,19 @@ library(octoflushow)
 d <- octoflushow::load_current()
 
 shinyServer(function(input, output) {
+  # input$data_is_loaded is set to true the first time the interactive data
+  # table is # opened. If the data table has not been opened, then the #
+  # input$raw_data_table_rows_all term is undefined.
+  data_is_loaded <- reactiveVal(value=FALSE)
 
   d_rct <- reactive({
-      row_indices <- input$raw_data_table_rows_all
-      d[row_indices, ]
+      if(data_is_loaded()){
+        # The data table has been loaded, so only view the selected rows
+        d[input$raw_data_table_rows_all, ]
+      } else {
+        # The data table has not been loaded, so view everything
+        d
+      }
   })
 
   output$time_plot <- renderPlot({
@@ -87,7 +96,10 @@ shinyServer(function(input, output) {
   })
 
   output$raw_data_table <- DT::renderDataTable(
-    d_col_rct(),
+    {
+      data_is_loaded(TRUE)
+      d_col_rct()
+    },
     filter="top",
     rownames=FALSE,
     style="bootstrap",
