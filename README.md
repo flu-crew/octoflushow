@@ -242,3 +242,28 @@ Next is a location block that was being used to force authentication at all dire
         </Location>
 ```
 
+This next location directive only applies to the path `/nextstrain/`. It uses the mod_proxy_html module to manually rewrite HTML code before serving to the client. It looks through all tags listed in ProxyHTMLLinks to rewrite the `"/"` path as `"/nextstrain/"`. While this helped fix thei ndex page, pths were being dynamically generated in the auspice javascript that were not captured by the rewrite filters, hence the additional reverse proxies. And ending the virtual host directive
+
+```
+        # The javascript is forming url paths, causing everything to fail.
+        <Location /nextstrain>
+                ProxyHTMLLinks  a          href
+                ProxyHTMLLinks  area       href
+                ProxyHTMLLinks  link       href
+                ProxyHTMLLinks  img        src longdesc usemap
+                ProxyHTMLLinks  object     classid codebase data usemap
+                ProxyHTMLLinks  q          cite
+                ProxyHTMLLinks  blockquote cite
+                ProxyHTMLLinks  ins        cite
+                ProxyHTMLLinks  del        cite
+                ProxyHTMLLinks  form       action
+                ProxyHTMLLinks  input      src usemap
+                ProxyHTMLLinks  head       profile
+                ProxyHTMLLinks  base       href
+                ProxyHTMLLinks  script     src for
+                ProxyHTMLEnable On
+                ProxyHTMLExtended On
+                ProxyHTMLURLMap / /nextstrain/
+        </Location>
+</VirtualHost>
+```
