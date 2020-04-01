@@ -1,5 +1,7 @@
 # octoFLU Show
 
+[Live site on flu-crew.org](http://flu-crew.org/octoflushow/)
+
 ## Installation
 
 The source code for the app is available on github and can be installed with `devtools`:
