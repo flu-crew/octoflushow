@@ -31,11 +31,14 @@ shinyUI(navbarPage("octoFLU show",
   tabPanel(
     "Landing page",
     fluidPage(
-      h1("Influenza A Virus in Swine Surveillence"),
-      p("The purpose of this site is to summarize the phylogenetic clade diversity of Influenza A Virus strains submitted to the passive surveillence program. octoFLU show provides a graphical dashboard of these changes and is maintained by Flu-Crew."),
+      h1("USDA Influenza A Virus in Swine Surveillence"),
+      p("The purpose of this site is to summarize the genetic diversity of influenza A virus in swine submitted to the national USDA influenza A virus in swine passive surveillence program. octoFLU show provides a graphical dashboard of these changes and is maintained by the Flu-Crew at the National Animal Disease Center, USDA-ARS."),
 #      tags$img(src = "https://github.com/flu-crew/octoFLU/blob/master/img/octoFLU_revised_V3-01.png", width = "100px", height = "100px"),
 #      tags$img(src = logofile, width = "100px", height = "100px"),
+      h2("Support"),
+      p("octoFLU show is in active development. If you need to report a problem, ask a question, or have a suggested enhancement, please contact Tavis Anderson, Zeb Arendsee, Jennifer Chang, or Amy Vincent."), 
       h2("Data"),
+      p("First, visit the Data tab to select the surveillance data you would like to graph."),
       p("The Data tab contains a table of all influenza A virus in swine isolates with A0 barcodes. Use this tab to filter and focus on subsets of the data. Filters will affect which isolates are included in the plots on the next three tabs."),
       p("Common filters include:"),
       tags$ul(
