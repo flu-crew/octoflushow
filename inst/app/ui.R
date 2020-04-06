@@ -38,7 +38,7 @@ shinyUI(navbarPage("octoFLU show",
       h2("Support"),
       p("octoFLU show is in active development. If you need to report a problem, ask a question, or have a suggested enhancement, please contact Tavis Anderson, Zeb Arendsee, Jennifer Chang, or Amy Vincent."), 
       h2("Data"),
-      p("First, visit the Data tab to select the surveillance data you would like to graph."),
+      p("Use the Data tab to select the surveillance data you would like to graph."),
       p("The Data tab contains a table of all influenza A virus in swine isolates with A0 barcodes. Use this tab to filter and focus on subsets of the data. Filters will affect which isolates are included in the plots on the next three tabs."),
       p("Common filters include:"),
       tags$ul(
