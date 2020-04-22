@@ -68,8 +68,10 @@ shinyUI(navbarPage("octoFLU show",
     "Data",
     fluidPage(
       fluidRow(
-        column(5),
+        column(4),
         column(2, actionButton("go", "Select Columns")),
+        column(2, textInput("strain_selection", label = "Select Strains", value = "", width = NULL, placeholder = NULL)),
+        # column(2, actionButton("go_select", "Select")),
         column(2, downloadButton("downloadData", "Download Data")) 
       ),
       fluidRow(

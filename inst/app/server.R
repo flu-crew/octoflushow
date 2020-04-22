@@ -91,8 +91,24 @@ shinyServer(function(input, output) {
     }
   )
 
+  # selection_pattern <- eventReactive(input$go_select, {
+  #   pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
+  #       unlist %>%
+  #       sub(pattern=" *([^ \t]*) *", replacement="\\1") %>%
+  #       paste0(collapse="|")
+  #   return(pattern)
+  # })
+
   d_col_rct <- reactive({
-      d[, input$selected_columns]
+      if(nchar(input$strain_selection) > 0){
+        pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
+            unlist %>% 
+            sub(pattern=" *([^ \t]*) *", replacement="\\1") %>%
+            paste0(collapse="|")
+        d[grepl(pattern, d$Strain), input$selected_columns]
+      } else {
+        d[, input$selected_columns]
+      }
   })
 
   output$raw_data_table <- DT::renderDataTable(
