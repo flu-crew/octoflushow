@@ -121,14 +121,14 @@ countByTimeUnit <- function(df, col_name="H1", Date="Date", tunit="month",
   if(is.null(maxDate)){
     maxDate <- df[[Date]] %>% max(.)
   }
-  minDate = lubridate::floor_date(minDate, tunit)
-  maxDate = lubridate::floor_date(maxDate, tunit)
-  
+  minDate <- lubridate::floor_date(minDate, unit=tunit)
+  maxDate <- lubridate::floor_date(maxDate, unit=tunit)
+
   # Count isolates by clade/subtype/state (col_name)
   cdf <- df %>%
     dplyr::select(., c(Date, col_name)) %>%
     dplyr::mutate(
-      Date = zoo::as.Date(lubridate::as_datetime(lubridate::floor_date(Date, tunit)))
+      Date = zoo::as.Date(lubridate::as_datetime(lubridate::floor_date(zoo::as.Date(Date), unit=tunit)))
     ) %>%
     dplyr::group_by(.dots=c(Date, col_name)) %>%
     dplyr::summarise(
@@ -142,7 +142,7 @@ countByTimeUnit <- function(df, col_name="H1", Date="Date", tunit="month",
     placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
     cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
   }
-  cdf$n[is.na(cdf$n)]=0
+  cdf$n[is.na(cdf$n)] <- 0
   return(cdf)
 }
 
