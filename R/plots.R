@@ -399,16 +399,16 @@ quadcountplot <- function(df, timespan_str) {
 barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::get_palette(variable), 
                             title="", 
                             bartype="stack",
-                            minDate=NULL, maxDate=NULL, # not used right now
+                            limits=NULL,
                             tunit="month",
-                            fed=F) {
+                            fed=FALSE) {
   
   # local format of federal quarter
   format_Q <- function(ddf){
     octoflushow::date2quarter(ddf, fed=fed)
   }
   
-  df[[variable]]=df[[variable]] %>% as.character(.) %>% factor(., levels=names(palette))
+  df[[variable]]=df[[variable]] %>% as.character %>% factor(levels=names(palette))
   
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
     ggplot2::geom_bar(stat = "identity", position = bartype) +
@@ -430,7 +430,9 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
         breaks = unique(df$Date)
       )
   }
-  #    ggplot2::expand_limits(x = bar_chart_limits)
+  if(!is.null(limits)){
+    p <- p + ggplot2::expand_limits(x = limits)
+  }
   
   if(bartype=="fill"){
     p <- p+ ggplot2::scale_y_continuous(labels = scales::percent)+
