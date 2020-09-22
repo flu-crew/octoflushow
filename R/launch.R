@@ -1,4 +1,4 @@
-#' Launch the Shiney app
+#' Launch the Shiny app
 #'
 #' @export
 launch_app <- function(){
