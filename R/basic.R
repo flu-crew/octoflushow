@@ -50,7 +50,7 @@ clean_data <- function(d, remove_mixed = TRUE) {
   my.data$Date <- zoo::as.Date(my.data$Date)
 
   # remove rows with missing dates
-  my.data <- my.data[not(is.na((my.data$Date))), ]
+  my.data <- my.data[!(is.na((my.data$Date))), ]
 
   # add federal collection quarter
   my.data$Collection_Q <- octoflushow::date2quarter(my.data$Date, fed=TRUE)
