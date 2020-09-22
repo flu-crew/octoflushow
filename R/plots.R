@@ -42,20 +42,20 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   segment_palette <- config$color[[segment]]
 
   d <- order_data_factors(clean_data(d), config) # JC: for some reason we're cleaning again?
-  
+
   if(floorDateBy=="quarter"){
     floorDateBy="3 months"
-  } 
-  
+  }
+
   # cd = clean data
   cd <- d %>%
     dplyr::select(c("Date",segment)) %>% {
       names(.) = c("Date","Segment")
       .
-    } %>% subset(., !is.na(Segment)) %>% 
+    } %>% subset(., !is.na(Segment)) %>%
     dplyr::mutate(
       Date = lubridate::as_datetime(lubridate::floor_date(Date, floorDateBy))
-    ) 
+    )
 
 #  d$Date <- lubridate::as_datetime(lubridate::floor_date(d$Date, floorDateBy))
 
@@ -106,27 +106,27 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 #'
 #' @param state_str State two letter codes as strings
 #' @return Returns the state names as full names
-#' @examples 
+#' @examples
 #' abbr2state(c("AK", "AL", "IA"))
 #' @export
 abbr2state <- function(state_str){
   state_str = as.character(state_str) %>% {
     . = dplyr::case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
                          .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
-                         .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",  
-                         .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",  
-                         .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",  
-                         .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",  
-                         .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",  
-                         .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",  
-                         .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",  
-                         .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",  
-                         .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico", 
-                         .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",  
-                         .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",  
-                         .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota", 
-                         .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",  
-                         .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",  
+                         .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",
+                         .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",
+                         .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",
+                         .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",
+                         .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",
+                         .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",
+                         .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",
+                         .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",
+                         .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico",
+                         .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",
+                         .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",
+                         .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota",
+                         .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",
+                         .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",
                          .=="WI"~"wisconsin", .=="WV"~"west virginia", .=="WY"~"wyoming")
   } %>% factor(.,
                levels=c("alaska","alabama","arkansas","arizona","california","colorado","connecticut",
@@ -158,7 +158,7 @@ facetMaps <- function(df, segment){
     subset(. ,!is.na(.[[segment]])) %>%
 #    dplyr::mutate(region=abbr2state(State)) %>%
     reshape2::dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
-    reshape2::melt(id="region") 
+    reshape2::melt(id="region")
 
   data_geo <- cdata %>%
     merge(states,., by="region",all.x=T) %>%
@@ -172,8 +172,8 @@ facetMaps <- function(df, segment){
   snames$value[snames$value=="0"]=""
 
   #plot, viridae color palette?
-  ggplot2::ggplot() + 
-    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=log(value)),color="lightgrey") + 
+  ggplot2::ggplot() +
+    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=log(value)),color="lightgrey") +
     ggplot2::scale_fill_gradient2(low="white", mid = "#43a2ca",high="#0868ac", midpoint = 3, guide="colorbar") +
     ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=value)) +
     ggplot2::theme_void() + ggplot2::theme(legend.position = "none",text=ggplot2::element_text(size=28)) +
@@ -204,7 +204,7 @@ plot_heatmap <- function(d){
     ) %>%
     dplyr::ungroup(.) %>%
     reshape2::dcast(., HAtype ~ NAtype, fill=0, value.var = "n") %>%
-    reshape2::melt(.) %>% 
+    reshape2::melt(.) %>%
     dplyr::mutate(
       NAtype=variable,
       n=value,
@@ -213,19 +213,19 @@ plot_heatmap <- function(d){
     ) %>% {
       .$tot = sum(.$n)
       .
-    } %>% 
+    } %>%
     dplyr::mutate(
       percent= (n/tot * 100) %>% round(., digits=1),
       tot=NULL
     )
-  
+
   mid.value <- (min(cdata$percent) + max(cdata$percent)) / 2
   tot <- sum(cdata$n)
-  
+
   (p <- cdata %>% ggplot2::ggplot(., ggplot2::aes(y=HAtype, x=NAtype, fill=percent)) +
       ggplot2::geom_tile(color="black")+
       ggplot2::geom_text(ggplot2::aes(label=percent))+
-      ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", midpoint=mid.value, 
+      ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", midpoint=mid.value,
                                     high = "#0868ac", space = "Lab", guide = "colorbar")+
       ggplot2::theme_minimal()+
       ggplot2::labs(x="NA type", y="HA type", title=paste("Percentage of HA and NA combinations (n=",tot,")", sep=""))+
@@ -245,19 +245,19 @@ plot_constellation <- function(d){
     subset(!grepl(",", Subtype)) %>%
     subset(Subtype!="mixed") %>%
     subset(Subtype!="H4N6")
-  
+
   # Get counts
   # ===== Get the counts
   (tots <- nrow(cdata))
-  
+
   hhdata <- prepGConstData(cdata)
-  
+
   xlabel <- "HA and NA Phylogenetic Clade Pairs"
   ylabel <- "Gene constellations"
   title <- paste("Gene Constellations (n=", tots, ")", sep = "")
-  
-  p<-hhdata %>% ggplot2::ggplot(., 
-                                ggplot2::aes(x = labels, y = Constellation, 
+
+  p<-hhdata %>% ggplot2::ggplot(.,
+                                ggplot2::aes(x = labels, y = Constellation,
                                              fill = log(nn))) +
     ggplot2::geom_tile(color = "black") +
     ggplot2::scale_fill_gradient2(
@@ -287,14 +287,14 @@ plot_constellation <- function(d){
     p <- p + ggplot2::geom_vline(xintercept = xint + 0.5, size = 0.25, color = "gray")
   }
   return(p)
-  
+
 }
 
 # ===== prepConstellationData
 prepGConstData <- function(d){
   cdata <- d %>%
     dplyr::mutate(                              # change name for heatmap
-      N1 = gsub("Pandemic", "pdm", N1), 
+      N1 = gsub("Pandemic", "pdm", N1),
       N1 = gsub("Classical", "classical", N1),
       H3 = gsub("Cluster_", "", H3),
       H3 = gsub("Human-like", "hu-like", H3)
@@ -305,11 +305,11 @@ prepGConstData <- function(d){
       N = dplyr::case_when(!is.na(N1) ~ N1,
                            !is.na(N2) ~ N2)
     )
-  
+
   # Get counts
   # ===== Get the counts
   (tots <- nrow(cdata))
-  
+
   hdata <- cdata %>%
     dplyr::group_by(Subtype, H, N, Constellation) %>%
     dplyr::summarise(
@@ -318,7 +318,7 @@ prepGConstData <- function(d){
     ) %>%
     dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
     dplyr::ungroup(.)
-  
+
   totdata <- cdata %>%
     dplyr::group_by(Constellation) %>%
     dplyr::summarise(
@@ -333,16 +333,16 @@ prepGConstData <- function(d){
     ) %>%
     dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
     dplyr::ungroup(.)
-  
+
   subtype_order <- c("total", "H1N1", "H1N2", "H3N1", "H3N2", "mixed")
-  
+
   hhdata <- rbind(hdata, totdata) %>%
     dplyr::mutate(
       labels=dplyr::case_when(H=="total" ~ "total",
                               1==1 ~ paste(H, N, sep=".")),
       Subtype=factor(Subtype, subtype_order)
     )
-  
+
   return(hhdata)
 }
 
@@ -396,46 +396,49 @@ quadcountplot <- function(df, timespan_str) {
 #' @param bartype is either "stack" or "fill"
 #' @param fed is either T or F if should use federal quarters
 #' @export
-barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::get_palette(variable), 
-                            title="", 
+barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::get_palette(variable),
+                            title="",
                             bartype="stack",
                             limits=NULL,
                             tunit="month",
                             fed=FALSE) {
-  
+
   # local format of federal quarter
   format_Q <- function(ddf){
     octoflushow::date2quarter(ddf, fed=fed)
   }
-  
+
   df[[variable]]=df[[variable]] %>% as.character %>% factor(levels=names(palette))
-  
+
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
     ggplot2::geom_bar(stat = "identity", position = bartype) +
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::labs(y="Number of Swine Isolates", x="", title=title) +
-    ggplot2::theme_bw() + 
+    ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 10, vjust = 0.5),
                    legend.title = ggplot2::element_blank(), legend.position = "bottom")
+
   if(tunit=="month"){
     p <- p + ggplot2::scale_x_date(
       labels = scales::date_format("%b-%y"),
-      date_breaks = "1 month"
-    ) 
+      date_breaks = "1 month",
+      expand=c(0,0),
+      limits=NULL
+    )
   }
+
   if(tunit=="quarter"){
     p <- p +
       ggplot2::scale_x_date(
         labels = format_Q,
-        breaks = unique(df$Date)
+        breaks = unique(df$Date),
+        expand=c(0,0),
+        limits=limits
       )
   }
-  if(!is.null(limits)){
-    p <- p + ggplot2::expand_limits(x = limits)
-  }
-  
+
   if(bartype=="fill"){
-    p <- p+ ggplot2::scale_y_continuous(labels = scales::percent)+
+    p <- p + ggplot2::scale_y_continuous(labels = scales::percent)+
       ggplot2::labs(y="Swine Isolates by %", x="", title=title)
   }
   return(p)
