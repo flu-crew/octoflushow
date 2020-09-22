@@ -11,10 +11,9 @@ barchart_bytime(
   palette = octoflushow::get_palette(variable),
   title = "",
   bartype = "stack",
-  minDate = NULL,
-  maxDate = NULL,
+  limits = NULL,
   tunit = "month",
-  fed = F
+  fed = FALSE
 )
 }
 \arguments{

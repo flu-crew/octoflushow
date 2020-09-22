@@ -4,12 +4,14 @@
 \alias{load_file}
 \title{Load a new swine surveillance report}
 \usage{
-load_file(filename, sheet = 1)
+load_file(filename, sheet = 1, region_to_state = TRUE)
 }
 \arguments{
 \item{filename}{The name of an excel file}
 
 \item{sheet}{The sheet in the excel file that contains the data.}
+
+\item{region_to_state}{logical Replace US regions with states (required for octoflushow Shiny app but not for quarterly reports)}
 }
 \description{
 Load a new swine surveillance report

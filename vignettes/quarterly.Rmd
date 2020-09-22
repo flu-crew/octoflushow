@@ -35,7 +35,7 @@ pQ=quarterrange[c(1:4)]
 cQ=quarterrange[c(5:8)]
 dif_title=paste("Gene Constellations (Current [Apr 2018 - Mar 2019] - Prior [Apr 2017 - Mar 2018])",sep="")
 
-infile <- system.file("app-data", "A0_Master_List.xlsx", package="octoflushow")
+infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
 segments <- c("H1", "H2", "H3", "N1", "N2", "M", "NP", "NS", "PA", "PB1", "PB2")
 segment_trees <- list(
     "H1"="H1.tre",

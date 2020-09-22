@@ -3,9 +3,9 @@ library(shinyBS)
 library(octoflushow)
 #library(png)
 
-infile <- system.file("app-data", "A0_Master_List.xlsx", package="octoflushow")
-sheet <- "Data"
-choices <- colnames(readxl::read_excel(infile, sheet = sheet, col_types = "text", n_max=3))
+infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
+choices <- colnames(readr::read_tsv(infile))
+
 names(choices) <- choices
 selected <- c("Barcode", "Date", "State", "Subtype", "Strain","H1","H3","N1","N2", "Constellation")
 stopifnot(all(selected %in% choices))

@@ -41,7 +41,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 
   segment_palette <- config$color[[segment]]
 
-  d <- order_data_factors(clean_data(d), config) # JC: for some reason we're cleaning again?
+  d <- order_data_factors(d, config)
 
   if(floorDateBy=="quarter"){
     floorDateBy="3 months"
@@ -53,11 +53,11 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
       names(.) = c("Date","Segment")
       .
     } %>% subset(., !is.na(Segment)) %>%
+    dplyr::filter(Segment != "mixed") %>% 
+    dplyr::filter(! is.na(Segment)) %>%
     dplyr::mutate(
       Date = lubridate::as_datetime(lubridate::floor_date(Date, floorDateBy))
     )
-
-#  d$Date <- lubridate::as_datetime(lubridate::floor_date(d$Date, floorDateBy))
 
   if (is.null(xlim)){
     xlim <- lubridate::as_datetime(c(min(d$Date), max(d$Date)))
@@ -71,6 +71,12 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     dplyr::ungroup(.) %>% dplyr::mutate(
       Date=lubridate::as_datetime(Date) %>% as.POSIXct(., format="%Y-%m-%d")
     )
+
+  for (clade in unique(summary_data$Segment)){
+    if(! (clade %in% names(segment_palette))){
+      stop(glue::glue("No color found for {clade} in {segment} color config. You need to either update the config.yaml file or the basic.R::clean_data function.")) 
+    }
+  }
 
   plotit <- function(position, ylab){
     ggplot2::ggplot(summary_data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
@@ -298,6 +304,12 @@ prepGConstData <- function(d){
       N1 = gsub("Classical", "classical", N1),
       H3 = gsub("Cluster_", "", H3),
       H3 = gsub("Human-like", "hu-like", H3)
+    ) %>%
+    dplyr::mutate(
+      N1 = factor(N1),
+      N2 = factor(N2),
+      H1 = factor(H1),
+      H3 = factor(H3)
     ) %>%
     dplyr::mutate(                              # create a HAtype and NAtype column
       H = dplyr::case_when(!is.na(H1) ~ H1,

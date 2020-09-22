@@ -81,6 +81,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "#FF0000"
     unknown: "#800000"
   PB1:
     PDM: "#762A83"
@@ -88,6 +89,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "#FF0000"
     unknown: "#800000"
   PA:
     PDM: "#762A83"
@@ -95,6 +97,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "###FF0000"
     unknown: "#800000"
   NP:
     PDM: "#762A83"
@@ -102,6 +105,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "#FF0000"
     unknown: "#800000"
   M:
     PDM: "#762A83"
@@ -109,6 +113,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "#FF0000"
     unknown: "#800000"
   NS:
     PDM: "#762A83"
@@ -116,6 +121,7 @@ colors:
     TX98: "#C7EAE5"
     Human-seasonal: "#969696"
     Human-seasonal_H3: "#969696"
+    classicalSwine: "#FF0000"
     unknown: "#800000"
   Subtype:
     H1N1: "#D7191C"
