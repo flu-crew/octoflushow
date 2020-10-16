@@ -68,11 +68,15 @@ shinyUI(navbarPage("octoFLU show",
     "Data",
     fluidPage(
       fluidRow(
-        column(4),
         column(2, actionButton("go", "Select Columns")),
-        column(2, textInput("strain_selection", label = "Select Strains", value = "", width = NULL, placeholder = NULL)),
-        # column(2, actionButton("go_select", "Select")),
-        column(2, downloadButton("downloadData", "Download Data")) 
+        column(2, downloadButton("downloadData", "Download")),
+        column(8, textAreaInput(
+          "strain_selection",
+          label = "Select strains (comma-delimited list of barcodes, strains, or regular expressions)",
+          value = "",
+          rows=2,
+          placeholder = "A01104056, Illinois/A01565507, Utah.*201[89]"
+        ) %>% shiny::tagAppendAttributes(style = 'width: 100%;')) 
       ),
       fluidRow(
         column(12,
