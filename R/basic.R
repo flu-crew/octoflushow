@@ -3,6 +3,7 @@
 #' For example, "Jun 2019 to Jun 2020"
 #'
 #' @param dates a vector of dates
+#' @export
 dates_to_str <- function(dates){
   min_date = min(dates) 
   max_date = max(dates)
