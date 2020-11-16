@@ -180,7 +180,7 @@ fixH1names <- function(h1) {
   h1 %>%
     replace(., . == "gamma.1" | . == "gamma.2" | . == "gamma.3", "gamma") %>%
     sub(".*,.*", "mixed", .) %>%
-    replace(., . == "LAIV.gamma2-beta-like", "gamma2-beta-like") %>%
+    replace(., . == "LAIV gamma2-beta-like", "gamma2-beta-like") %>%
     sub("pdm-vaccine|pdm", "pandemic", .)
 }
 
