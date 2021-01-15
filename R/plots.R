@@ -250,7 +250,8 @@ plot_constellation <- function(d){
     subset(!grepl("-", Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
     subset(Subtype!="mixed") %>%
-    subset(Subtype!="H4N6")
+    subset(Subtype!="H4N6") %>%
+    subset(!is.na(Constellation))
 
   # Get counts
   # ===== Get the counts
@@ -298,24 +299,23 @@ plot_constellation <- function(d){
 
 # ===== prepConstellationData
 prepGConstData <- function(d){
+
   cdata <- d %>%
-    dplyr::mutate(                              # change name for heatmap
+    dplyr::mutate(
+      N1 = as.character(N1),
+      N2 = as.character(N2),
+      H1 = as.character(H1),
+      H3 = as.character(H3)
+    ) %>%
+    dplyr::mutate(                      # change name for heatmap
       N1 = gsub("Pandemic", "pdm", N1),
       N1 = gsub("Classical", "classical", N1),
       H3 = gsub("Cluster_", "", H3),
       H3 = gsub("Human-like", "hu-like", H3)
     ) %>%
-    dplyr::mutate(
-      N1 = factor(N1),
-      N2 = factor(N2),
-      H1 = factor(H1),
-      H3 = factor(H3)
-    ) %>%
-    dplyr::mutate(                              # create a HAtype and NAtype column
-      H = dplyr::case_when(!is.na(H1) ~ H1,
-                           !is.na(H3) ~ H3),
-      N = dplyr::case_when(!is.na(N1) ~ N1,
-                           !is.na(N2) ~ N2)
+    dplyr::mutate(                      # create a HAtype and NAtype column
+      H = factor(dplyr::coalesce(H1, H3)),
+      N = factor(dplyr::coalesce(N1, N2))
     )
 
   # Get counts
