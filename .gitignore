@@ -2,6 +2,7 @@ inst/doc
 doc
 Meta
 .Rdata
+.RData
 .Rhistory
 .DS_Store
 ~*
