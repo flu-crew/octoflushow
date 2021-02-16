@@ -80,7 +80,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 
   plotit <- function(position, ylab){
     ggplot2::ggplot(summary_data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
-    ggplot2::geom_bar(stat="identity", position=position) +
+    ggplot2::geom_bar(stat="identity") +
       ggplot2::theme_bw() +
       ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
       ggplot2::scale_fill_manual(values=segment_palette) +
