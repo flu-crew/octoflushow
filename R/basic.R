@@ -53,6 +53,22 @@ clean_data <- function(d, remove_mixed = TRUE) {
   # remove rows with missing dates
   my.data <- my.data[!(is.na((my.data$Date))), ]
 
+  my.data <- my.data %>%
+    # remove any entries with multiple HA or NA entries
+    dplyr::filter(!grepl(",", H1)) %>%
+    dplyr::filter(!grepl(",", H3)) %>%
+    dplyr::filter(!grepl(",", N1)) %>%
+    dplyr::filter(!grepl(",", N2)) %>%
+    # remove any entries with multiple subtypes
+    dplyr::filter(!grepl(",", Subtype)) %>%
+    # remove any entries with multiple dates
+    dplyr::filter(!grepl(",", Date)) %>%
+    # remove any entries with multiple states
+    dplyr::filter(!grepl(",", State)) %>%
+    # remove any entries with both H1 and H3 entries
+    dplyr::filter(!(!is.na(H1) & !is.na(H3))) %>%
+    dplyr::filter(!(!is.na(N1) & !is.na(N2)))
+
   # add federal collection quarter
   my.data$Collection_Q <- octoflushow::date2quarter(my.data$Date, fed=TRUE)
 
