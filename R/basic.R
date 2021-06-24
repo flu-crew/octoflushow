@@ -67,8 +67,7 @@ clean_data <- function(d, remove_mixed = TRUE) {
     dplyr::filter(!grepl(",", State)) %>%
     # remove any entries with both H1 and H3 entries
     dplyr::filter(!(!is.na(H1) & !is.na(H3))) %>%
-    dplyr::filter(!(!is.na(N1) & !is.na(N2))) %>%
-    dplyr::filter(!(H1 == "mixed" | H3 == "mixed" | N1 == "mixed" | N2 == "mixed" | Subtype == "mixed")) 
+    dplyr::filter(!(!is.na(N1) & !is.na(N2)))
 
   # add federal collection quarter
   my.data$Collection_Q <- octoflushow::date2quarter(my.data$Date, fed=TRUE)
@@ -224,21 +223,14 @@ fixN1names <- function(n1) {
 }
 
 fixN2names <- function(n2) {
-  pat2002 <- "2002|02|02A_[12]|02B_[12]|2002[AB]|02[AB][12]?"
-  pat1998 <- "1998|98|98A_[12]|98B_[12]|1998[AB]|98[AB][12]?"
-
   patTX98 <- "TX1998|TX98|LAIV|LAIV-98"
   n2 %>%
     sub("^02", "2002", .) %>%
     sub("^98", "1998", .) %>%
     # fixes 2002A_2 and friends
     sub("_", "", .) %>%
-    sub(glue::glue("^({patTX98}),({patTX98})$"), "TX98", .) %>%
     sub(glue::glue("^({patTX98})$"), "TX98", .) %>%
-    sub("humanSeasonal", "Human-like", .) %>%
-    sub(glue::glue("^({pat2002})$"), "2002", .) %>%
-    sub(glue::glue("^({pat1998})$"), "1998", .) %>%
-    sub(".*,.*", "mixed", .)
+    sub("humanSeasonal", "Human-like", .)
 }
 
 fixIGnames <- function(ig) {
