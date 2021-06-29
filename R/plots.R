@@ -26,8 +26,8 @@ order_data_factors <- function(d, config){
 #' @param dateFormat A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")
 #' @param dateBreaks Date to break by (e.g., "years", or "months")
 #' @param xlim Limitations on the x axis
-#' @export
 #' @return ggplot object
+#' @export
 plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", dateBreaks="years", xlim=NULL){
   # ===== Basic Counting and plotting
   # ==== Colors and Order of names
@@ -40,7 +40,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   # The input data must have a Date column
   stopifnot("Date" %in% names(d))
 
-  segment_palette <- config$color[[segment]]
+  segment_palette <- config$colors[[segment]]
 
   d <- droplevels(order_data_factors(d, config))
 
@@ -81,7 +81,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 
   plotit <- function(position, ylab){
     ggplot2::ggplot(summary_data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
-    ggplot2::geom_bar(stat="identity", position=position) +
+      ggplot2::geom_bar(stat="identity", position=position) +
       ggplot2::theme_bw() +
       ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
       ggplot2::scale_fill_manual(values=segment_palette) +

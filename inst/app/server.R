@@ -14,15 +14,6 @@ plot_munge <- function(d, collapse_n2_clade){
 }
 
 server <- function(input, output, session) {
-
-  # The onStep term below is from Andrii's answer on StackOverflow#37408072,
-  # it touches app.R to prevent caching between sessions.
-  # Trick file date creation update
-  onStop(function() {
-    p <- paste0(getwd(), "/app.R")
-    Sys.setFileTime(p, now())
-  })
-
   # input$data_is_loaded is set to true the first time the interactive data
   # table is # opened. If the data table has not been opened, then the #
   # input$raw_data_table_rows_all term is undefined.
