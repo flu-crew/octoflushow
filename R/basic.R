@@ -12,10 +12,10 @@ dates_to_str <- function(dates){
 
 #' Load a new swine surveillance report
 #'
-#' @param filename The name of an excel file
-#' @param sheet The sheet in the excel file that contains the data.
+#' @param filename The name of the input TAB-delimited file (the output of
+#' `octofludb make masterlist`)
 #' @export
-load_file <- function(filename, sheet = 1) {
+load_file <- function(filename) {
   my.data <- clean_data(readr::read_tsv(filename))
   return(my.data)
 }
@@ -35,7 +35,7 @@ load_current <- function() {
 #' @return Data suitable for basic_plot
 #' @export
 collapse_n2 <- function(d) {
-  d$N2 <- sub("[AB]", "", d$N2)
+  d$N2 <- sub("[AB][12]?$", "", d$N2, perl=TRUE)
   d
 }
 
