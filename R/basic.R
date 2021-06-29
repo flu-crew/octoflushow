@@ -1,15 +1,3 @@
-#' Prepare a text description of a date range
-#'
-#' For example, "Jun 2019 to Jun 2020"
-#'
-#' @param dates a vector of dates
-#' @export
-dates_to_str <- function(dates){
-  min_date = min(dates) 
-  max_date = max(dates)
-  paste(lubridate::month(min_date, label=T, abbr=T), lubridate::year(min_date), "to", lubridate::month(max_date, label=T, abbr=T), lubridate::year(max_date))
-}
-
 #' Load a new swine surveillance report
 #'
 #' @param filename The name of the input TAB-delimited file (the output of
@@ -132,6 +120,77 @@ clean_data <- function(d, remove_mixed = TRUE) {
   my.data
 }
 
+#' Prepare a text description of a date range
+#'
+#' For example, "Jun 2019 to Jun 2020"
+#'
+#' @param dates a vector of dates
+#' @export
+dates_to_str <- function(dates){
+  min_date = min(dates) 
+  max_date = max(dates)
+  paste(lubridate::month(min_date, label=T, abbr=T), lubridate::year(min_date), "to", lubridate::month(max_date, label=T, abbr=T), lubridate::year(max_date))
+}
+
+#' Convert from date to fiscal quarter
+#'
+#' @param datey date
+#' @return quarter (Q1, Q2, Q3, Q4)
+#' @export
+date_to_quarter <- function(datey){
+  year_str = sub("20", "", year(datey %m+% months(3)))
+  quarter_str = (((month(datey) + 2) %% 12)) %/% 3 + 1
+  paste0(year_str, "Q", quarter_str)
+}
+
+#' Increment fiscal quarter
+#'
+#' @param quarter The fiscal quarter (e.g., 20Q1)
+#' @return the next quarter (e.g., 20Q1 -> 20Q2 and 20Q4 -> 21Q1)
+#' @export
+increment_quarter <- function(quarter){
+  y = as.integer(sub("Q.*", "", quarter))
+  q = as.integer(sub(".*Q", "", quarter))
+  if(all(q == 4)){
+    y <- y + 1
+    q <- 1
+  } else {
+    q <- q + 1
+  }
+  paste0(y, "Q", q)
+}
+
+#' Make a label stating the quarterly range 
+#'
+#' @param quarters a list of quarters 
+#' @return A string describing the quarterly range (e.g., "[20Q1 to 21Q4]")
+#' @export
+labelFromQuarters <- function(quarters){
+  quarters <- sort(quarters)
+  if(length(quarters) == 1){
+    quarters
+  } else {
+    paste0("[", quarters[1], " to ", rev(quarters)[1], "]") 
+  }
+}
+
+#' Make cannonical constellation ordering
+#'
+#' @param d A dataframe with a Constellation column
+#' @return The dataframe with the ordered Constellation column
+#' @export
+orderConstellations <- function(d){
+  # FIXME: this should just take the constellation vector as an argument rather
+  # than operating on the entire dataframe and hard-coded column name
+  clvl <- levels(d$Constellation)
+  d$Constellation <- factor(d$Constellation, levels=c(
+    sort(clvl[!grepl("V", clvl)]),
+    sort(clvl[ grepl("V", clvl)])
+  ))
+  d
+}
+
+
 #' Return regular or federal quarters
 #' @param dates Vector of date values
 #' @param fed True for returning federal quarters (19Q1 -> 19Q2)
@@ -144,10 +203,10 @@ date2quarter <- function(dates, fed = FALSE){
                      Quarter = lubridate::quarter(dates))
   if(fed){
     temp$Quarter = temp$Quarter+1
-    temp$Year[temp$Quarter>4] = temp$Year[temp$Quarter>4] +1
+    temp$Year[temp$Quarter>4] = temp$Year[temp$Quarter>4] + 1
     temp$Quarter[temp$Quarter>4] = 1
   }
-  temp$qtr = paste(temp$Year, temp$Quarter, sep="Q") %>% substr(., 3,6)
+  temp$qtr = paste(temp$Year, temp$Quarter, sep="Q") %>% substr(., 3, 6)
   return(temp$qtr)
 }
 

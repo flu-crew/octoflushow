@@ -99,11 +99,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   unscaled <- plotit("stack", ylab="Number of Swine Isolates")
   scaled <- plotit("fill", ylab="Swine Isolates by %")
 
-  legend <- cowplot::get_legend(scaled)
-  unscaled <- unscaled + ggplot2::theme(legend.position = "none")
-  scaled   <- scaled   + ggplot2::theme(legend.position = "none")
-
-  cowplot::plot_grid(unscaled, scaled, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
+  shared_legend_plot(unscaled, scaled)
 }
 
 # ===== State plots
@@ -286,16 +282,14 @@ plot_constellation <- function(d){
   ylabel <- "Gene constellations"
   title <- paste("Gene Constellations (n=", tots, ")", sep = "")
 
-  p<-hhdata %>% ggplot2::ggplot(.,
-                                ggplot2::aes(x = labels, y = Constellation,
-                                             fill = log(nn))) +
-    ggplot2::geom_tile(color = "black") +
+  p <- ggplot2::ggplot(hhdata, ggplot2::aes(x=labels, y=Constellation, fill=log(nn))) +
+    ggplot2::geom_tile(color="black") +
     ggplot2::scale_fill_gradient2(
-      low = "white", mid = "#43a2ca",
-      high = "#0868ac", na.value = "white",
+      low="white", mid="#43a2ca",
+      high="#0868ac", na.value="white",
       midpoint = mean(log(hhdata$nn))
     ) +
-    ggplot2::geom_text(ggplot2::aes(label = n)) +
+    ggplot2::geom_text(ggplot2::aes(label=n)) +
     ggplot2::labs(
       title = title,
       x = xlabel,
@@ -477,4 +471,160 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       ggplot2::labs(y="Swine Isolates by %", x="", title=title)
   }
   return(p)
+}
+
+
+
+#' Make two plots on top of eachother with a shared legend beneath 
+#'
+#' This layout works well for wide barcharts. Both plots are assumed to have
+#' the same legend, but this is not checked.
+#'
+#' @param p1 Top plot (the shared legend is taken from this plot)
+#' @param p2 Bottom plot
+#' @return a ggplot2 object
+#' @export
+shared_legend_plot <- function(p1, p2){
+  legend <- cowplot::get_legend(p1)
+  p1 <- p1 + ggplot2::theme(legend.position = "none")
+  p2 <- p2 + ggplot2::theme(legend.position = "none")
+  cowplot::plot_grid(p1, p2, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
+}
+
+#' Prepare data for hana
+#'
+#' @export
+make_hhdata <- function(x, quarters){
+  subset(x, Collection_Q %in% quarters) %>%
+  subset(Subtype != "mixed") %>%            # drop mixed isolates
+  subset(!is.na(Subtype)) %>%               # drop anything missing a subtype
+  subset(!(is.na(H1) & is.na(H3))) %>%      # must have an H1 or H3 classified
+  subset(!(is.na(N1) & is.na(N2))) %>%      # must have an N1 or N2 classified
+  subset(grepl("^[A-Z][A-Z]$", State)) %>%  # drop isolates without state information
+  subset(!is.na(Constellation)) %>%         # drop missing constellation isolates
+  subset(!grepl("-", Constellation))        # drop missing constellation isolates
+}
+
+
+### heatmaps
+
+#' Prepare data for heatmaps
+#'
+#' @export
+make_heatmap_data_by_interval <- function(d, quarters){
+  # Preparing Heatmap data
+  heatmap_data <- d %>%
+    subset(Collection_Q %in% quarters) %>% # limit heatmap data to the last 4 quarters
+    subset(Subtype != "mixed" & State != "NoState") %>% # Not mixed subtype or no state
+    dplyr::mutate(
+      H_Type = dplyr::case_when(!is.na(H1) ~ paste("H1", H1, sep = "."), # H Type
+                                !is.na(H3) ~ paste("H3", H3, sep = ".")),
+      N_Type = dplyr::case_when(!is.na(N1) ~ paste("N1", N1, sep = "."), # N Type
+                                !is.na(N2) ~ paste("N2", N2, sep = "."))
+    ) %>%
+    subset(!is.na(H_Type) & !is.na(N_Type)) # Drop if H or N are NA
+}
+
+#' Make a HANA heatmap
+#'
+#' @export
+heatmap_HANA <- function(df, dates, text=TRUE, totals=FALSE, font_size=3) {
+  df <- dplyr::select(df, H_Type, variable, percent)
+  if(totals){
+    x_totals <- dplyr::group_by(df, H_Type) %>% dplyr::summarize(variable = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+    y_totals <- dplyr::group_by(df, variable) %>% dplyr::summarize(H_Type = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+    df <- rbind(df, x_totals, y_totals)
+    df$variable <- droplevels(df$variable)
+    df$H_Type <- droplevels(df$H_Type)
+    df$H_Type <- factor(df$H_Type, levels=rev(levels(df$H_Type)))
+    nX = nlevels(df$variable)
+    nY = nlevels(df$H_Type)
+  }
+
+  mid.value <- (min(df$percent) + max(df$percent)) / 2
+  title <- paste("Percentage of HA and NA combinations -", octoflushow::dates_to_str(dates), sep = " ")
+  df$label <- ifelse(df$percent == 0, "", round(df$percent, 1)) 
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = H_Type)) +
+    ggplot2::geom_tile(ggplot2::aes(fill = percent), colour = "black") +
+    ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", high = "#0868ac",
+                                  space = "Lab", midpoint = mid.value, guide = "colorbar") +
+    ggplot2::theme_bw() +
+    ggplot2::labs(y="HA clade", x="NA clade", title=title) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 8, hjust = 1, vjust = 0.5))
+
+  if(totals){
+    p <- p +
+      ggplot2::geom_segment(ggplot2::aes(x = nX - 0.5, xend = nX - 0.5, y = 0.5, yend = nY + 0.5), color="black", size=1) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.5, xend = nX + 0.5, y = 1.5, yend = 1.5), color="black", size=1)
+  }
+
+  if(text==TRUE){
+    p <- p + ggplot2::geom_text(ggplot2::aes(label = label), size = font_size)
+  }
+  return(p)
+}
+
+#' Get HANA counts
+#'
+#' @param df Data from @make_heatmap_data_by_interval@ function
+#' @export
+hana_counts <- function(df){
+  # Order the labels
+  ha_order <- c(
+    "H1.alpha",
+    "H1.beta",
+    "H1.gamma",
+    "H1.gamma2",
+    "H1.gamma2-beta-like",
+    "H1.pandemic",
+    "H1.delta1",
+    "H1.delta1a",
+    "H1.delta1b",
+    "H1.delta2",
+    "H3.I",
+    "H3.II",
+    "H3.III",
+    "H3.IV",
+    "H3.IV-A",
+    "H3.IV-B",
+    "H3.IV-C",
+    "H3.IV-D",
+    "H3.IV-E",
+    "H3.IV-F",
+    "H3.IV-G",
+    "H3.IV-H",
+    "H3.IV-I",
+    "H3.IV-J",
+    "H3.IV-K",
+    "H3.2010.1",
+    "H3.2010.2",
+    "H3.other-human"
+  )
+
+  na_order <- c(
+    "N1.Classical",
+    "N1.Pandemic",
+    "N1.MN99",
+    "N2.1998",
+    "N2.2002",
+    "N2.2016",
+    "N2.TX98",
+    "N2.Human-like"
+  )
+
+  df %>%
+    # Barcode, H1.clade, N1.clade (or H3, and N2)
+    dplyr::select(Barcode, H_Type, N_Type) %>%
+    # Count number of HA and NA pairs
+    reshape2::dcast(H_Type ~ N_Type, fun.aggregate = length, value.var = "Barcode") %>%
+    # Prep for ggplot format
+    reshape2::melt(id = "H_Type") %>%
+    # get 2 digit percentage counts
+    dplyr::mutate(percent = round(value * 100 / sum(value), digits = 1)) %>%
+    dplyr::arrange(desc(percent)) %>%
+    dplyr::mutate(
+      H_Type = factor(H_Type, levels = ha_order),
+      variable = factor(variable, levels = na_order)
+      )
 }
