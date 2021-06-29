@@ -40,10 +40,10 @@ collapse_n2 <- function(d) {
 }
 
 #' Clean the dataset
+#'
 #' @param df Datatable containing swine surveillance information
 #' @return Return a data table with standardized clade names and filtered datasets
 #' @export
-
 clean_data <- function(d, remove_mixed = TRUE) {
   my.data <- d
 
