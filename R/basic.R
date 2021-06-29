@@ -24,6 +24,9 @@ load_current <- function() {
 #' @export
 collapse_n2 <- function(d) {
   d$N2 <- sub("[AB][12]?$", "", d$N2, perl=TRUE)
+  if(is.factor(d$N2)) {
+    d$N2 <- droplevels(d$N2) 
+  }
   d
 }
 
