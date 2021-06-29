@@ -4,12 +4,11 @@
 \alias{load_file}
 \title{Load a new swine surveillance report}
 \usage{
-load_file(filename, sheet = 1)
+load_file(filename)
 }
 \arguments{
-\item{filename}{The name of an excel file}
-
-\item{sheet}{The sheet in the excel file that contains the data.}
+\item{filename}{The name of the input TAB-delimited file (the output of
+`octofludb make masterlist`)}
 }
 \description{
 Load a new swine surveillance report

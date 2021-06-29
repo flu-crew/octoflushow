@@ -7,7 +7,7 @@ d <- octoflushow::clean_data(octoflushow::load_current())
 # update data in various ways prior to plotting
 plot_munge <- function(d, collapse_n2_clade){
   if(collapse_n2_clade){
-    collapse_n2(d)
+    octoflushow::collapse_n2(d)
   } else {
     d
   }
