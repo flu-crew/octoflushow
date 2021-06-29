@@ -56,7 +56,8 @@ shinyServer(function(input, output) {
   })
   
   heatmap_plot_rct <- reactive({
-    plot_heatmap(d_rct())
+    plot_munge(d_rct(), input$collapse_n2_clade_heatmap) %>%
+      heatmap_HANA(totals=TRUE)
   })
   
   constellation_plot_rct <- reactive({

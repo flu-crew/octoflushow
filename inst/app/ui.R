@@ -159,6 +159,7 @@ shinyUI(navbarPage("octoFLU Show",
     "Clades by heatmap",
     sidebarLayout(
       sidebarPanel(
+        checkboxInput("collapse_n2_clade_heatmap", "Collapse N2", value=FALSE),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_heatmap_plot", "Download Figure")

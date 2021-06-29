@@ -203,60 +203,6 @@ facetMaps <- function(df, segment){
 }
 
 
-#' Make a HA NA Heatmap of the data
-#'
-#' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
-#' @export
-#' @return ggplot object
-plot_heatmap <- function(d){
-  # ===== Basic Counting and plotting
-  cdata <- d %>%
-    dplyr::select(H1, H3, N1, N2) %>%     # only looking at HANA heatmap
-    dplyr::mutate(
-      HAtype=dplyr::case_when(!is.na(H1)~paste("H1",H1, sep="."),
-                              !is.na(H3)~paste("H3",H3, sep=".")),
-      NAtype=dplyr::case_when(!is.na(N1)~paste("N1",N1, sep="."),
-                              !is.na(N2)~paste("N2",N2, sep="."))
-    ) %>%
-    dplyr::select(HAtype, NAtype) %>%
-    subset(!is.na(HAtype) & !is.na(NAtype)) %>%
-    dplyr::group_by(HAtype, NAtype) %>%
-    dplyr::summarise(
-      n=dplyr::n()
-    ) %>%
-    dplyr::ungroup(.) %>%
-    reshape2::dcast(., HAtype ~ NAtype, fill=0, value.var = "n") %>%
-    reshape2::melt(.) %>%
-    dplyr::mutate(
-      NAtype=variable,
-      n=value,
-      variable=NULL,
-      value=NULL
-    ) %>% {
-      .$tot = sum(.$n)
-      .
-    } %>%
-    dplyr::mutate(
-      percent= (n/tot * 100) %>% round(., digits=1),
-      tot=NULL
-    )
-
-  mid.value <- (min(cdata$percent) + max(cdata$percent)) / 2
-  tot <- sum(cdata$n)
-
-  (p <- cdata %>% ggplot2::ggplot(., ggplot2::aes(y=HAtype, x=NAtype, fill=percent)) +
-      ggplot2::geom_tile(color="black")+
-      ggplot2::geom_text(ggplot2::aes(label=percent))+
-      ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", midpoint=mid.value,
-                                    high = "#0868ac", space = "Lab", guide = "colorbar")+
-      ggplot2::theme_minimal()+
-      ggplot2::labs(x="NA type", y="HA type", title=paste("Percentage of HA and NA combinations (n=",tot,")", sep=""))+
-      ggplot2::theme(legend.position = "bottom")
-  )
-  return(p)
-}
-
-
 #' Make a Gene Constellation Heatmap of the data
 #'
 #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
@@ -512,9 +458,13 @@ make_hhdata <- function(x, quarters){
 #'
 #' @export
 make_heatmap_data_by_interval <- function(d, quarters){
+  if(!is.null(quarters)){
+    # limit heatmap data to the last 4 quarters
+    d <- subset(d, Collection_Q %in% quarters)
+  }
+
   # Preparing Heatmap data
   heatmap_data <- d %>%
-    subset(Collection_Q %in% quarters) %>% # limit heatmap data to the last 4 quarters
     subset(Subtype != "mixed" & State != "NoState") %>% # Not mixed subtype or no state
     dplyr::mutate(
       H_Type = dplyr::case_when(!is.na(H1) ~ paste("H1", H1, sep = "."), # H Type
@@ -522,17 +472,25 @@ make_heatmap_data_by_interval <- function(d, quarters){
       N_Type = dplyr::case_when(!is.na(N1) ~ paste("N1", N1, sep = "."), # N Type
                                 !is.na(N2) ~ paste("N2", N2, sep = "."))
     ) %>%
-    subset(!is.na(H_Type) & !is.na(N_Type)) # Drop if H or N are NA
+    # Drop if H or N are NA
+    dplyr::filter(!is.na(H_Type)) %>%
+    dplyr::filter(!is.na(N_Type))
 }
 
 #' Make a HANA heatmap
 #'
 #' @export
-heatmap_HANA <- function(df, dates, text=TRUE, totals=FALSE, font_size=3) {
-  df <- dplyr::select(df, H_Type, variable, percent)
+heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
+
+  df <- make_heatmap_data_by_interval(df, NULL) %>%
+    hana_counts %>%
+    dplyr::select(H_Type, variable, percent)
+
   if(totals){
-    x_totals <- dplyr::group_by(df, H_Type) %>% dplyr::summarize(variable = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
-    y_totals <- dplyr::group_by(df, variable) %>% dplyr::summarize(H_Type = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+    x_totals <- dplyr::group_by(df, H_Type) %>%
+      dplyr::summarize(variable = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+    y_totals <- dplyr::group_by(df, variable) %>%
+      dplyr::summarize(H_Type = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
     df <- rbind(df, x_totals, y_totals)
     df$variable <- droplevels(df$variable)
     df$H_Type <- droplevels(df$H_Type)
@@ -541,8 +499,12 @@ heatmap_HANA <- function(df, dates, text=TRUE, totals=FALSE, font_size=3) {
     nY = nlevels(df$H_Type)
   }
 
+  title = "Percentage of HA and NA combinations"
+  if(!is.null(dates)){
+    title = paste(title, "-", octoflushow::dates_to_str(dates))
+  }
+
   mid.value <- (min(df$percent) + max(df$percent)) / 2
-  title <- paste("Percentage of HA and NA combinations -", octoflushow::dates_to_str(dates), sep = " ")
   df$label <- ifelse(df$percent == 0, "", round(df$percent, 1)) 
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = H_Type)) +
@@ -565,53 +527,107 @@ heatmap_HANA <- function(df, dates, text=TRUE, totals=FALSE, font_size=3) {
   return(p)
 }
 
+# #' Make a HA NA Heatmap of the data
+# #'
+# #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
+# #' @export
+# #' @return ggplot object
+# plot_heatmap <- function(d){
+#   # ===== Basic Counting and plotting
+#   cdata <- d %>%
+#     dplyr::select(H1, H3, N1, N2) %>%     # only looking at HANA heatmap
+#     dplyr::mutate(
+#       HAtype=dplyr::case_when(!is.na(H1)~paste("H1",H1, sep="."),
+#                               !is.na(H3)~paste("H3",H3, sep=".")),
+#       NAtype=dplyr::case_when(!is.na(N1)~paste("N1",N1, sep="."),
+#                               !is.na(N2)~paste("N2",N2, sep="."))
+#     ) %>%
+#     dplyr::select(HAtype, NAtype) %>%
+#     subset(!is.na(HAtype) & !is.na(NAtype)) %>%
+#     dplyr::group_by(HAtype, NAtype) %>%
+#     dplyr::summarise(
+#       n=dplyr::n()
+#     ) %>%
+#     dplyr::ungroup(.) %>%
+#     reshape2::dcast(., HAtype ~ NAtype, fill=0, value.var = "n") %>%
+#     reshape2::melt(.) %>%
+#     dplyr::mutate(
+#       NAtype=variable,
+#       n=value,
+#       variable=NULL,
+#       value=NULL
+#     ) %>% {
+#       .$tot = sum(.$n)
+#       .
+#     } %>%
+#     dplyr::mutate(
+#       percent= (n/tot * 100) %>% round(., digits=1),
+#       tot=NULL
+#     )
+#
+#   mid.value <- (min(cdata$percent) + max(cdata$percent)) / 2
+#   tot <- sum(cdata$n)
+#
+#   (p <- cdata %>% ggplot2::ggplot(., ggplot2::aes(y=HAtype, x=NAtype, fill=percent)) +
+#       ggplot2::geom_tile(color="black")+
+#       ggplot2::geom_text(ggplot2::aes(label=percent))+
+#       ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", midpoint=mid.value,
+#                                     high = "#0868ac", space = "Lab", guide = "colorbar")+
+#       ggplot2::theme_minimal()+
+#       ggplot2::labs(x="NA type", y="HA type", title=paste("Percentage of HA and NA combinations (n=",tot,")", sep=""))+
+#       ggplot2::theme(legend.position = "bottom")
+#   )
+#   return(p)
+# }
+
+
 #' Get HANA counts
 #'
 #' @param df Data from @make_heatmap_data_by_interval@ function
 #' @export
 hana_counts <- function(df){
-  # Order the labels
-  ha_order <- c(
-    "H1.alpha",
-    "H1.beta",
-    "H1.gamma",
-    "H1.gamma2",
-    "H1.gamma2-beta-like",
-    "H1.pandemic",
-    "H1.delta1",
-    "H1.delta1a",
-    "H1.delta1b",
-    "H1.delta2",
-    "H3.I",
-    "H3.II",
-    "H3.III",
-    "H3.IV",
-    "H3.IV-A",
-    "H3.IV-B",
-    "H3.IV-C",
-    "H3.IV-D",
-    "H3.IV-E",
-    "H3.IV-F",
-    "H3.IV-G",
-    "H3.IV-H",
-    "H3.IV-I",
-    "H3.IV-J",
-    "H3.IV-K",
-    "H3.2010.1",
-    "H3.2010.2",
-    "H3.other-human"
-  )
-
-  na_order <- c(
-    "N1.Classical",
-    "N1.Pandemic",
-    "N1.MN99",
-    "N2.1998",
-    "N2.2002",
-    "N2.2016",
-    "N2.TX98",
-    "N2.Human-like"
-  )
+  # # Order the labels
+  # ha_order <- c(
+  #   "H1.alpha",
+  #   "H1.beta",
+  #   "H1.gamma",
+  #   "H1.gamma2",
+  #   "H1.gamma2-beta-like",
+  #   "H1.pandemic",
+  #   "H1.delta1",
+  #   "H1.delta1a",
+  #   "H1.delta1b",
+  #   "H1.delta2",
+  #   "H3.I",
+  #   "H3.II",
+  #   "H3.III",
+  #   "H3.IV",
+  #   "H3.IV-A",
+  #   "H3.IV-B",
+  #   "H3.IV-C",
+  #   "H3.IV-D",
+  #   "H3.IV-E",
+  #   "H3.IV-F",
+  #   "H3.IV-G",
+  #   "H3.IV-H",
+  #   "H3.IV-I",
+  #   "H3.IV-J",
+  #   "H3.IV-K",
+  #   "H3.2010.1",
+  #   "H3.2010.2",
+  #   "H3.other-human"
+  # )
+  #
+  # na_order <- c(
+  #   "N1.Classical",
+  #   "N1.Pandemic",
+  #   "N1.MN99",
+  #   "N2.1998",
+  #   "N2.2002",
+  #   "N2.2016",
+  #   "N2.TX98",
+  #   "N2.Human-like"
+  # )
 
   df %>%
     # Barcode, H1.clade, N1.clade (or H3, and N2)
@@ -624,7 +640,9 @@ hana_counts <- function(df){
     dplyr::mutate(percent = round(value * 100 / sum(value), digits = 1)) %>%
     dplyr::arrange(desc(percent)) %>%
     dplyr::mutate(
-      H_Type = factor(H_Type, levels = ha_order),
-      variable = factor(variable, levels = na_order)
+      # H_Type = factor(H_Type, levels = ha_order),
+      # variable = factor(variable, levels = na_order)
+      H_Type = factor(H_Type),
+      variable = factor(variable)
       )
 }
