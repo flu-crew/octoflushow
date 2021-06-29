@@ -14,13 +14,9 @@ dates_to_str <- function(dates){
 #'
 #' @param filename The name of an excel file
 #' @param sheet The sheet in the excel file that contains the data.
-#' @param region_to_state logical Replace US regions with states (required for octoflushow Shiny app but not for quarterly reports)
 #' @export
-load_file <- function(filename, sheet = 1, region_to_state=TRUE) {
+load_file <- function(filename, sheet = 1) {
   my.data <- clean_data(readr::read_tsv(filename))
-  if (region_to_state) {
-    my.data$region = abbr2state(state_str = my.data$State) 
-  }
   return(my.data)
 }
 
@@ -31,6 +27,16 @@ load_current <- function() {
   infile <- system.file("app-data", "A0_Master_List.tab", package = "octoflushow")
   my.data <- load_file(infile)
   return(my.data)
+}
+
+#' Collapse 2002A, 2002B, 1998A and 1998B clades into 2002 and 1998
+#'
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_n2 <- function(d) {
+  d$N2 <- sub("[AB]", "", d$N2)
+  d
 }
 
 #' Clean the dataset
@@ -67,14 +73,12 @@ clean_data <- function(d, remove_mixed = TRUE) {
     dplyr::filter(!grepl(",", State)) %>%
     # remove any entries with both H1 and H3 entries
     dplyr::filter(!(!is.na(H1) & !is.na(H3))) %>%
-    dplyr::filter(!(!is.na(N1) & !is.na(N2)))
+    dplyr::filter(!(!is.na(N1) & !is.na(N2))) %>%
+    # remove anything that is missing State info
+    dplyr::filter(!is.na(State))
 
   # add federal collection quarter
   my.data$Collection_Q <- octoflushow::date2quarter(my.data$Date, fed=TRUE)
-
-  # set anything other than a state postal code to "NoState"
-  # this will include ambiguous states like "TX,WY"
-  my.data$State <- ifelse(grepl("^..$", my.data$State), my.data$State, "NoState")
 
   # ======================================== Add Regions
   region1 <- c("ME", "VT", "NH", "MA", "CT", "RI", "NY",

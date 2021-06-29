@@ -25,6 +25,8 @@ plot_basic(
 \item{dateFormat}{A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")}
 
 \item{dateBreaks}{Date to break by (e.g., "years", or "months")}
+
+\item{xlim}{Limitations on the x axis}
 }
 \value{
 ggplot object

@@ -110,6 +110,7 @@ shinyUI(navbarPage("octoFLU show",
           inline = TRUE,
           selected = "quarter"
         ),
+        checkboxInput("collapse_n2_bar", "Collapse N2", value=FALSE),
         radioButtons(
           "segmentChoiceBar",
           label    = "Segment",
@@ -133,6 +134,7 @@ shinyUI(navbarPage("octoFLU show",
     "Clades by state",
     sidebarLayout(
      sidebarPanel(
+       checkboxInput("collapse_n2_state", "Collapse N2", value=FALSE),
        radioButtons(
          "segmentChoiceState",
          label    = "Segment",

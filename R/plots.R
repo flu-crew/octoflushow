@@ -25,6 +25,7 @@ order_data_factors <- function(d, config){
 #' "week", "3 months", "year")
 #' @param dateFormat A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")
 #' @param dateBreaks Date to break by (e.g., "years", or "months")
+#' @param xlim Limitations on the x axis
 #' @export
 #' @return ggplot object
 plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", dateBreaks="years", xlim=NULL){
@@ -108,43 +109,59 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 # ===== State plots
 # state stuff starts here...
 
-#' Make sure all states are there, rename states to regions for plotting maps
-#'
-#' @param state_str State two letter codes as strings
-#' @return Returns the state names as full names
-#' @examples
-#' abbr2state(c("AK", "AL", "IA"))
-#' @export
-abbr2state <- function(state_str){
-  state_str = as.character(state_str) %>% {
-    . = dplyr::case_when(.=="AK"~"alaska", .=="AL"~"alabama", .=="AR"~"arkansas",
-                         .=="AZ"~"arizona", .=="CA"~"california", .=="CO"~"colorado",
-                         .=="CT"~"connecticut", .=="DC"~"district of columbia", .=="DE"~"delaware",
-                         .=="FL"~"florida", .=="GA"~"georgia", .=="HI"~"hawaii",
-                         .=="IA"~"iowa", .=="ID"~"idaho", .=="IL"~"illinois",
-                         .=="IN"~"indiana", .=="KS"~"kansas", .=="KY"~"kentucky",
-                         .=="LA"~"louisiana", .=="MA"~"massachusetts", .=="MD"~"maryland",
-                         .=="ME"~"maine", .=="MI"~"michigan", .=="MN"~"minnesota",
-                         .=="MO"~"missouri", .=="MS"~"mississippi", .=="MT"~"montana",
-                         .=="NC"~"north carolina", .=="ND"~"north dakota", .=="NE"~"nebraska",
-                         .=="NH"~"new hampshire", .=="NJ"~"new jersey", .=="NM"~"new mexico",
-                         .=="NV"~"nevada", .=="NY"~"new york", .=="OH"~"ohio",
-                         .=="OK"~"oklahoma", .=="OR"~"oregon", .=="PA"~"pennsylvania",
-                         .=="RI"~"rhode island", .=="SC"~"south carolina", .=="SD"~"south dakota",
-                         .=="TN"~"tennessee", .=="TX"~"texas", .=="UT"~"utah",
-                         .=="VA"~"virginia", .=="VT"~"vermont", .=="WA"~"washington",
-                         .=="WI"~"wisconsin", .=="WV"~"west virginia", .=="WY"~"wyoming")
-  } %>% factor(.,
-               levels=c("alaska","alabama","arkansas","arizona","california","colorado","connecticut",
-                        "district of columbia","delaware","florida","georgia","hawaii","iowa","idaho",
-                        "illinois","indiana","kansas","kentucky","louisiana","massachusetts","maryland",
-                        "maine","michigan","minnesota","missouri","mississippi","montana","north carolina",
-                        "north dakota","nebraska","new hampshire","new jersey","new mexico","nevada",
-                        "new york","ohio","oklahoma","oregon","pennsylvania","rhode island","south carolina",
-                        "south dakota","tennessee","texas","utah","virginia","vermont","washington","wisconsin",
-                        "west virginia","wyoming"))
-  return(state_str)
-}
+abbr2state = c(
+  "AL"="alabama",
+  "AR"="arkansas",
+  "CA"="california",
+  "CO"="colorado",
+  "DC"="district of columbia",
+  "DE"="delaware",
+  "GA"="georgia",
+  "HI"="hawaii",
+  "ID"="idaho",
+  "IL"="illinois",
+  "KS"="kansas",
+  "KY"="kentucky",
+  "MA"="massachusetts",
+  "MD"="maryland",
+  "MI"="michigan",
+  "MN"="minnesota",
+  "MS"="mississippi",
+  "MT"="montana",
+  "ND"="north dakota",
+  "NE"="nebraska",
+  "NJ"="new jersey",
+  "NM"="new mexico",
+  "NY"="new york",
+  "OH"="ohio",
+  "OR"="oregon",
+  "PA"="pennsylvania",
+  "SC"="south carolina",
+  "SD"="south dakota",
+  "TX"="texas",
+  "UT"="utah",
+  "VT"="vermont",
+  "WA"="washington",
+  "WV"="west virginia",
+  "WY"="wyoming",
+  "AK"="alaska",
+  "AZ"="arizona",
+  "CT"="connecticut",
+  "FL"="florida",
+  "IA"="iowa",
+  "IN"="indiana",
+  "LA"="louisiana",
+  "ME"="maine",
+  "MO"="missouri",
+  "NC"="north carolina",
+  "NH"="new hampshire",
+  "NV"="nevada",
+  "OK"="oklahoma",
+  "RI"="rhode island",
+  "TN"="tennessee",
+  "VA"="virginia",
+  "WI"="wisconsin"
+)
 
 # get states long and lat values
 states <- ggplot2::map_data("state")
@@ -155,37 +172,40 @@ states <- ggplot2::map_data("state")
 #' @param segment the column to facet by
 #' @export
 facetMaps <- function(df, segment){
-#  config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
-#  df <- order_data_factors(clean_data(df), config) %>% droplevels(.)
-  df <- order_data_factors(df, config) #%>% droplevels(.)
+  data(state)
 
-  # add info
-  cdata <- df %>% subset(.,State!="NoState" ) %>%
-    subset(. ,!is.na(.[[segment]])) %>%
-#    dplyr::mutate(region=abbr2state(State)) %>%
-    reshape2::dcast(. ,region~.[[segment]], fun.aggregate = length, value.var=segment, drop=FALSE) %>%
-    reshape2::melt(id="region")
+  cdata <- df[!is.na(df[[segment]]), ] %>%
+    dplyr::mutate(region = as.character(State)) %>%
+    dplyr::filter(region %in% names(abbr2state)) %>%
+    dplyr::mutate(region = unname(abbr2state[region])) %>%
+    order_data_factors(config) %>% droplevels %>%
+    dplyr::select_("region", clade=segment) %>%
+    dplyr::group_by(region, clade) %>%
+    dplyr::count() %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(region=factor(region, levels=unname(abbr2state))) %>%
+    tidyr::complete(clade, region, fill=list(n=0))
 
-  data_geo <- cdata %>%
-    merge(states,., by="region",all.x=T) %>%
+  data_geo <- merge(states, cdata, all=TRUE, by="region") %>%
+    dplyr::mutate(n = ifelse(is.na(n), 0, n)) %>%
     dplyr::arrange(order)
 
   # Labels
-  snames <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y)
-  snames <- merge(snames, cdata, by="region")
-
-  # do not label zeros
-  snames$value[snames$value=="0"]=""
+  snames <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y) %>%
+    merge(cdata, all=TRUE, by="region") %>%
+    dplyr::mutate(n = ifelse(n == 0, "", n)) %>%
+    dplyr::mutate(n = ifelse(is.na(n), "", n))
 
   #plot, viridae color palette?
   ggplot2::ggplot() +
-    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=log(value)),color="lightgrey") +
+    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=log(n)),color="lightgrey") +
     ggplot2::scale_fill_gradient2(low="white", mid = "#43a2ca",high="#0868ac", midpoint = 3, guide="colorbar") +
-    ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=value)) +
+    ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=n), size=2) +
     ggplot2::theme_void() + ggplot2::theme(legend.position = "none",text=ggplot2::element_text(size=28)) +
-    ggplot2::facet_wrap(~variable, drop=TRUE) +
+    ggplot2::facet_wrap(~clade, drop=TRUE) +
     ggplot2::coord_fixed(1.3)
 }
+
 
 #' Make a HA NA Heatmap of the data
 #'
@@ -239,6 +259,7 @@ plot_heatmap <- function(d){
   )
   return(p)
 }
+
 
 #' Make a Gene Constellation Heatmap of the data
 #'

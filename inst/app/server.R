@@ -1,7 +1,17 @@
 library(shiny)
 library(octoflushow)
 
-d <- octoflushow::load_current()
+d <- octoflushow::clean_data(octoflushow::load_current())
+
+
+# update data in various ways prior to plotting
+plot_munge <- function(d, collapse_n2_clade){
+  if(collapse_n2_clade){
+    collapse_n2(d)
+  } else {
+    d
+  }
+}
 
 shinyServer(function(input, output) {
   # input$data_is_loaded is set to true the first time the interactive data
@@ -36,11 +46,13 @@ shinyServer(function(input, output) {
   })
 
   basic_plot_rct <- reactive({
-    plot_basic(d_rct(), floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
+    plot_munge(d_rct(), input$collapse_n2_bar) %>%
+      plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   state_plot_rct <- reactive({
-    facetMaps(d_rct(), segment=input$segmentChoiceState)
+    plot_munge(d_rct(), input$collapse_n2_state) %>%
+      facetMaps(segment=input$segmentChoiceState)
   })
   
   heatmap_plot_rct <- reactive({
