@@ -69,8 +69,9 @@ shinyUI(navbarPage("octoFLU Show",
     fluidPage(
       fluidRow(
         column(2, actionButton("go", "Select Columns")),
-        column(2, downloadButton("downloadData", "Download")),
-        column(8, textAreaInput(
+        column(2, downloadButton("downloadExcel", "Download Excel")),
+        column(2, downloadButton("downloadTAB", "Download TSV")),
+        column(6, textAreaInput(
           "strain_selection",
           label = "Select strains (comma-delimited list of barcodes, strains, or regular expressions)",
           value = "",

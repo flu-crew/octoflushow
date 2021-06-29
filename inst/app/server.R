@@ -91,15 +91,27 @@ shinyServer(function(input, output) {
     }
   )
 
-  output$downloadData <- downloadHandler(
+  output$downloadExcel <- downloadHandler(
     filename = 'swine-surveillance-data.xlsx',
     content = function(file) {
       # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
       # <output id>_rows_all gets all selected rows on all pages
       # <output id>_rows_current gets only the selected rows on the current page
       row_indices <- input$raw_data_table_rows_all
-      selected_data <- d[row_indices, ]
+      selected_data <- d[row_indices, input$selected_columns]
       writexl::write_xlsx(selected_data, path=file)
+    }
+  )
+
+  output$downloadTAB <- downloadHandler(
+    filename = 'swine-surveillance-data.txt',
+    content = function(file) {
+      # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
+      # <output id>_rows_all gets all selected rows on all pages
+      # <output id>_rows_current gets only the selected rows on the current page
+      row_indices <- input$raw_data_table_rows_all
+      selected_data <- d[row_indices, input$selected_columns]
+      readr::write_tsv(selected_data, file=file)
     }
   )
 
