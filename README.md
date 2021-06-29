@@ -1,4 +1,4 @@
-# octoFLU Show
+# octoflushow
 
 [Live site on flu-crew.org](http://flu-crew.org/octoflushow/)
 

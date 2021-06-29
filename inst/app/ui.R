@@ -26,21 +26,21 @@ resize_on_change <- function(elementID){
 
 #logofile <- system.file("app-data", "logo.png", package="octoflushow")
 
-shinyUI(navbarPage("octoFLU show",
+shinyUI(navbarPage("octoFLU Show",
 
   tabPanel(
     "Landing page",
     fluidPage(
       h1("USDA Influenza A Virus in Swine Surveillence"),
-      p("The purpose of this site is to summarize the genetic diversity of influenza A virus in swine submitted to the national USDA influenza A virus in swine passive surveillence program. octoFLU show provides a graphical dashboard of these changes and is maintained by the Flu-Crew at the National Animal Disease Center, USDA-ARS."),
+      p("The purpose of this site is to summarize the genetic diversity of influenza A virus in swine submitted to the national USDA influenza A virus in swine passive surveillence program. octoFLU Show provides a graphical dashboard of these changes and is maintained by the Flu-Crew at the National Animal Disease Center, USDA-ARS."),
 #      tags$img(src = "https://github.com/flu-crew/octoFLU/blob/master/img/octoFLU_revised_V3-01.png", width = "100px", height = "100px"),
 #      tags$img(src = logofile, width = "100px", height = "100px"),
       h2("Support"),
-      p("octoFLU show is in active development. If you need to report a problem, ask a question, or have a suggested enhancement, please contact Tavis Anderson, Zebulun Arendsee, Jennifer Chang, or Amy Vincent."), 
+      p("octoFLU Show is in active development. If you need to report a problem, ask a question, or have a suggested enhancement, please contact Tavis Anderson, Zebulun Arendsee, Jennifer Chang, or Amy Vincent."), 
       h3("How to cite"),
-      p("If you use data provided by octoFLU show in your work, please credit in the following format:"),
+      p("If you use data provided by octoFLU Show in your work, please credit in the following format:"),
 #      p("octoFLU show, https://flu-crew.org/octoflushow/, (data retrieved <?php echo (new DateTime())->format('d M, Y');?>)"),
-      p("octoFLU show, https://flu-crew.org/octoflushow/, (data retrieved on dd/MM/YYYY)."),
+      p("octoFLU Show, https://flu-crew.org/octoflushow/, (data retrieved on dd/MM/YYYY)."),
       p("Citation is subject to change pending publication."),
       h2("Data"),
       p("Use the Data tab to select the surveillance data you would like to graph."),

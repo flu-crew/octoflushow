@@ -136,10 +136,9 @@ shinyServer(function(input, output) {
       target="column",
       selected=0
     ),
-    extensions = c("Buttons", "ColReorder"),
+    extensions = c("ColReorder"),
     options = list(
       dom = 'Blfrtip',
-      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
       autoWidth=FALSE,
       orderMulti=TRUE,
       searching=TRUE,
