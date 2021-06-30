@@ -69,8 +69,9 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
     dplyr::summarise(n=dplyr::n(),
                      tot=nrow(.),
                      per=round(dplyr::n() / nrow(.)*100, digits = 2)) %>% # Calculate summary statistics
-    dplyr::ungroup(.) %>% dplyr::mutate(
-      Date=lubridate::as_datetime(Date) %>% as.POSIXct(., format="%Y-%m-%d")
+    dplyr::ungroup() %>% dplyr::mutate(
+      Date=lubridate::as_datetime(Date) %>% as.POSIXct(., format="%Y-%m-%d"),
+      Segment=droplevels(Segment)
     )
 
   for (clade in unique(summary_data$Segment)){
