@@ -18,6 +18,8 @@ Authors@R: c(
 Description: Lets you see and search stuff.
 License: MIT + file LICENSE
 Imports:
+    shinyBS,
+    jquerylib,
     DT,
     RColorBrewer,
     cowplot,
