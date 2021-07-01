@@ -52,22 +52,22 @@ server <- function(input, output, session) {
 
   basic_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar) %>%
-      plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
+      octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   state_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state) %>%
-      facetMaps(segment=input$segmentChoiceState)
+      octoflushow::facetMaps(segment=input$segmentChoiceState)
   })
   
   heatmap_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_clade_heatmap, input$collapse_gamma_heatmap, input$collapse_c4_heatmap) %>%
-      heatmap_HANA(totals=TRUE)
+      octoflushow::heatmap_HANA(totals=TRUE)
   })
   
   constellation_plot_rct <- reactive({
     plot_munge(d_rct(), TRUE, TRUE, TRUE) %>%
-    plot_constellation()
+    octoflushow::plot_constellation()
   })
 
   output$download_time_plot <- downloadHandler(
