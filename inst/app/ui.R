@@ -1,5 +1,6 @@
 library(shiny)
 library(shinyBS)
+require(magrittr)
 
 infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
 choices <- colnames(readr::read_tsv(infile))

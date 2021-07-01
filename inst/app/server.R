@@ -1,4 +1,5 @@
 library(shiny)
+require(magrittr)
 
 d <- octoflushow::clean_data(octoflushow::load_current())
 
@@ -120,14 +121,6 @@ server <- function(input, output, session) {
       readr::write_tsv(selected_data, file=file)
     }
   )
-
-  # selection_pattern <- eventReactive(input$go_select, {
-  #   pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
-  #       unlist %>%
-  #       sub(pattern=" *([^ \t]*) *", replacement="\\1") %>%
-  #       paste0(collapse="|")
-  #   return(pattern)
-  # })
 
   d_col_rct <- reactive({
       if(nchar(input$strain_selection) > 0){
