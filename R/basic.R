@@ -30,6 +30,33 @@ collapse_n2 <- function(d) {
   d
 }
 
+#' Collapse gamma.[123] and gamma2 into gamma
+#'
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_gamma <- function(d) {
+  d$H1 <- sub("^gamma(2|.[123])$", "gamma", d$H1, perl=TRUE)
+  if(is.factor(d$H1)) {
+    d$H1 <- droplevels(d$H1) 
+  }
+  d
+}
+
+#' Collapse Cluster IV into C-IV and C-IVA
+#'
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_c4 <- function(d) {
+  d$H3 <- sub("^IV-[B-Z]$", "IV", d$H3, perl=TRUE)
+  if(is.factor(d$H3)) {
+    d$H3 <- droplevels(d$H3) 
+  }
+  d
+}
+
+
 #' Clean the dataset
 #'
 #' @param df Datatable containing swine surveillance information

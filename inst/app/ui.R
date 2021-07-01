@@ -111,6 +111,8 @@ shinyUI(navbarPage("octoFLU Show",
           selected = "quarter"
         ),
         checkboxInput("collapse_n2_bar", "Collapse N2", value=FALSE),
+        checkboxInput("collapse_gamma_bar", "Collapse Gamma", value=FALSE),
+        checkboxInput("collapse_c4_bar", "Collapse C-IV", value=FALSE),
         radioButtons(
           "segmentChoiceBar",
           label    = "Segment",
@@ -135,6 +137,8 @@ shinyUI(navbarPage("octoFLU Show",
     sidebarLayout(
      sidebarPanel(
        checkboxInput("collapse_n2_state", "Collapse N2", value=FALSE),
+       checkboxInput("collapse_gamma_state", "Collapse Gamma", value=FALSE),
+       checkboxInput("collapse_c4_state", "Collapse C-IV", value=FALSE),
        radioButtons(
          "segmentChoiceState",
          label    = "Segment",
@@ -159,6 +163,8 @@ shinyUI(navbarPage("octoFLU Show",
     sidebarLayout(
       sidebarPanel(
         checkboxInput("collapse_n2_clade_heatmap", "Collapse N2", value=FALSE),
+        checkboxInput("collapse_gamma_heatmap", "Collapse Gamma", value=FALSE),
+        checkboxInput("collapse_c4_heatmap", "Collapse C-IV", value=FALSE),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_heatmap_plot", "Download Figure")

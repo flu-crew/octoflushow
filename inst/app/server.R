@@ -5,12 +5,17 @@ d <- octoflushow::clean_data(octoflushow::load_current())
 
 
 # update data in various ways prior to plotting
-plot_munge <- function(d, collapse_n2_clade){
+plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade){
   if(collapse_n2_clade){
-    octoflushow::collapse_n2(d)
-  } else {
-    d
+    d = octoflushow::collapse_n2(d)
   }
+  if(collapse_gamma_clade){
+    d = octoflushow::collapse_gamma(d)
+  }
+  if(collapse_c4_clade){
+    d = octoflushow::collapse_c4(d)
+  }
+  d
 }
 
 server <- function(input, output, session) {
@@ -46,22 +51,23 @@ server <- function(input, output, session) {
   })
 
   basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_bar) %>%
+    plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar) %>%
       plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   state_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_state) %>%
+    plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state) %>%
       facetMaps(segment=input$segmentChoiceState)
   })
   
   heatmap_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_clade_heatmap) %>%
+    plot_munge(d_rct(), input$collapse_n2_clade_heatmap, input$collapse_gamma_heatmap, input$collapse_c4_heatmap) %>%
       heatmap_HANA(totals=TRUE)
   })
   
   constellation_plot_rct <- reactive({
-    plot_constellation(d_rct())
+    plot_munge(d_rct(), TRUE, TRUE, TRUE) %>%
+    plot_constellation()
   })
 
   output$download_time_plot <- downloadHandler(

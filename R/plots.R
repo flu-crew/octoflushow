@@ -213,8 +213,6 @@ facetMaps <- function(df, segment){
 #' @export
 #' @return ggplot object
 plot_constellation <- function(d){
-  d <- octoflushow::collapse_n2(d)
-
   cdata <- d %>%
     subset(!grepl("-", Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
