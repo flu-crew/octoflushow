@@ -50,14 +50,11 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 
   # cd = clean data
   cd <- d %>%
-    dplyr::select(c("Date",segment)) %>% {
-      names(.) = c("Date","Segment")
-      .
-    } %>% subset(., !is.na(Segment)) %>%
-    dplyr::filter(Segment != "mixed") %>% 
-    dplyr::filter(! is.na(Segment)) %>%
+    dplyr::select_(date="Date", clade=segment) %>%
+    dplyr::filter(!is.na(clade)) %>%
+    dplyr::filter(clade != "mixed") %>% 
     dplyr::mutate(
-      Date = lubridate::as_datetime(lubridate::floor_date(Date, floorDateBy))
+      date = lubridate::as_datetime(lubridate::floor_date(date, floorDateBy))
     )
 
   if (is.null(xlim)){
@@ -65,26 +62,33 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   }
 
   summary_data <- cd %>% # m
-    dplyr::group_by(Date, Segment) %>%
+    dplyr::group_by(date, clade) %>%
     dplyr::summarise(n=dplyr::n(),
                      tot=nrow(.),
-                     per=round(dplyr::n() / nrow(.)*100, digits = 2)) %>% # Calculate summary statistics
+                     # Calculate summary statistics
+                     per=round(dplyr::n() / nrow(.)*100, digits = 2)
+                    ) %>%
     dplyr::ungroup() %>% dplyr::mutate(
-      Date=lubridate::as_datetime(Date) %>% as.POSIXct(., format="%Y-%m-%d")
+      date=lubridate::as_datetime(date) %>% as.POSIXct(., format="%Y-%m-%d")
     )
 
-  for (clade in unique(summary_data$Segment)){
+  for (clade in unique(summary_data$clade)){
     if(! (clade %in% names(segment_palette))){
       stop(glue::glue("No color found for {clade} in {segment} color config. You need to either update the config.yaml file or the basic.R::clean_data function.")) 
     }
   }
 
+  summary_data$clade <- droplevels(factor(summary_data$clade, levels=names(segment_palette)))
+
+  print(head(summary_data))
+  print(levels(summary_data$clade))
+
   plotit <- function(position, ylab){
-    ggplot2::ggplot(summary_data, ggplot2::aes(x=Date, y=n, fill=Segment)) +
+    ggplot2::ggplot(summary_data, ggplot2::aes(x=date, y=n, fill=clade)) +
       ggplot2::geom_bar(stat="identity", position=position) +
       ggplot2::theme_bw() +
       ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
-      ggplot2::scale_fill_manual(values=segment_palette) +
+      ggplot2::scale_fill_manual(values=segment_palette[levels(summary_data$clade)]) +
       ggplot2::scale_x_datetime(labels = scales::date_format(dateFormat), breaks = scales::date_breaks(dateBreaks)) +
       ggplot2::coord_cartesian(xlim=xlim) +
       ggplot2::theme(
