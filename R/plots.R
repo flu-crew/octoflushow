@@ -57,10 +57,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
       date = lubridate::as_datetime(lubridate::floor_date(date, floorDateBy))
     )
 
-  if (is.null(xlim)){
-    xlim <- lubridate::as_datetime(c(min(d$Date), max(d$Date)))
-  }
-
   summary_data <- cd %>% # m
     dplyr::group_by(date, clade) %>%
     dplyr::summarise(n=dplyr::n(),
@@ -86,8 +82,10 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
       ggplot2::theme_bw() +
       ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
       ggplot2::scale_fill_manual(values=segment_palette[levels(summary_data$clade)]) +
-      ggplot2::scale_x_datetime(labels = scales::date_format(dateFormat), breaks = scales::date_breaks(dateBreaks)) +
-      ggplot2::coord_cartesian(xlim=xlim) +
+      ggplot2::scale_x_datetime(
+        labels = scales::date_format(dateFormat),
+        breaks = scales::date_breaks(dateBreaks),
+        expand=c(0.01,0.01)) +
       ggplot2::theme(
         axis.text.x     = ggplot2::element_text(angle=90, size=10, vjust=0.5),
         legend.title    = ggplot2::element_blank(),
@@ -98,7 +96,7 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
   }
 
   unscaled <- plotit("stack", ylab="Number of Swine Isolates")
-  scaled <- plotit("fill", ylab="Swine Isolates by %")
+  scaled <- plotit("fill", ylab="Swine Isolates by %") + ggplot2::scale_y_continuous(labels = scales::percent)
 
   shared_legend_plot(unscaled, scaled)
 }
