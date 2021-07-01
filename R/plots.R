@@ -80,9 +80,6 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", da
 
   summary_data$clade <- droplevels(factor(summary_data$clade, levels=names(segment_palette)))
 
-  print(head(summary_data))
-  print(levels(summary_data$clade))
-
   plotit <- function(position, ylab){
     ggplot2::ggplot(summary_data, ggplot2::aes(x=date, y=n, fill=clade)) +
       ggplot2::geom_bar(stat="identity", position=position) +

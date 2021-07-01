@@ -1,5 +1,4 @@
 library(shiny)
-library(octoflushow)
 
 d <- octoflushow::clean_data(octoflushow::load_current())
 
