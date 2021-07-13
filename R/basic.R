@@ -145,6 +145,8 @@ clean_data <- function(d, remove_mixed = TRUE) {
   my.data$M <- droplevels(factor(my.data$M))
   my.data$NS <- droplevels(factor(my.data$NS))
 
+  my.data$WGS <- grepl("^[HVTP]{6}$", my.data$Constellation, perl=TRUE)
+
   my.data$Constellation <- as.factor(my.data$Constellation)
 
   my.data

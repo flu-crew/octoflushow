@@ -1,7 +1,7 @@
 library(shiny)
 require(magrittr)
 
-d <- octoflushow::clean_data(octoflushow::load_current())
+d <- octoflushow::load_current()
 
 
 # update data in various ways prior to plotting
