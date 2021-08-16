@@ -242,49 +242,6 @@ date2quarter <- function(dates, fed = FALSE){
   return(temp$qtr)
 }
 
-#' Count number of entries by time chunk
-#' @param df is dataframe containing a column of Date and clade to count by.
-#' @param col_name by default is "H1" but can change it to "N2","Subtype","region", etc.
-#' @param Date by default is "Date" but can change if column name is different.
-#' @param tunit is "month", "quarter" or "year".
-#' @param minDate is default NULL, but can expand the date range lubridate::as_date("2019-01-01")
-#' @param maxDate is default NULL, but can expand the date range
-#' @return a datatable with columns Date, Clade, n (counts)
-#' @export
-countByTimeUnit <- function(df, col_name="H1", Date="Date", tunit="month", 
-                            minDate=NULL, maxDate=NULL){
-  # Get range of dates in order to fill in missing date values
-  if(is.null(minDate)){ 
-    minDate <-df[[Date]] %>% min(.) 
-  }
-  if(is.null(maxDate)){
-    maxDate <- df[[Date]] %>% max(.)
-  }
-  minDate <- lubridate::floor_date(minDate, unit=tunit)
-  maxDate <- lubridate::floor_date(maxDate, unit=tunit)
-
-  # Count isolates by clade/subtype/state (col_name)
-  cdf <- df %>%
-    dplyr::select(., c(Date, col_name)) %>%
-    dplyr::mutate(
-      Date = zoo::as.Date(lubridate::as_datetime(lubridate::floor_date(zoo::as.Date(Date), unit=tunit)))
-    ) %>%
-    dplyr::group_by(.dots=c(Date, col_name)) %>%
-    dplyr::summarise(
-      n=dplyr::n()
-    )%>%
-    dplyr::ungroup(.) %>%
-    tidyr::complete(Date=seq.Date(minDate, maxDate, by=tunit)) # fill in missing dates
-  
-  # For the missing dates, fill in a placeholder clade label and n=0
-  for(col_i in col_name){
-    placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
-    cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
-  }
-  cdf$n[is.na(cdf$n)] <- 0
-  return(cdf)
-}
-
 # ==== Private functions
 # ===== Standardize clade names
 fixH1names <- function(h1) {

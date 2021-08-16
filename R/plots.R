@@ -10,96 +10,81 @@ get_palette <- function(seg="H1"){
 }
 
 order_data_factors <- function(d, config){
-  if("H1" %in% names(d)) {d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1)) %>% droplevels(.) }
-  if("H3" %in% names(d)) {d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3)) %>% droplevels(.) }
-  if("N1" %in% names(d)) {d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1)) %>% droplevels(.) }
+  if("H1" %in% names(d)) {d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1)) %>% droplevels }
+  if("H3" %in% names(d)) {d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3)) %>% droplevels }
+  if("N1" %in% names(d)) {d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1)) %>% droplevels }
   d
 }
 
-#' Make a basic barplot of the data
+#' Stacked bar chart for phylocluster by month, quarter or year
 #'
 #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
 #' @param segment The influenze segment that will be plotted [H1,H3,N1,N3,PB2,PB1,PA,NP,M,NS]
 #' @param floorDateBy An argument that is passed to
 #' \code{lubridate::floor_date} specifying how to group dates (e.g., "month",
 #' "week", "3 months", "year")
-#' @param dateFormat A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")
-#' @param dateBreaks Date to break by (e.g., "years", or "months")
-#' @param xlim Limitations on the x axis
 #' @return ggplot object
 #' @export
-plot_basic <- function(d, segment="H1", floorDateBy="month", dateFormat="%Y", dateBreaks="years", xlim=NULL){
-  # ===== Basic Counting and plotting
-  # ==== Colors and Order of names
-  # Stacked bar chart for phylocluster by month
+plot_basic <- function(d, segment="H1", floorDateBy="month"){
+  title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}")
+  title2 = glue::glue("{segment} phylogenetic-clade % by {floorDateBy}")
 
-  # Die if the segment is not correctly named
-  stopifnot(segment %in% c("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"))
-  # The segment must be a column name in the data
-  stopifnot(segment %in% names(d))
-  # The input data must have a Date column
-  stopifnot("Date" %in% names(d))
+  d <- d[!is.na(d[[segment]]) & d[[segment]] != "mixed", c("Date", segment)] %>%
+       order_data_factors(config) %>%
+       droplevels %>%
+       octoflushow::countByTimeUnit(col_names=segment, Date="Date", tunit=floorDateBy)
 
-  segment_palette <- config$colors[[segment]]
-
-  d <- droplevels(order_data_factors(d, config))
-
-  if(floorDateBy=="quarter"){
-    floorDateBy="3 months"
-  }
-
-  # cd = clean data
-  cd <- d %>%
-    dplyr::select_(date="Date", clade=segment) %>%
-    dplyr::filter(!is.na(clade)) %>%
-    dplyr::filter(clade != "mixed") %>% 
-    dplyr::mutate(
-      date = lubridate::as_datetime(lubridate::floor_date(date, floorDateBy))
-    )
-
-  summary_data <- cd %>% # m
-    dplyr::group_by(date, clade) %>%
-    dplyr::summarise(n=dplyr::n(),
-                     tot=nrow(.),
-                     # Calculate summary statistics
-                     per=round(dplyr::n() / nrow(.)*100, digits = 2)
-                    ) %>%
-    dplyr::ungroup() %>% dplyr::mutate(
-      date=lubridate::as_datetime(date) %>% as.POSIXct(., format="%Y-%m-%d")
-    )
-
-  for (clade in unique(summary_data$clade)){
-    if(! (clade %in% names(segment_palette))){
-      stop(glue::glue("No color found for {clade} in {segment} color config. You need to either update the config.yaml file or the basic.R::clean_data function.")) 
-    }
-  }
-
-  summary_data$clade <- droplevels(factor(summary_data$clade, levels=names(segment_palette)))
-
-  plotit <- function(position, ylab){
-    ggplot2::ggplot(summary_data, ggplot2::aes(x=date, y=n, fill=clade)) +
-      ggplot2::geom_bar(stat="identity", position=position) +
-      ggplot2::theme_bw() +
-      ggplot2::ggtitle(paste(segment, "phylogenetic-clades by", floorDateBy)) +
-      ggplot2::scale_fill_manual(values=segment_palette[levels(summary_data$clade)]) +
-      ggplot2::scale_x_datetime(
-        labels = scales::date_format(dateFormat),
-        breaks = scales::date_breaks(dateBreaks),
-        expand=c(0.01,0.01)) +
-      ggplot2::theme(
-        axis.text.x     = ggplot2::element_text(angle=90, size=10, vjust=0.5),
-        legend.title    = ggplot2::element_blank(),
-        legend.position = "bottom",
-        strip.text      = ggplot2::element_text(size=12),
-      ) +
-      ggplot2::labs(x="", y=ylab)
-  }
-
-  unscaled <- plotit("stack", ylab="Number of Swine Isolates")
-  scaled <- plotit("fill", ylab="Swine Isolates by %") + ggplot2::scale_y_continuous(labels = scales::percent)
-
+  unscaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=NULL, title=title1)
+  scaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=NULL, title=title2, bartype = "fill")
   shared_legend_plot(unscaled, scaled)
 }
+
+#' Count number of entries by time chunk
+#' @param df is dataframe containing a column of Date and clade to count by.
+#' @param col_names by default is "H1" but can change it to "N2","Subtype","region", etc.
+#' @param Date by default is "Date" but can change if column name is different.
+#' @param tunit is "month", "quarter" or "year".
+#' @param minDate is default NULL, but can expand the date range lubridate::as_date("2019-01-01")
+#' @param maxDate is default NULL, but can expand the date range
+#' @return a datatable with columns Date, Clade, n (counts)
+#' @export
+countByTimeUnit <- function(df, col_names="H1", Date="Date", tunit="month", 
+                            minDate=NULL, maxDate=NULL){
+
+  # Get range of dates in order to fill in missing date values
+  if(is.null(minDate)){ 
+    minDate <- df[[Date]] %>% min(.) 
+  }
+  if(is.null(maxDate)){
+    maxDate <- df[[Date]] %>% max(.)
+  }
+  minDate <- lubridate::floor_date(minDate, unit=tunit)
+  maxDate <- lubridate::floor_date(maxDate, unit=tunit)
+
+  # Count isolates by clade/subtype/state (col_names)
+  cdf <- df %>%
+    dplyr::select(c(Date, col_names)) %>%
+    dplyr::mutate(
+      Date = zoo::as.Date(lubridate::as_datetime(lubridate::floor_date(zoo::as.Date(Date), unit=tunit)))
+    ) %>%
+    dplyr::group_by(.dots=c(Date, col_names)) %>%
+    dplyr::summarise(
+      n=dplyr::n()
+    )%>%
+    dplyr::ungroup() %>%
+    tidyr::complete(Date=seq.Date(minDate, maxDate, by=tunit)) # fill in missing dates
+  
+  # For the missing dates, fill in a placeholder clade label and n=0
+  for(col_i in col_names){
+    placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
+    cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
+  }
+
+  cdf$n[is.na(cdf$n)] <- 0
+
+  return(cdf)
+}
+
 
 # ===== State plots
 # state stuff starts here...
@@ -380,7 +365,8 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
     octoflushow::date2quarter(ddf, fed=fed)
   }
 
-  df[[variable]]=df[[variable]] %>% as.character %>% factor(levels=names(palette))
+  df[[variable]] <- df[[variable]] %>% as.character %>% factor(levels=names(palette)) %>% droplevels
+  palette = palette[levels(df[[variable]])]
 
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
     ggplot2::geom_bar(stat = "identity", position = bartype) +
@@ -406,6 +392,16 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
         breaks = unique(df$Date),
         expand=c(0,0),
         limits=limits
+      )
+  }
+
+  if(tunit=="year"){
+    p <- p +
+      ggplot2::scale_x_date(
+        labels = scales::date_format("%Y"),
+        date_breaks = "year",
+        expand=c(0,0),
+        limits=NULL
       )
   }
 

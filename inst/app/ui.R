@@ -55,7 +55,7 @@ shinyUI(navbarPage("octoFLU Show",
       p("Temporal patterns of clades represented in a barchart. Select a segment (H1, H3, PB2,...NS) of interest and the phylogenetic clade of that segment is shown in stacked barchart by time."),
       h2("Clades by state"),
       p("Regional patterns of clades represented in a ggmap. Select a segment (H1, H3, PB2, ... NS) of interest and the map is faceted by phylogenetic clade with isolate counts."),
-      h2("HA/NA heatmap"),
+      h2("Clade heatmap"),
       p("Hemagglutinin (HA) and neuraminidase (NA) patterns represented in a heatmap. HA clades are represented by rows while NA clades are represented by columns. Heatmap can be used to determine most common HA-NA clade pairing for a particular data filter."),
   h2("Constellation heatmap"),
   p("Internal gene constellation patterns of subtypes where T=TRIG, P=Pandemic, and V=LAIV-related. Strains with mixed subtypes or mixed internal constellations were filtered out. The heatmap can be used to determine the most common Gene Constellation from the left Totals column."),
@@ -160,7 +160,7 @@ shinyUI(navbarPage("octoFLU Show",
   ),
 
   tabPanel(
-    "HA/NA heatmap",
+    "Clade heatmap",
     sidebarLayout(
       sidebarPanel(
         checkboxInput("collapse_n2_clade_heatmap", "Collapse N2", value=FALSE),
