@@ -1,6 +1,14 @@
 # ==== Global Variables
 config <- yaml::read_yaml(system.file("config.yaml", package="octoflushow"))
 
+hana_theme = ggplot2::theme(
+    text = ggplot2::element_text(size=10),
+    axis.text.x = ggplot2::element_text(size=10),
+    axis.text.y = ggplot2::element_text(size=10),
+    legend.text = ggplot2::element_text(size=10),
+    strip.text = ggplot2::element_text(size=10)
+  )
+
 #' Return the segment palette for the plots
 #' @param seg H1, H3, N1, N2, PB2, PB1, PA, NP, M, NS
 #' @return Return a named vector of hex colors
@@ -25,18 +33,18 @@ order_data_factors <- function(d, config){
 #' "week", "3 months", "year")
 #' @return ggplot object
 #' @export
-plot_basic <- function(d, segment="H1", floorDateBy="month"){
-  title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}")
-  title2 = glue::glue("{segment} phylogenetic-clade % by {floorDateBy}")
-
+plot_basic <- function(d, segment="H1", floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
+                      title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}"),
+                      title2 = glue::glue("{segment} phylogenetic-clade % by {floorDateBy}")
+                      ){
   d <- d[!is.na(d[[segment]]) & d[[segment]] != "mixed", c("Date", segment)] %>%
        order_data_factors(config) %>%
        droplevels %>%
        octoflushow::countByTimeUnit(col_names=segment, Date="Date", tunit=floorDateBy)
 
-  unscaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=NULL, title=title1)
-  scaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=NULL, title=title2, bartype = "fill")
-  shared_legend_plot(unscaled, scaled)
+  unscaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
+  scaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
+  octoflushow::shared_legend_plot(unscaled, scaled)
 }
 
 #' Count number of entries by time chunk
@@ -358,7 +366,9 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
                             bartype="stack",
                             limits=NULL,
                             tunit="month",
-                            fed=FALSE) {
+                            fed=FALSE,
+                            xfontsize=10,
+                            yfontsize=10) {
 
   # local format of federal quarter
   format_Q <- function(ddf){
@@ -374,6 +384,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
     ggplot2::labs(y="Number of Swine Isolates", x="", title=title) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 10, vjust = 0.5),
+                   axis.text.y = ggplot2::element_text(size = 10),
                    legend.title = ggplot2::element_blank(), legend.position = "bottom")
 
   if(tunit=="month"){
@@ -381,7 +392,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       labels = scales::date_format("%b-%y"),
       date_breaks = "1 month",
       expand=c(0,0),
-      limits=NULL
+      limits=limits
     )
   }
 
@@ -401,7 +412,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
         labels = scales::date_format("%Y"),
         date_breaks = "year",
         expand=c(0,0),
-        limits=NULL
+        limits=limits
       )
   }
 
@@ -427,7 +438,7 @@ shared_legend_plot <- function(p1, p2){
   legend <- cowplot::get_legend(p1)
   p1 <- p1 + ggplot2::theme(legend.position = "none")
   p2 <- p2 + ggplot2::theme(legend.position = "none")
-  cowplot::plot_grid(p1, p2, legend, rel_heights=c(1,1,0.3), ncol=1, labels=NULL)
+  cowplot::plot_grid(p1, legend, p2, rel_heights=c(1,0.2,1), ncol=1, labels=NULL)
 }
 
 #' Prepare data for hana
@@ -456,9 +467,18 @@ make_heatmap_data_by_interval <- function(d, quarters){
     d <- subset(d, Collection_Q %in% quarters)
   }
 
+  removeMixed <- function(d){
+    if ("Subtype" %in% names(d)){
+      d <- subset(d, Subtype != "mixed")
+    }
+    if ("State" %in% names(d)){
+      d <- subset(d, State != "NoState")
+    }
+    d
+  }
+
   # Preparing Heatmap data
-  heatmap_data <- d %>%
-    subset(Subtype != "mixed" & State != "NoState") %>% # Not mixed subtype or no state
+  removeMixed(d) %>% # Not mixed subtype or no state
     dplyr::mutate(
       H_Type = dplyr::case_when(!is.na(H1) ~ paste("H1", H1, sep = "."), # H Type
                                 !is.na(H3) ~ paste("H3", H3, sep = ".")),
@@ -472,18 +492,20 @@ make_heatmap_data_by_interval <- function(d, quarters){
 
 #' Make a HANA heatmap
 #'
+#' The input is the full dataset which is then reduced to HA/NA counts before building.
+#'
 #' @export
 heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
 
-  df <- make_heatmap_data_by_interval(df, NULL) %>%
+  df <- octoflushow::make_heatmap_data_by_interval(df, NULL) %>%
     hana_counts %>%
     dplyr::select(H_Type, variable, percent)
 
   if(totals){
     x_totals <- dplyr::group_by(df, H_Type) %>%
-      dplyr::summarize(variable = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+      dplyr::summarize(variable = "HA.Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
     y_totals <- dplyr::group_by(df, variable) %>%
-      dplyr::summarize(H_Type = "Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
+      dplyr::summarize(H_Type = "NA.Total", percent = sum(percent, na.rm=TRUE)) %>% dplyr::ungroup()
     df <- rbind(df, x_totals, y_totals)
     df$variable <- droplevels(df$variable)
     df$H_Type <- droplevels(df$H_Type)
@@ -505,8 +527,9 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
     ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", high = "#0868ac",
                                   space = "Lab", midpoint = mid.value, guide = "colorbar") +
     ggplot2::theme_bw() +
-    ggplot2::labs(y="HA clade", x="NA clade", title=title) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 8, hjust = 1, vjust = 0.5))
+    ggplot2::labs(y="HA Clade", x="NA Clade", title=title) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 8, hjust = 1, vjust = 0.5)) +
+    hana_theme
 
   if(totals){
     p <- p +
@@ -519,6 +542,55 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
   }
   return(p)
 }
+
+
+#' Make a HANA diff heatmap
+#'
+#' The input is the full dataset which is then reduced to HA/NA counts before building.
+#'
+#' @export
+heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE){
+  cdata <- octoflushow::hana_counts(octoflushow::make_heatmap_data_by_interval(d, cquarters)) %>% dplyr::select(H=H_Type, N=variable, cpercent=percent)
+  pdata <- octoflushow::hana_counts(octoflushow::make_heatmap_data_by_interval(d, pquarters)) %>% dplyr::select(H=H_Type, N=variable, ppercent=percent)
+
+  dif_title <- paste0("HA/NA percentage differences (Current ", labelFromQuarters(cquarters), " - Prior ", labelFromQuarters(pquarters), ")")
+
+  cpdata <- merge(cdata, pdata, all=FALSE)
+  cpdata$diff <- (cpdata$cpercent - cpdata$ppercent) %>% ifelse(. == 0, NA, .)
+  cpdata <- dplyr::select(cpdata, H, N, diff)
+  ha_totals <- dplyr::group_by(cpdata, H) %>% dplyr::summarize(N = "NA.Total", diff = sum(diff, na.rm=TRUE))
+  na_totals <- dplyr::group_by(cpdata, N) %>% dplyr::summarize(H = "HA.Total", diff = sum(diff, na.rm=TRUE))
+  cpdata <- rbind(cpdata, ha_totals, na_totals)
+  cpdata$H <- droplevels(cpdata$H)
+
+  nX = length(unique(cpdata$N))
+  nY = length(unique(cpdata$H))
+  cpdata$H <- factor(cpdata$H, levels=rev(levels(cpdata$H)))
+
+  p <- ggplot2::ggplot(cpdata, ggplot2::aes(x = N, y = H, fill = diff)) +
+    ggplot2::geom_tile(color = "black") +
+    ggplot2::geom_text(ggplot2::aes(label = round(diff, 1)), size = font_size) +
+    ggplot2::scale_fill_gradient2(
+      low = "#b2182b", mid = "#91bfdb", # mid = "#E0f3F8",
+      high = "#0868ac", na.value = "white",
+      midpoint = 0
+    ) +
+    ggplot2::geom_segment(ggplot2::aes(x = nX - 0.5, xend = nX - 0.5, y = 0.5, yend = nY + 0.5), color="black", size=1) +
+    ggplot2::geom_segment(ggplot2::aes(x = 0.5, xend = nX + 0.5, y = 1.5, yend = 1.5), color="black", size=1) +
+    ggplot2::theme_bw() +
+    ggplot2::labs(title = dif_title, x = "NA Clade", y = "HA Clade") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 8, hjust = 1, vjust = 0.5)) +
+    hana_theme
+
+  if(totals){
+    p <- p +
+      ggplot2::geom_segment(ggplot2::aes(x = nX - 0.5, xend = nX - 0.5, y = 0.5, yend = nY + 0.5), color="black", size=1) +
+      ggplot2::geom_segment(ggplot2::aes(x = 0.5, xend = nX + 0.5, y = 1.5, yend = 1.5), color="black", size=1)
+  }
+
+  return(p)
+}
+
 
 #' Get HANA counts
 #'

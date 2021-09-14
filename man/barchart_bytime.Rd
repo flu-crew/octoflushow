@@ -13,7 +13,9 @@ barchart_bytime(
   bartype = "stack",
   limits = NULL,
   tunit = "month",
-  fed = FALSE
+  fed = FALSE,
+  xfontsize = 10,
+  yfontsize = 10
 )
 }
 \arguments{

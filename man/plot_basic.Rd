@@ -2,15 +2,17 @@
 % Please edit documentation in R/plots.R
 \name{plot_basic}
 \alias{plot_basic}
-\title{Make a basic barplot of the data}
+\title{Stacked bar chart for phylocluster by month, quarter or year}
 \usage{
 plot_basic(
   d,
   segment = "H1",
   floorDateBy = "month",
-  dateFormat = "\%Y",
-  dateBreaks = "years",
-  xlim = NULL
+  xfontsize = 10,
+  yfontsize = 10,
+  limits = NULL,
+  title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}"),
+  title2 = glue::glue("{segment} phylogenetic-clade \% by {floorDateBy}")
 )
 }
 \arguments{
@@ -21,16 +23,10 @@ plot_basic(
 \item{floorDateBy}{An argument that is passed to
 \code{lubridate::floor_date} specifying how to group dates (e.g., "month",
 "week", "3 months", "year")}
-
-\item{dateFormat}{A formatting string for the x-axis date labels (e.g. "%Y" or "%m-%Y")}
-
-\item{dateBreaks}{Date to break by (e.g., "years", or "months")}
-
-\item{xlim}{Limitations on the x axis}
 }
 \value{
 ggplot object
 }
 \description{
-Make a basic barplot of the data
+Stacked bar chart for phylocluster by month, quarter or year
 }
