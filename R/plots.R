@@ -207,7 +207,7 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
     dplyr::mutate(n = ifelse(is.na(n), "", n))
 
   g <- ggplot2::ggplot() +
-    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=r), size=1) +
+    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=r), size=0.2, color="black") +
     viridis::scale_fill_viridis(name="r", label = scales::comma)
 
   if (counts) {
