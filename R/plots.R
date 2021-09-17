@@ -151,13 +151,20 @@ abbr2state = c(
   "WI"="wisconsin"
 )
 
+# get states long and lat values
+states <- ggplot2::map_data("state")
 
 #' Make state map
 #'
 #' @param df the input surveyllance data
 #' @param segment the column to facet by
 #' @export
-facetMaps <- function(df, segment, normalization="clade-max"){
+facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
+  df <- df[!is.na(df[[segment]]) & df$State %in% names(abbr2state), ]
+
+  title <- glue::glue("{segment}: {nrow(df)} strains collected from {min(df$Date)} to {max(df$Date)} with colors normalized via {normalization}")
+
+  data(state)
 
   if(normalization == "clade-max"){
     normalize <- function(d){
@@ -167,7 +174,7 @@ facetMaps <- function(df, segment, normalization="clade-max"){
     }
   } else if (normalization == "state-percentage") {
     normalize <- function(d) {
-      dplyr::group_by(d, abbr) %>%
+      dplyr::group_by(d, region) %>%
         dplyr::mutate(r = n / sum(n, na.rm=TRUE)) %>%
         dplyr::ungroup()
     }
@@ -177,29 +184,45 @@ facetMaps <- function(df, segment, normalization="clade-max"){
     }
   }
 
-  states <- usmap::statepop[, c("fips", "abbr", "full")]
-
-  state_data <- dplyr::select_(df, abbr="State", clade=segment) %>%
-    dplyr::filter(!is.na(clade)) %>%
-    dplyr::filter(!is.na(abbr)) %>%
-    dplyr::group_by(clade, abbr) %>% dplyr::count() %>% dplyr::ungroup() %>%
-    merge(states[, "abbr"], ., by="abbr", all=TRUE) %>%
-    tidyr::complete(clade, abbr, fill=list(n=NA)) %>%
-    merge(states, ., by="abbr") %>%
-    dplyr::filter(!is.na(clade)) %>%
+  cdata <- df %>%
+    dplyr::select_(clade=segment, region="State") %>%
+    dplyr::mutate(region = unname(abbr2state[as.character(region)])) %>%
+    order_data_factors(config) %>% droplevels %>%
+    dplyr::group_by(region, clade) %>% dplyr::count() %>% dplyr::ungroup() %>%
+    dplyr::mutate(region=factor(region, levels=unname(abbr2state))) %>%
+    tidyr::complete(clade, region, fill=list(n=NA)) %>%
     dplyr::group_by(clade) %>% dplyr::mutate(
       label = glue::glue("{clade} (n={sum(n, na.rm=TRUE)})")
     ) %>% dplyr::ungroup() %>%
     normalize
 
-  title <- glue::glue("{segment}: {sum(state_data$n, na.rm=TRUE)} strains collected from {min(df$Date)} to {max(df$Date)} with colors normalized via {normalization}")
+  data_geo <- merge(states, cdata, all=TRUE, by="region") %>%
+    dplyr::mutate(r = ifelse(is.na(r), NA, r)) %>%
+    dplyr::arrange(order)
 
-  usmap::plot_usmap(data = state_data, values = "r") +
-    # ggplot2::scale_fill_continuous(name = "n", label = scales::comma) +
-    viridis::scale_fill_viridis(name="r", label = scales::comma) +
+  # Labels
+  snames <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y) %>%
+    merge(cdata, all=TRUE, by="region") %>%
+    dplyr::mutate(n = ifelse(n == 0, "", n)) %>%
+    dplyr::mutate(n = ifelse(is.na(n), "", n))
+
+  g <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=r), size=1) +
+    viridis::scale_fill_viridis(name="r", label = scales::comma)
+
+  if (counts) {
+    g <- g + ggplot2::geom_text(data=snames, ggplot2::aes(long, lat, label=n), size=2)
+  }
+
+  g + ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "none",
+      plot.title=ggplot2::element_text(size=12, hjust=0.5, margin=ggplot2::margin(0,0,10,0)),
+      text=ggplot2::element_text(size=12)
+    ) +
+    ggplot2::facet_wrap(~label, drop=TRUE) +
     ggplot2::ggtitle(title) +
-    ggplot2::theme(legend.position = "none") +
-    ggplot2::facet_wrap(~label, drop=TRUE)
+    ggplot2::coord_fixed(1.3)
 }
 
 

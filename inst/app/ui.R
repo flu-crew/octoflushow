@@ -154,6 +154,7 @@ shinyUI(navbarPage("octoFLU Show",
          inline   = TRUE,
          selected = "count"
        ),
+       checkboxInput("state_counts", "Show Counts", value=FALSE),
        div(
          style="display:inline-block;vertical-align:top; width:150px;",
          downloadButton("download_state_plot", "Download Figure")

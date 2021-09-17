@@ -41,7 +41,6 @@ Imports:
     tibble,
     tidytree,
     treeio,
-    usmap,
     viridis,
     writexl,
     yaml,
