@@ -57,7 +57,7 @@ server <- function(input, output, session) {
 
   state_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state) %>%
-      octoflushow::facetMaps(segment=input$segmentChoiceState)
+      octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState)
   })
   
   heatmap_plot_rct <- reactive({

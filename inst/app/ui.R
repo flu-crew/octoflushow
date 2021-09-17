@@ -147,10 +147,17 @@ shinyUI(navbarPage("octoFLU Show",
          inline   = TRUE,
          selected = "H1"
        ),
-        div(
-          style="display:inline-block;vertical-align:top; width:150px;",
-          downloadButton("download_state_plot", "Download Figure")
-        )
+       radioButtons(
+         "fillMethodState",
+         label    = "Fill Method",
+         choices  = list("count", "clade-max", "state-percentage"),
+         inline   = TRUE,
+         selected = "count"
+       ),
+       div(
+         style="display:inline-block;vertical-align:top; width:150px;",
+         downloadButton("download_state_plot", "Download Figure")
+       )
       ),
       mainPanel(
         plotOutput("state_plot"),

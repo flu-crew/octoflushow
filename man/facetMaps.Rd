@@ -4,7 +4,7 @@
 \alias{facetMaps}
 \title{Make state map}
 \usage{
-facetMaps(df, segment)
+facetMaps(df, segment, normalization = "clade-max")
 }
 \arguments{
 \item{df}{the input surveyllance data}
