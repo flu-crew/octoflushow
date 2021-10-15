@@ -121,6 +121,13 @@ shinyUI(navbarPage("octoFLUshow",
           inline   = TRUE,
           selected = "H1"
         ),
+        radioButtons(
+          "global_bar",
+          label = "HA nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_time_plot", "Download Figure")
@@ -146,6 +153,13 @@ shinyUI(navbarPage("octoFLUshow",
          choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
          inline   = TRUE,
          selected = "H1"
+       ),
+       radioButtons(
+         "global_state",
+         label = "HA nomenclature",
+         choices = list("US", "global"),
+         inline = TRUE,
+         selected = "US"
        ),
        radioButtons(
          "fillMethodState",
@@ -174,6 +188,13 @@ shinyUI(navbarPage("octoFLUshow",
         checkboxInput("collapse_n2_clade_heatmap", "Collapse N2", value=FALSE),
         checkboxInput("collapse_gamma_heatmap", "Collapse Gamma", value=FALSE),
         checkboxInput("collapse_c4_heatmap", "Collapse C-IV", value=FALSE),
+        radioButtons(
+          "global_heatmap",
+          label = "HA nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_heatmap_plot", "Download Figure")
@@ -190,6 +211,13 @@ shinyUI(navbarPage("octoFLUshow",
     "Constellation heatmap",
     sidebarLayout(
       sidebarPanel(
+        radioButtons(
+          "global_constellation",
+          label = "HA nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_constellation_plot", "Download Figure")

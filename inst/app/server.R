@@ -5,7 +5,7 @@ d <- octoflushow::load_current()
 
 
 # update data in various ways prior to plotting
-plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade){
+plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha){
   if(collapse_n2_clade){
     d = octoflushow::collapse_n2(d)
   }
@@ -14,6 +14,10 @@ plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_c
   }
   if(collapse_c4_clade){
     d = octoflushow::collapse_c4(d)
+  }
+  if(global_ha == "global"){
+    d$H1 = ifelse(grepl("^1", d$GL_Clade), as.character(d$GL_Clade), NA)
+    d$H3 = ifelse(grepl("^3", d$GL_Clade), as.character(d$GL_Clade), NA)
   }
   d
 }
@@ -51,22 +55,22 @@ server <- function(input, output, session) {
   })
 
   basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar) %>%
+    plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar, input$global_bar) %>%
       octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   state_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state) %>%
+    plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state, input$global_state) %>%
       octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts)
   })
   
   heatmap_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_clade_heatmap, input$collapse_gamma_heatmap, input$collapse_c4_heatmap) %>%
+    plot_munge(d_rct(), input$collapse_n2_clade_heatmap, input$collapse_gamma_heatmap, input$collapse_c4_heatmap, input$global_heatmap) %>%
       octoflushow::heatmap_HANA(totals=TRUE)
   })
   
   constellation_plot_rct <- reactive({
-    plot_munge(d_rct(), TRUE, TRUE, TRUE) %>%
+    plot_munge(d_rct(), TRUE, TRUE, TRUE, input$global_constellation) %>%
     octoflushow::plot_constellation()
   })
 
