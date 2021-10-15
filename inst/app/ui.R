@@ -26,7 +26,7 @@ resize_on_change <- function(elementID){
 
 #logofile <- system.file("app-data", "logo.png", package="octoflushow")
 
-shinyUI(navbarPage("octoFLU Show",
+shinyUI(navbarPage("octoFLUshow",
 
   tabPanel(
     "Landing page",
@@ -36,7 +36,7 @@ shinyUI(navbarPage("octoFLU Show",
 #      tags$img(src = "https://github.com/flu-crew/octoFLU/blob/master/img/octoFLU_revised_V3-01.png", width = "100px", height = "100px"),
 #      tags$img(src = logofile, width = "100px", height = "100px"),
       h2("Support"),
-      p("octoFLU Show is in active development. If you need to report a problem, ask a question, or have a suggested enhancement, please contact Tavis Anderson, Zebulun Arendsee, Jennifer Chang, or Amy Vincent."), 
+      p("octoFLUshow is in developlemt. If you need to report a problem, or have a suggested enhancement, please create an issue at https://github.com/flu-crew/octoflushow or contact Tavis Anderson or Zebulun Arendsee."), 
       h3("How to cite"),
       p("If you use data provided by octoFLU Show in your work, please credit in the following format:"),
 #      p("octoFLU show, https://flu-crew.org/octoflushow/, (data retrieved <?php echo (new DateTime())->format('d M, Y');?>)"),
@@ -60,7 +60,7 @@ shinyUI(navbarPage("octoFLU Show",
   h2("Constellation heatmap"),
   p("Internal gene constellation patterns of subtypes where T=TRIG, P=Pandemic, and V=LAIV-related. Strains with mixed subtypes or mixed internal constellations were filtered out. The heatmap can be used to determine the most common Gene Constellation from the left Totals column."),
   h3("Acknowledgements:"),
-  p("We were supported by USDA-ARS, USDA-APHIS, and by an NIH-National Institute of Allergy and Infectious Diseases (NIAID) interagency agreement associated with CRIP (Center of Research in Influenza Pathogenesis), an NIAID-funded Center of Excellence in Influenza Research and Surveillance (CEIRS, HHSN272201400008C). We are grateful to the pork producers, swine veterinarians, and laboratories for participating in the USDA Influenza Virus Surveillance System for swine. This research used resources provided by the SCINet project of the USDA Agricultural Research Service, ARS project number 0500-00093-001-00-D.")
+  p("We were supported by USDA-ARS and USDA-APHIS. We are grateful to the pork producers, swine veterinarians, and laboratories for participating in the USDA Influenza Virus Surveillance System for swine. This research used resources provided by the SCINet project of the USDA Agricultural Research Service, ARS project number 0500-00093-001-00-D.")
     )
   ),
 
