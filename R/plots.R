@@ -625,40 +625,66 @@ heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE
 
 #' Barchart comparing the most common clades over time
 #'
-#' The input is the full dataset which is then reduced to HA/NA counts before building.
-#'
 #' @export
-hana_barplots <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
-                      title1 = glue::glue("HA/NA phylogenetic-clade count by {floorDateBy}"),
-                      title2 = glue::glue("HA/NA phylogenetic-clade % by {floorDateBy}")){
+hana_barplots <- function(d, floorDateBy="month", ...){
   d <- d %>%
     dplyr::mutate(
       H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
       N = ifelse(is.na(N1), paste("N2", N2, sep="."), paste("N1", N1, sep=".")),
     ) %>%
     dplyr::filter(!is.na(H) & !is.na(N)) %>%
-    dplyr::mutate(HANA = paste(H, N, sep="/")) %>%
-    octoflushow::countByTimeUnit(col_names="HANA", Date="Date", tunit=floorDateBy)
+    dplyr::mutate(Group = paste(H, N, sep="/"))
+
+  common_barplot(d, floorDateBy=floorDateBy,
+    title1 = glue::glue("HA/NA phylogenetic-clade count by {floorDateBy}"),
+    title2 = glue::glue("HA/NA phylogenetic-clade % by {floorDateBy}"), ...)
+}
+
+#' Barchart comparing the most common HA/NA/Constellation triplet
+#'
+#' @export
+all_barplots <- function(d, floorDateBy="month", ...){
+  d <- d %>%
+    dplyr::mutate(
+      H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
+      N = ifelse(is.na(N1), paste("N2", N2, sep="."), paste("N1", N1, sep=".")),
+    ) %>%
+    dplyr::filter(!is.na(H) & !is.na(N) & grepl("[PTVH]{6}", Constellation, perl=TRUE)) %>%
+    dplyr::mutate(Group = paste(H, N, Constellation, sep="/"))
+
+  common_barplot(d, floorDateBy=floorDateBy,
+    title1 = glue::glue("HA/NA/Constellation count by {floorDateBy}"),
+    title2 = glue::glue("HA/NA/Constellation % by {floorDateBy}"), ...)
+}
+
+#' Barchart comparing the most common HA/NA/Constellation triplet
+#'
+#' @export
+common_barplot <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
+                      title1 = glue::glue("count by {floorDateBy}"),
+                      title2 = glue::glue("% by {floorDateBy}")){
+
+  d <- octoflushow::countByTimeUnit(d, col_names="Group", Date="Date", tunit=floorDateBy)
 
   mostCommon <- d %>%
-    dplyr::group_by(HANA) %>%
-    dplyr::summarize(total = sum(n)) %>%
-    dplyr::arrange(-total) %>% head(12) %$% HANA
+    dplyr::group_by(Group) %>%
+    dplyr::summarize(n = sum(n)) %>%
+    dplyr::arrange(-n) %>% head(12) %$% Group
 
   d <- d %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(d, HANA = ifelse(HANA %in% mostCommon, HANA, "Other")) %>%
-    dplyr::group_by(HANA, Date) %>%
+    dplyr::mutate(d, Group = ifelse(Group %in% mostCommon, Group, "Other")) %>%
+    dplyr::group_by(Group, Date) %>%
     dplyr::summarize(n = sum(n)) %>%
     dplyr::arrange(Date, -n)
 
   palette <- c(RColorBrewer::brewer.pal(length(mostCommon), "Paired"), "#666666")
   names(palette) <- c(mostCommon, "Other")
 
-  d$HANA <- factor(d$HANA, levels=c(mostCommon, "Other"))
+  d$Group <- factor(d$Group, levels=c(mostCommon, "Other"))
 
-  unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="HANA", tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
-  scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="HANA", tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
+  unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
+  scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
   octoflushow::shared_legend_plot(unscaled, scaled)
 }
 

@@ -4,16 +4,8 @@
 \alias{hana_barplots}
 \title{Barchart comparing the most common clades over time}
 \usage{
-hana_barplots(
-  d,
-  floorDateBy = "month",
-  xfontsize = 10,
-  yfontsize = 10,
-  limits = NULL,
-  title1 = glue::glue("HA/NA phylogenetic-clade count by {floorDateBy}"),
-  title2 = glue::glue("HA/NA phylogenetic-clade \% by {floorDateBy}")
-)
+hana_barplots(d, floorDateBy = "month", ...)
 }
 \description{
-The input is the full dataset which is then reduced to HA/NA counts before building.
+Barchart comparing the most common clades over time
 }

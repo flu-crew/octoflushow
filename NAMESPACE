@@ -2,11 +2,13 @@
 
 export("%>%")
 export(add_data)
+export(all_barplots)
 export(barchart_bytime)
 export(clean_data)
 export(collapse_c4)
 export(collapse_gamma)
 export(collapse_n2)
+export(common_barplot)
 export(countByTimeUnit)
 export(countplot)
 export(date2quarter)
