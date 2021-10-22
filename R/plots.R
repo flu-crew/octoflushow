@@ -469,7 +469,7 @@ shared_legend_plot <- function(p1, p2){
   legend <- cowplot::get_legend(p1)
   p1 <- p1 + ggplot2::theme(legend.position = "none")
   p2 <- p2 + ggplot2::theme(legend.position = "none")
-  cowplot::plot_grid(p1, legend, p2, rel_heights=c(1,0.2,1), ncol=1, labels=NULL)
+  cowplot::plot_grid(p1, legend, p2, rel_heights=c(1,0.3,1), ncol=1, labels=NULL)
 }
 
 #' Prepare data for hana
@@ -622,6 +622,45 @@ heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE
   return(p)
 }
 
+
+#' Barchart comparing the most common clades over time
+#'
+#' The input is the full dataset which is then reduced to HA/NA counts before building.
+#'
+#' @export
+hana_barplots <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
+                      title1 = glue::glue("HA/NA phylogenetic-clade count by {floorDateBy}"),
+                      title2 = glue::glue("HA/NA phylogenetic-clade % by {floorDateBy}")){
+  d <- d %>%
+    dplyr::mutate(
+      H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
+      N = ifelse(is.na(N1), paste("N2", N2, sep="."), paste("N1", N1, sep=".")),
+    ) %>%
+    dplyr::filter(!is.na(H) & !is.na(N)) %>%
+    dplyr::mutate(HANA = paste(H, N, sep="/")) %>%
+    octoflushow::countByTimeUnit(col_names="HANA", Date="Date", tunit=floorDateBy)
+
+  mostCommon <- d %>%
+    dplyr::group_by(HANA) %>%
+    dplyr::summarize(total = sum(n)) %>%
+    dplyr::arrange(-total) %>% head(12) %$% HANA
+
+  d <- d %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(d, HANA = ifelse(HANA %in% mostCommon, HANA, "Other")) %>%
+    dplyr::group_by(HANA, Date) %>%
+    dplyr::summarize(n = sum(n)) %>%
+    dplyr::arrange(Date, -n)
+
+  palette <- c(RColorBrewer::brewer.pal(length(mostCommon), "Paired"), "#666666")
+  names(palette) <- c(mostCommon, "Other")
+
+  d$HANA <- factor(d$HANA, levels=c(mostCommon, "Other"))
+
+  unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="HANA", tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
+  scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="HANA", tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
+  octoflushow::shared_legend_plot(unscaled, scaled)
+}
 
 #' Get HANA counts
 #'
