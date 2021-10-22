@@ -141,6 +141,72 @@ shinyUI(navbarPage("octoFLUshow",
   ),
 
   tabPanel(
+    "HA/NA by time",
+    sidebarLayout(
+     sidebarPanel(
+        radioButtons(
+          "floorDateByHanaBar",
+          label = "Plot dates by",
+          choices = list("month", "quarter", "year"),
+          inline = TRUE,
+          selected = "quarter"
+        ),
+        checkboxInput("collapse_n2_hana_bar", "Collapse N2", value=FALSE),
+        checkboxInput("collapse_gamma_hana_bar", "Collapse Gamma", value=FALSE),
+        checkboxInput("collapse_c4_hana_bar", "Collapse C-IV", value=FALSE),
+        radioButtons(
+          "global_hana_bar",
+          label = "HA nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_hana_time_plot", "Download Figure")
+        )
+      ),
+      mainPanel(
+        plotOutput("hana_time_plot"),
+        resize_on_change("hana_time_plot")
+      )
+    )
+  ),
+
+  tabPanel(
+    "HA/NA/Const by time",
+    sidebarLayout(
+     sidebarPanel(
+        radioButtons(
+          "floorDateByTripleBar",
+          label = "Plot dates by",
+          choices = list("month", "quarter", "year"),
+          inline = TRUE,
+          selected = "quarter"
+        ),
+        checkboxInput("collapse_n2_triple_bar", "Collapse N2", value=FALSE),
+        checkboxInput("collapse_gamma_triple_bar", "Collapse Gamma", value=FALSE),
+        checkboxInput("collapse_c4_triple_bar", "Collapse C-IV", value=FALSE),
+        radioButtons(
+          "global_triple_bar",
+          label = "HA nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_triple_time_plot", "Download Figure")
+        )
+      ),
+      mainPanel(
+        plotOutput("triple_time_plot"),
+        resize_on_change("triple_time_plot")
+      )
+    )
+  ),
+
+  tabPanel(
     "Clades by state",
     sidebarLayout(
      sidebarPanel(

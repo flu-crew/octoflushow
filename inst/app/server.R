@@ -42,6 +42,14 @@ server <- function(input, output, session) {
       print(basic_plot_rct())
   })
 
+  output$hana_time_plot <- renderPlot({
+      print(hana_basic_plot_rct())
+  })
+
+  output$triple_time_plot <- renderPlot({
+      print(triple_basic_plot_rct())
+  })
+
   output$state_plot <- renderPlot({
       print(state_plot_rct())
   })
@@ -57,6 +65,16 @@ server <- function(input, output, session) {
   basic_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar, input$global_bar) %>%
       octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
+  })
+
+  hana_basic_plot_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar, input$global_hana_bar) %>%
+      octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar)
+  })
+
+  triple_basic_plot_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar, input$global_triple_bar) %>%
+      octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar)
   })
 
   state_plot_rct <- reactive({
@@ -78,6 +96,20 @@ server <- function(input, output, session) {
     filename = function(){"swine-survey-time_plot.pdf"},
     content = function(file){
         ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
+    }
+  )
+
+  output$download_hana_time_plot <- downloadHandler(
+    filename = function(){"swine-survey-hana_time_plot.pdf"},
+    content = function(file){
+        ggplot2::ggsave(file, hana_basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
+    }
+  )
+
+  output$download_triple_time_plot <- downloadHandler(
+    filename = function(){"swine-survey-triple_time_plot.pdf"},
+    content = function(file){
+        ggplot2::ggsave(file, triple_basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
     }
   )
   

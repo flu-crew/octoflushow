@@ -643,7 +643,7 @@ hana_barplots <- function(d, floorDateBy="month", ...){
 #' Barchart comparing the most common HA/NA/Constellation triplet
 #'
 #' @export
-all_barplots <- function(d, floorDateBy="month", ...){
+triple_barplots <- function(d, floorDateBy="month", ...){
   d <- d %>%
     dplyr::mutate(
       H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
