@@ -1,6 +1,6 @@
 # octoflushow
 
-[Live site on flu-crew.org](http://flu-crew.org/octoflushow/)
+[Live site on flu-crew.org](https://flu-crew.org/)
 
 ## Installation
 
