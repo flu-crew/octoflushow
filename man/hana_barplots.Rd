@@ -4,7 +4,7 @@
 \alias{hana_barplots}
 \title{Barchart comparing the most common clades over time}
 \usage{
-hana_barplots(d, floorDateBy = "month", ...)
+hana_barplots(d, floorDateBy = "month", global = FALSE, ...)
 }
 \description{
 Barchart comparing the most common clades over time

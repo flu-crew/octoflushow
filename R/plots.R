@@ -623,15 +623,22 @@ heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE
 }
 
 
+unifyHANA <- function(d, global=FALSE){
+  if(global){
+    d$H = d$GL_Clade
+  } else {
+    d$H = ifelse(is.na(d$H1), paste("H3", d$H3, sep="."), paste("H1", d$H1, sep="."))
+  }
+  d$N = ifelse(is.na(d$N1), paste("N2", d$N2, sep="."), paste("N1", d$N1, sep="."))
+  d
+}
+
 #' Barchart comparing the most common clades over time
 #'
 #' @export
-hana_barplots <- function(d, floorDateBy="month", ...){
+hana_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
   d <- d %>%
-    dplyr::mutate(
-      H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
-      N = ifelse(is.na(N1), paste("N2", N2, sep="."), paste("N1", N1, sep=".")),
-    ) %>%
+    unifyHANA(global) %>%
     dplyr::filter(!is.na(H) & !is.na(N)) %>%
     dplyr::mutate(Group = paste(H, N, sep="/"))
 
@@ -643,12 +650,9 @@ hana_barplots <- function(d, floorDateBy="month", ...){
 #' Barchart comparing the most common HA/NA/Constellation triplet
 #'
 #' @export
-triple_barplots <- function(d, floorDateBy="month", ...){
+triple_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
   d <- d %>%
-    dplyr::mutate(
-      H = ifelse(is.na(H1), paste("H3", H3, sep="."), paste("H1", H1, sep=".")),
-      N = ifelse(is.na(N1), paste("N2", N2, sep="."), paste("N1", N1, sep=".")),
-    ) %>%
+    unifyHANA(global) %>%
     dplyr::filter(!is.na(H) & !is.na(N) & grepl("[PTVH]{6}", Constellation, perl=TRUE)) %>%
     dplyr::mutate(Group = paste(H, N, Constellation, sep="/"))
 

@@ -5,7 +5,7 @@ d <- octoflushow::load_current()
 
 
 # update data in various ways prior to plotting
-plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha){
+plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha="us"){
   if(collapse_n2_clade){
     d = octoflushow::collapse_n2(d)
   }
@@ -68,13 +68,13 @@ server <- function(input, output, session) {
   })
 
   hana_basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar, input$global_hana_bar) %>%
-      octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar)
+    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar) %>%
+      octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
   })
 
   triple_basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar, input$global_triple_bar) %>%
-      octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar)
+    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar) %>%
+      octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
   })
 
   state_plot_rct <- reactive({

@@ -4,7 +4,7 @@
 \alias{triple_barplots}
 \title{Barchart comparing the most common HA/NA/Constellation triplet}
 \usage{
-triple_barplots(d, floorDateBy = "month", ...)
+triple_barplots(d, floorDateBy = "month", global = FALSE, ...)
 }
 \description{
 Barchart comparing the most common HA/NA/Constellation triplet
