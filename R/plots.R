@@ -37,8 +37,15 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", xfontsize=10, yfont
                       title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}"),
                       title2 = glue::glue("{segment} phylogenetic-clade % by {floorDateBy}")
                       ){
-  d <- d[!is.na(d[[segment]]) & d[[segment]] != "mixed", c("Date", segment)] %>%
-       order_data_factors(config) %>%
+  d <- d[!is.na(d[[segment]]) & d[[segment]] != "mixed", c("Date", segment)]
+
+  # Show empty plot if not data is selected
+  if(nrow(d) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
+
+  d <- order_data_factors(d, config) %>%
        droplevels %>%
        octoflushow::countByTimeUnit(col_names=segment, Date="Date", tunit=floorDateBy)
 
@@ -162,6 +169,13 @@ states <- ggplot2::map_data("state")
 facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
   df <- df[!is.na(df[[segment]]) & df$State %in% names(abbr2state), ]
 
+  # If the input dataset is empty (for example when only H3N2 are selected and
+  # the user tries to plot H1 data), return an empty figure.
+  if (nrow(df) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
+
   title <- glue::glue("{segment}: {nrow(df)} strains collected from {min(df$Date)} to {max(df$Date)} with colors normalized via {normalization}")
 
   data(state)
@@ -244,6 +258,12 @@ plot_constellation <- function(d){
   (tots <- nrow(cdata))
 
   hhdata <- prepGConstData(cdata)
+
+  # Show empty plot if not data is selected
+  if(nrow(hhdata) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
 
   xlabel <- "HA and NA Phylogenetic Clade Pairs"
   ylabel <- "Gene constellations"
@@ -407,6 +427,13 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
   }
 
   df[[variable]] <- df[[variable]] %>% as.character %>% factor(levels=names(palette)) %>% droplevels
+
+  # Show empty plot if not data is selected
+  if(nrow(df) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
+
   palette = palette[levels(df[[variable]])]
 
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
@@ -528,6 +555,12 @@ make_heatmap_data_by_interval <- function(d, quarters){
 #' @export
 heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
 
+  # Show empty plot if not data is selected
+  if(nrow(df) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
+
   df <- octoflushow::make_heatmap_data_by_interval(df, NULL) %>%
     hana_counts %>%
     dplyr::select(H_Type, variable, percent)
@@ -581,6 +614,13 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
 #'
 #' @export
 heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE){
+
+  # Show empty plot if not data is selected
+  if(nrow(d) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
+
   cdata <- octoflushow::hana_counts(octoflushow::make_heatmap_data_by_interval(d, cquarters)) %>% dplyr::select(H=H_Type, N=variable, cpercent=percent)
   pdata <- octoflushow::hana_counts(octoflushow::make_heatmap_data_by_interval(d, pquarters)) %>% dplyr::select(H=H_Type, N=variable, ppercent=percent)
 
@@ -589,6 +629,7 @@ heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE
   cpdata <- merge(cdata, pdata, all=FALSE)
   cpdata$diff <- (cpdata$cpercent - cpdata$ppercent) %>% ifelse(. == 0, NA, .)
   cpdata <- dplyr::select(cpdata, H, N, diff)
+
   ha_totals <- dplyr::group_by(cpdata, H) %>% dplyr::summarize(N = "NA.Total", diff = sum(diff, na.rm=TRUE))
   na_totals <- dplyr::group_by(cpdata, N) %>% dplyr::summarize(H = "HA.Total", diff = sum(diff, na.rm=TRUE))
   cpdata <- rbind(cpdata, ha_totals, na_totals)
@@ -667,6 +708,12 @@ triple_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
 common_barplot <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
                       title1 = glue::glue("count by {floorDateBy}"),
                       title2 = glue::glue("% by {floorDateBy}")){
+
+  # Show empty plot if not data is selected
+  if(nrow(d) == 0){
+    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+    return(q)
+  }
 
   d <- octoflushow::countByTimeUnit(d, col_names="Group", Date="Date", tunit=floorDateBy)
 
