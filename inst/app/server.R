@@ -162,7 +162,8 @@ server <- function(input, output, session) {
       if(nchar(input$strain_selection) > 0){
         pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
             unlist %>% 
-            sub(pattern=" *([^ \t]*) *", replacement="\\1") %>%
+            sub(pattern="\\s*([^ \t]*)\\s*", replacement="\\1", perl=TRUE) %>%
+            Filter(f=function(x) nchar(x) > 0) %>%
             paste0(collapse="|")
         d[grepl(pattern, d$Strain), input$selected_columns]
       } else {
