@@ -1,6 +1,6 @@
 Package: octoflushow 
 Title: A Shiny app for the swine surveillence data
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c( 
         person(given = "Zebulun",
                family = "Arendsee",

@@ -113,3 +113,13 @@ Check the website address see if site is working.
    ```
    
    Click through the [documentation](https://httpd.apache.org/docs/2.4/mod/directives.html) for what the tags mean in `000-default.conf` so you can configure it properly.
+
+# Debugging
+
+If downloading plots returns an HTML file containing the error messages
+"polygon edge not found", then you may need to update the font database. In the
+R shell, run the following command:
+
+```R
+extrafont::font_import()
+```
