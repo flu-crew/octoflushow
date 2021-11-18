@@ -15,7 +15,8 @@ barchart_bytime(
   tunit = "month",
   fed = FALSE,
   xfontsize = 10,
-  yfontsize = 10
+  yfontsize = 10,
+  ytitle = "Number of Swine Isolates"
 )
 }
 \arguments{

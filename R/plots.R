@@ -419,7 +419,8 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
                             tunit="month",
                             fed=FALSE,
                             xfontsize=10,
-                            yfontsize=10) {
+                            yfontsize=10,
+                            ytitle="Number of Swine Isolates") {
 
   # local format of federal quarter
   format_Q <- function(ddf){
@@ -439,7 +440,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
     ggplot2::geom_bar(stat = "identity", position = bartype) +
     ggplot2::scale_fill_manual(values = palette) +
-    ggplot2::labs(y="Number of Swine Isolates", x="", title=title) +
+    ggplot2::labs(y=ytitle, x="", title=title) +
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, size = 10, vjust = 0.5),
                    axis.text.y = ggplot2::element_text(size = 10),

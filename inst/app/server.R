@@ -1,8 +1,8 @@
 library(shiny)
+
 require(magrittr)
 
 d <- octoflushow::load_current()
-
 
 # update data in various ways prior to plotting
 plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha="us"){
@@ -39,15 +39,15 @@ server <- function(input, output, session) {
   })
 
   output$time_plot <- renderPlot({
-      print(basic_plot_rct())
+      print(time_plot_rct())
   })
 
   output$hana_time_plot <- renderPlot({
-      print(hana_basic_plot_rct())
+      print(hana_time_plot_rct())
   })
 
   output$triple_time_plot <- renderPlot({
-      print(triple_basic_plot_rct())
+      print(triple_time_plot_rct())
   })
 
   output$state_plot <- renderPlot({
@@ -62,18 +62,18 @@ server <- function(input, output, session) {
     print(constellation_plot_rct())
   })
 
-  basic_plot_rct <- reactive({
+  time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar, input$global_bar) %>%
       octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
-  hana_basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar) %>%
+  hana_time_plot_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar, input$global_hana_bar) %>%
       octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
   })
 
-  triple_basic_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar) %>%
+  triple_time_plot_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar, input$global_triple_bar) %>%
       octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
   })
 
@@ -92,47 +92,28 @@ server <- function(input, output, session) {
     octoflushow::plot_constellation()
   })
 
-  output$download_time_plot <- downloadHandler(
-    filename = function(){"swine-survey-time_plot.pdf"},
-    content = function(file){
-        ggplot2::ggsave(file, basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
-    }
-  )
+  make_downloader <- function(function_name){
+    reactive_function = get(glue::glue("{function_name}_rct"))
+    width_field = glue::glue("shiny_width_{function_name}")
+    height_field = glue::glue("shiny_height_{function_name}")
+    downloadHandler(
+      filename = function(){glue::glue("swine-survey-{function_name}.pdf")},
+      content = function(file){
+          ggplot2::ggsave(file,
+            reactive_function(),
+            device="pdf",
+            width = input[[width_field]]/72,
+            height = input[[height_field]]/72)
+      }
+    )
+  }
 
-  output$download_hana_time_plot <- downloadHandler(
-    filename = function(){"swine-survey-hana_time_plot.pdf"},
-    content = function(file){
-        ggplot2::ggsave(file, hana_basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
-    }
-  )
-
-  output$download_triple_time_plot <- downloadHandler(
-    filename = function(){"swine-survey-triple_time_plot.pdf"},
-    content = function(file){
-        ggplot2::ggsave(file, triple_basic_plot_rct(), device="pdf", width = input$shiny_width_time_plot/72, height = input$shiny_height_time_plot/72)
-    }
-  )
-  
-  output$download_state_plot <- downloadHandler(
-    filename = function(){"swine-survey-state_plot.pdf"},
-    content = function(file){
-      ggplot2::ggsave(file, state_plot_rct(), device="pdf", width = input$shiny_width_state_plot/72, height = input$shiny_height_state_plot/72)
-    }
-  )
-  
-  output$download_heatmap_plot <- downloadHandler(
-    filename = function(){"swine-survey-heatmap_plot.pdf"},
-    content = function(file){
-      ggplot2::ggsave(file, heatmap_plot_rct(), device="pdf", width = input$shiny_width_heatmap_plot/72, height = input$shiny_height_heatmap_plot/72)
-    }
-  )
-  
-  output$download_constellation_plot <- downloadHandler(
-    filename = function(){"swine-survey-constellation_plot.pdf"},
-    content = function(file){
-      ggplot2::ggsave(file, constellation_plot_rct(), device="pdf", width = input$shiny_width_constellation_plot/72, height = input$shiny_height_constellation_plot/72)
-    }
-  )
+  output$download_time_plot <- make_downloader("time_plot")
+  output$download_hana_time_plot <- make_downloader("hana_time_plot")
+  output$download_triple_time_plot <- make_downloader("triple_time_plot")
+  output$download_state_plot <- make_downloader("state_plot")
+  output$download_heatmap_plot <- make_downloader("heatmap_plot")
+  output$download_constellation_plot <- make_downloader("constellation_plot")
 
   output$downloadExcel <- downloadHandler(
     filename = 'swine-surveillance-data.xlsx',
