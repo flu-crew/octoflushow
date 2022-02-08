@@ -21,9 +21,9 @@ Imports:
     DT,
     RColorBrewer,
     cowplot,
+    maps,
     dplyr,
     ggplot2,
-    ggtree,
     glue,
     grid,
     gridExtra,
@@ -31,7 +31,6 @@ Imports:
     kableExtra,
     lubridate,
     magrittr,
-    phangorn,
     readr,
     readxl,
     reshape2,
@@ -39,8 +38,6 @@ Imports:
     shiny,
     shinyBS,
     tibble,
-    tidytree,
-    treeio,
     viridis,
     writexl,
     yaml,
@@ -51,5 +48,9 @@ RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown,
-    ggnewscale
+    ggnewscale,
+    phangorn,
+    tidytree,
+    ggtree,
+    treeio
 VignetteBuilder: knitr
