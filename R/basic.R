@@ -72,7 +72,7 @@ clean_data <- function(d, remove_mixed = TRUE) {
   my.data$Date <- sub("([^,+]*).*", "\\1", my.data$Date)
 
   # convert date strings to date objects
-  my.data$Date <- zoo::as.Date(my.data$Date)
+  my.data$Date <- zoo::as.Date(my.data$Date, "%Y-%m-%d")
 
   # remove rows with missing dates
   my.data <- my.data[!(is.na((my.data$Date))), ]
