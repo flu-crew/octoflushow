@@ -20,6 +20,12 @@ devtools::install()
 octoflushow::launch_app()
 ```
 
+## Updating reference file using octofludb
+Note - file should be a Windows (CRLF) unicode (UTF-8) text file
+```
+octofludb report masterlist > inst/app-data/A0_Master_List.tab
+```
+
 ## Updating octoflushow on AWS
 
 ```
