@@ -36,7 +36,7 @@ collapse_n2 <- function(d) {
 #' @return Data suitable for basic_plot
 #' @export
 collapse_gamma <- function(d) {
-  d$H1 <- sub("^gamma(2|.[123])$", "gamma", d$H1, perl=TRUE)
+  d$H1 <- sub("^gamma(2|.[123]|-c[123])$", "gamma", d$H1, perl=TRUE)
   if(is.factor(d$H1)) {
     d$H1 <- droplevels(d$H1) 
   }
