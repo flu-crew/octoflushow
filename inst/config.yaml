@@ -1,6 +1,7 @@
 colors:
   H1:
     alpha:  "#543005"
+    alpha-del:  "#543005"
     1A.1:   "#543005"
     1A.1.1: "#543005"
     beta: "#8c510a"
@@ -8,8 +9,11 @@ colors:
     gamma:    "#80cdc1" 
     1A.3.3.3: "#80cdc1" 
     gamma.1:  "#80cdc1"
+    gamma-c1:  "#80cdc1"
     gamma.2:  "#70cdc1" # FIXME: this is arbitrary
+    gamma-c2:  "#70cdc1"
     gamma.3:  "#60cdc1" # FIXME: this is arbitrary
+    gamma-c3:  "#60cdc1"
     gamma2: "#35978f"
     1A.3.2: "#35978f"
     pandemic: "#01665e"
