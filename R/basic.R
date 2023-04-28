@@ -37,6 +37,7 @@ collapse_n2 <- function(d) {
 #' @export
 collapse_gamma <- function(d) {
   d$H1 <- sub("^gamma(2|.[123]|-c[123])$", "gamma", d$H1, perl=TRUE)
+  d$H1 <- sub("^1A.3.3.3(.[123]|-c[123])$", "1A.3.3.3", d$H1, perl=TRUE)
   if(is.factor(d$H1)) {
     d$H1 <- droplevels(d$H1) 
   }
@@ -50,6 +51,7 @@ collapse_gamma <- function(d) {
 #' @export
 collapse_c4 <- function(d) {
   d$H3 <- sub("^IV-[B-Z]$", "IV", d$H3, perl=TRUE)
+  d$H3 <- sub("^1990.4.([2-9]|1[0-9]|[B-Zb-z][12]?)$", "1990.4", d$H3, perl=TRUE)
   if(is.factor(d$H3)) {
     d$H3 <- droplevels(d$H3) 
   }
@@ -257,13 +259,13 @@ fixH3names <- function(h3) {
     sub("Cluster_", "", .) %>%
     sub(".*,.*", "mixed", .) %>%
     sub("^LAIV.C-I$", "I", .) %>%
-    sub("^C.IVB[12]?$", "IV-B", .) %>%
-    sub("^C.IV(.)$", "IV-\\1", .) %>%
     sub("^C.(I|II|III|IV)$", "\\1", .) %>%
+    sub("^C.IV(.*)$", "IV-\\1", .) %>%
+    sub("^IV-B[12]?$", "IV-B", .) %>%
     sub("2010-human.like", "2010.1", .) %>%
     sub("2016-human.like", "2010.2", .) %>%
     sub("humanVaccine", "other-human", .) %>%
-    replace(. == "Other-human", "other-human")
+    sub("Other-[Hh]uman.*", "other-human", .)
 }
 
 fixN1names <- function(n1) {

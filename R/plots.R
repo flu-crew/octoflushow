@@ -497,7 +497,7 @@ shared_legend_plot <- function(p1, p2){
   legend <- cowplot::get_legend(p1)
   p1 <- p1 + ggplot2::theme(legend.position = "none")
   p2 <- p2 + ggplot2::theme(legend.position = "none")
-  cowplot::plot_grid(p1, legend, p2, rel_heights=c(1,0.3,1), ncol=1, labels=NULL)
+  cowplot::plot_grid(p1, legend, p2, rel_heights=c(1,0.4,1), ncol=1, labels=NULL)
 }
 
 #' Prepare data for hana
