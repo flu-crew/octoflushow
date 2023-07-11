@@ -104,19 +104,19 @@ colors:
     Other-Human-2020: "#999999"
     huVaccine: "#999999"
     LAIV: "#FF9999"	                #1990.1
-    IV: "#FF66CC"	                #1990.4
-    IV-A: "#CC00CC"     	        #1990.4.a
-    IV-B1: "#00CCFF"	            #1990.4.b1
-    IV-B2: "#00CCFF"	            #1990.4.b2
-    IV-B: "#FF3300"	                #1990.4.b
-    IV-C: "#FF9933"	                #1990.4.c
-    IV-D: "#99FFFF"	                #1990.4.d
-    IV-E: "#3399FF"	                #1990.4.e
-    IV-F: "#CC9900"	                #1990.4.f
-    IV-G: "#66FF99"	                #1990.4.g
-    IV-H: "#FFB3E6"	                #1990.4.h
-    IV-I: "#9966FF"	                #1990.4.i
-    IV-K: "#66CCFF"	                #1990.4.k
+    C_IV: "#FF66CC"	                #1990.4
+    C_IVA: "#CC00CC"     	        #1990.4.a
+    C_IVB1: "#00CCFF"	            #1990.4.b1
+    C_IVB2: "#00CCFF"	            #1990.4.b2
+    C_IVB: "#FF3300"	                #1990.4.b
+    C_IVC: "#FF9933"	                #1990.4.c
+    C_IVD: "#99FFFF"	                #1990.4.d
+    C_IVE: "#3399FF"	                #1990.4.e
+    C_IVF: "#CC9900"	                #1990.4.f
+    C_IVG: "#66FF99"	                #1990.4.g
+    C_IVH: "#FFB3E6"	                #1990.4.h
+    C_IVI: "#9966FF"	                #1990.4.i
+    C_IVK: "#66CCFF"	                #1990.4.k
     Human-like_2010.1: "#9900FF"	#2010.1
     Human-like_2010.2: "#0E00D2"	#2010.2
 #    No_data: "#EDF8B1"
