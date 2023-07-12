@@ -7,8 +7,9 @@ d <- octoflushow::load_current()
 # update data in various ways prior to plotting
 plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha="us"){
   if(global_ha == "global"){
+  	# regex must match all global clades in config.yaml
     d$H1 = ifelse(grepl("^1[A-Z]", d$GL_Clade), as.character(d$GL_Clade), NA)
-    d$H3 = ifelse(grepl("^(3|[12][0-9]{3})", d$GL_Clade), as.character(d$GL_Clade), NA)
+    d$H3 = ifelse(grepl("^(3|[12][0-9]{3})|[Hh]uman", d$GL_Clade), as.character(d$GL_Clade), NA)
   }
   if(collapse_n2_clade){
     d = octoflushow::collapse_n2(d)

@@ -8,9 +8,14 @@ load_segment_tree(
   segment,
   filename = NULL,
   reference_data = NULL,
-  fun.tre = function(x) {     x <- sub("REF|", "", x)     sub("([^|]+\\\\|[^|]+).*",
-    "\\\\1", x, perl = TRUE) },
-  fun.dat = function(gbid, strain) {     paste0(gbid, "|", strain) }
+  fun.tre = function(x) {
+     x <- sub("REF|", "", x)
+     sub("([^|]+\\\\|[^|]+).*",
+    "\\\\1", x, perl = TRUE)
+ },
+  fun.dat = function(gbid, strain) {
+     paste0(gbid, "|", strain)
+ }
 )
 }
 \description{

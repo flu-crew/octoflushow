@@ -9,7 +9,9 @@ plot_segment_against(
   colname,
   tre = NULL,
   f = NULL,
-  subset_with = function(x) {     rep(TRUE, nrow(x@data)) },
+  subset_with = function(x) {
+     rep(TRUE, nrow(x@data))
+ },
   ggpalette = viridis::scale_color_viridis(discrete = TRUE),
   output_nexus_filename = NULL,
   ...

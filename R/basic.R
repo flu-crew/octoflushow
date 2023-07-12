@@ -264,8 +264,7 @@ fixH3names <- function(h3) {
     sub("^IV-B[12]?$", "IV-B", .) %>%
     sub("2010-human.like", "2010.1", .) %>%
     sub("2016-human.like", "2010.2", .) %>%
-    sub("humanVaccine", "other-human", .) %>%
-    sub("Other-[Hh]uman.*", "other-human", .)
+    sub("humanVaccine", "other-human", .)
 }
 
 fixN1names <- function(n1) {
