@@ -7,7 +7,7 @@ infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
 choices <- c(colnames(readr::read_tsv(infile)), "WGS")
 
 names(choices) <- choices
-selected <- c("Barcode", "Date", "State", "Subtype", "Strain","H1","H3","N1","N2", "Constellation", "WGS")
+selected <- c("Barcode", "Date", "State", "Subtype", "Strain","GL_Clade","H1","H3","N1","N2", "Constellation", "WGS")
 stopifnot(all(selected %in% choices))
 
 resize_on_change <- function(elementID){

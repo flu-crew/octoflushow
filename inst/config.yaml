@@ -103,7 +103,21 @@ colors:
     Other-Human-2010: "#CC0000"
     Other-Human-2020: "#999999"
     huVaccine: "#999999"
+    other-human: "#999999"          #sub
     LAIV: "#FF9999"	                #1990.1
+    IV: "#FF66CC"	                #sub
+    IV-A: "#CC00CC"     	        #sub
+    IV-B1: "#00CCFF"	            #sub
+    IV-B2: "#00CCFF"	            #sub
+    IV-B: "#FF3300"	                #sub
+    IV-C: "#FF9933"	                #sub
+    IV-D: "#99FFFF"	                #sub
+    IV-E: "#3399FF"	                #sub
+    IV-F: "#CC9900"	                #sub
+    IV-G: "#66FF99"	                #sub
+    IV-H: "#FFB3E6"	                #sub
+    IV-I: "#9966FF"	                #sub
+    IV-K: "#66CCFF"	                #sub
     C_IV: "#FF66CC"	                #1990.4
     C_IVA: "#CC00CC"     	        #1990.4.a
     C_IVB1: "#00CCFF"	            #1990.4.b1
