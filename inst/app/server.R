@@ -5,20 +5,24 @@ require(magrittr)
 d <- octoflushow::load_current()
 
 # update data in various ways prior to plotting
-plot_munge <- function(d, collapse_n2_clade, collapse_gamma_clade, collapse_c4_clade, global_ha="us"){
+plot_munge <- function(d, collapse_h1_clade, collapse_h3_clade, collapse_n1_clade, collapse_n2_clade, global_ha="us"){
+  global_clade<-FALSE
   if(global_ha == "global"){
-  	# regex must match all global clades in config.yaml
-    d$H1 = ifelse(grepl("^1[A-Z]", d$GL_Clade), as.character(d$GL_Clade), NA)
-    d$H3 = ifelse(grepl("^(3|[12][0-9]{3})|[Hh]uman", d$GL_Clade), as.character(d$GL_Clade), NA)
+    global_clade<-TRUE
+  }
+  d = octoflushow::toggle_clade_definition(d, global_clade)
+  
+  if(collapse_h1_clade){
+    d = octoflushow::collapse_h1(d)
+  }
+  if(collapse_h3_clade){
+    d = octoflushow::collapse_h3(d)
+  }
+  if(collapse_n1_clade){
+    d = octoflushow::collapse_n1(d)
   }
   if(collapse_n2_clade){
     d = octoflushow::collapse_n2(d)
-  }
-  if(collapse_gamma_clade){
-    d = octoflushow::collapse_gamma(d)
-  }
-  if(collapse_c4_clade){
-    d = octoflushow::collapse_c4(d)
   }
   d
 }
@@ -64,27 +68,27 @@ server <- function(input, output, session) {
   })
 
   time_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_bar, input$collapse_gamma_bar, input$collapse_c4_bar, input$global_bar) %>%
+    plot_munge(d_rct(), input$collapse_h1_bar, input$collapse_h3_bar, input$collapse_n1_bar, input$collapse_n2_bar, input$global_bar) %>%
       octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   hana_time_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_hana_bar, input$collapse_gamma_hana_bar, input$collapse_c4_hana_bar, input$global_hana_bar) %>%
+    plot_munge(d_rct(), input$collapse_h1_hana_bar, input$collapse_h3_hana_bar, input$collapse_n1_hana_bar, input$collapse_n2_hana_bar, input$global_hana_bar) %>%
       octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
   })
 
   triple_time_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_triple_bar, input$collapse_gamma_triple_bar, input$collapse_c4_triple_bar, input$global_triple_bar) %>%
+    plot_munge(d_rct(), input$collapse_h1_triple_bar, input$collapse_h3_triple_bar, input$collapse_n1_triple_bar, input$collapse_n2_triple_bar, input$global_triple_bar) %>%
       octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
   })
 
   state_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_state, input$collapse_gamma_state, input$collapse_c4_state, input$global_state) %>%
+    plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state) %>%
       octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts)
   })
   
   heatmap_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_n2_clade_heatmap, input$collapse_gamma_heatmap, input$collapse_c4_heatmap, input$global_heatmap) %>%
+    plot_munge(d_rct(), input$collapse_h1_heatmap, input$collapse_h3_heatmap, input$collapse_n1_heatmap, input$collapse_n2_heatmap, input$global_heatmap) %>%
       octoflushow::heatmap_HANA(totals=TRUE)
   })
   
@@ -141,6 +145,12 @@ server <- function(input, output, session) {
   )
 
   d_col_rct <- reactive({
+      global_clade<-FALSE
+      if(input$global_table == "global"){
+        global_clade<-TRUE
+      }
+      d = octoflushow::toggle_clade_definition(d, global_clade)
+      
       if(nchar(input$strain_selection) > 0){
         pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
             unlist %>% 

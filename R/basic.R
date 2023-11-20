@@ -17,47 +17,81 @@ load_current <- function() {
   return(my.data)
 }
 
-#' Collapse 2002A, 2002B, 1998A and 1998B clades into 2002 and 1998
-#'
 #' @param The input dataset
 #' @return Data suitable for basic_plot
 #' @export
-collapse_n2 <- function(d) {
-  d$N2 <- sub("[AB][12]?$", "", d$N2, perl=TRUE)
-  if(is.factor(d$N2)) {
-    d$N2 <- droplevels(d$N2) 
+toggle_clade_definition <- function(d, global_clade="False") {
+  sub_regex = "\\|[^|]*$"
+  if(global_clade) {
+    sub_regex = "^[^|]*\\|"
+  }
+  column_list <- list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS")
+  for(column in column_list) {
+    d[[column]] <- sub(sub_regex, "", d[[column]], perl=TRUE)
+    if(is.factor(d[[column]])) {
+      d[[column]] <- droplevels(d[[column]]) 
+    }
   }
   d
 }
 
-#' Collapse gamma.[123] and gamma2 into gamma
-#'
 #' @param The input dataset
 #' @return Data suitable for basic_plot
 #' @export
-collapse_gamma <- function(d) {
-  d$H1 <- sub("^gamma(2|.[123]|-c[123])$", "gamma", d$H1, perl=TRUE)
-  d$H1 <- sub("^1A.3.3.3(.[123]|-c[123])$", "1A.3.3.3", d$H1, perl=TRUE)
+collapse_h1 <- function(d) {
+  # alpha
+  d$H1 <- sub("^alpha.*", "alpha", d$H1, perl=TRUE)
+  d$H1 <- sub("^1A.1.*", "1A.1", d$H1, perl=TRUE)
+  # gamma (exclude gamma2)
+  d$H1 <- sub("^gamma[^2].*", "gamma", d$H1, perl=TRUE)
+  d$H1 <- sub("^1A.3.3.3.*", "1A.3.3.3", d$H1, perl=TRUE)
   if(is.factor(d$H1)) {
     d$H1 <- droplevels(d$H1) 
   }
   d
 }
 
-#' Collapse Cluster IV into C-IV and C-IVA
-#'
 #' @param The input dataset
 #' @return Data suitable for basic_plot
 #' @export
-collapse_c4 <- function(d) {
-  d$H3 <- sub("^IV-[B-Z]$", "IV", d$H3, perl=TRUE)
-  d$H3 <- sub("^1990.4.([2-9]|1[0-9]|[B-Zb-z][12]?)$", "1990.4", d$H3, perl=TRUE)
+collapse_h3 <- function(d) {
+  # collapse cluster IV
+  d$H3 <- sub("^IV-[A-Z].*", "IV", d$H3, perl=TRUE)
+  d$H3 <- sub("^1990.4.*", "1990.4", d$H3, perl=TRUE)
   if(is.factor(d$H3)) {
     d$H3 <- droplevels(d$H3) 
   }
   d
 }
 
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_n1 <- function(d) {
+  # avian (EU)
+  d$N1 <- sub("^N1-avian.*", "N1-avian", d$N1, perl=TRUE)
+  d$N1 <- sub("^N1.E.*", "N1.E", d$N1, perl=TRUE)
+  # classical
+  d$N1 <- sub("^[Cc]lassical", "Classical", d$N1, perl=TRUE)
+  d$N1 <- sub("^N1.C.*", "N1.C", d$N1, perl=TRUE)
+  if(is.factor(d$N1)) {
+    d$N1 <- droplevels(d$N1) 
+  }
+  d
+}
+
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_n2 <- function(d) {
+  # collapse 1998[AB] and 2002[AB]
+  d$N2 <- sub("^(1998|98).*", "1998", d$N2, perl=TRUE)
+  d$N2 <- sub("^(2002|02).*", "2002", d$N2, perl=TRUE)
+  if(is.factor(d$N2)) {
+    d$N2 <- droplevels(d$N2) 
+  }
+  d
+}
 
 #' Clean the dataset
 #'
@@ -248,49 +282,41 @@ date2quarter <- function(dates, fed = FALSE){
 # ===== Standardize clade names
 fixH1names <- function(h1) {
   h1 %>%
-    replace(., . == "gamma.1" | . == "gamma.2" | . == "gamma.3", "gamma") %>%
     sub(".*,.*", "mixed", .) %>%
-    replace(., . == "LAIV gamma2-beta-like", "gamma2-beta-like") %>%
+    sub("_", " ", .) %>%
     sub("pdm-vaccine|pdm", "pandemic", .)
 }
 
 fixH3names <- function(h3) {
   h3 %>%
-    sub("Cluster_", "", .) %>%
     sub(".*,.*", "mixed", .) %>%
-    sub("^LAIV.C-I$", "I", .) %>%
-    sub("^C.(I|II|III|IV)$", "\\1", .) %>%
-    sub("^C.IV(.*)$", "IV-\\1", .) %>%
-    sub("^IV-B[12]?$", "IV-B", .) %>%
-    sub("2010-human.like", "2010.1", .) %>%
-    sub("2016-human.like", "2010.2", .) %>%
-    sub("humanVaccine", "other-human", .)
+    sub("_", " ", .) %>%
+    sub("^C IV", "IV-", .) %>%
+    sub("Other-Human.*", "other-human", .)
 }
 
 fixN1names <- function(n1) {
   n1 %>%
     sub(".*,.*", "mixed", .) %>%
+    sub("_", " ", .) %>%
     sub(".andemic|pdm", "Pandemic", .) %>%
     sub("classicalSwine|classical", "Classical", .) %>%
-    sub("LAIV-Classical", "MN99", .)
+    sub("LAIV-Classical|MN99", "LAIV", .)
 }
 
 fixN2names <- function(n2) {
   patTX98 <- "TX1998|TX98|LAIV|LAIV-98"
   n2 %>%
-    sub("^02", "2002", .) %>%
-    sub("^98", "1998", .) %>%
-    # fixes 2002A_2 and friends
-    sub("_", "", .) %>%
-    sub(glue::glue("^({patTX98})$"), "TX98", .) %>%
-    sub("humanSeasonal", "Human-like", .)
+    sub(".*,.*", "mixed", .) %>%
+    sub("_", " ", .) %>%
+    sub(glue::glue("^({patTX98})$"), "LAIV-98", .)
 }
 
 fixIGnames <- function(ig) {
   ig %>%
     sub(".*,.*", "mixed", .) %>%
-    replace(., . == "humanSeasonal", "Human-seasonal") %>%
-    replace(., . == "LAIV", "TX98") %>%
-    replace(., . == "VTX98", "TX98") %>%
-    replace(., . == "pdm", "PDM")
+    sub("_", " ", .) %>%
+    sub(".*[Hh]uman.*", "Human-seasonal", .) %>%
+    sub(".*(pdm|[Pp]andemic).*", "PDM", .) %>%
+    sub(".*avian.*", "avian", .)
 }

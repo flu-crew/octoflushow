@@ -7,7 +7,7 @@ infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
 choices <- c(colnames(readr::read_tsv(infile)), "WGS")
 
 names(choices) <- choices
-selected <- c("Barcode", "Date", "State", "Subtype", "Strain","GL_Clade","H1","H3","N1","N2", "Constellation", "WGS")
+selected <- c("Barcode", "Date", "State", "Subtype", "Strain","H1","H3","N1","N2", "Constellation", "WGS")
 stopifnot(all(selected %in% choices))
 
 resize_on_change <- function(elementID){
@@ -40,15 +40,27 @@ shinyUI(navbarPage("octoFLUshow",
     fluidPage(
       fluidRow(
         column(2, actionButton("go", "Select Columns")),
-        column(2, downloadButton("downloadExcel", "Download Excel")),
-        column(2, downloadButton("downloadTAB", "Download TSV")),
-        column(6, textAreaInput(
+        column(6),
+        column(2, align="right", downloadButton("downloadExcel", "Download Excel")),
+        column(2, align="right", downloadButton("downloadTAB", "Download TSV"))
+      ),
+      fluidRow(column(12, div(style = "height:12px;"))),
+      fluidRow(
+        column(2, radioButtons(
+          "global_table",
+          label = "Segment nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        )),
+        column(8, textAreaInput(
           "strain_selection",
           label = "Select strains (comma-delimited list of barcodes, strains, or regular expressions)",
           value = "",
           rows=2,
           placeholder = "A01104056, Illinois/A01565507, Utah.*201[89]"
-        ) %>% shiny::tagAppendAttributes(style = 'width: 100%;')) 
+        ) %>% shiny::tagAppendAttributes(style = 'width: 100%;')),
+        column(2)
       ),
       fluidRow(
         column(12,
@@ -82,9 +94,10 @@ shinyUI(navbarPage("octoFLUshow",
           inline = TRUE,
           selected = "quarter"
         ),
-        checkboxInput("collapse_n2_bar", "Collapse N2", value=FALSE),
-        checkboxInput("collapse_gamma_bar", "Collapse Gamma", value=FALSE),
-        checkboxInput("collapse_c4_bar", "Collapse C-IV", value=FALSE),
+        checkboxInput("collapse_h1_bar", "Collapse H1 (alpha, gamma)", value=FALSE),
+        checkboxInput("collapse_h3_bar", "Collapse H3 (cluster IV)", value=FALSE),
+        checkboxInput("collapse_n1_bar", "Collapse N1 (avian, classical)", value=FALSE),
+        checkboxInput("collapse_n2_bar", "Collapse N2 (1998, 2002)", value=FALSE),
         radioButtons(
           "segmentChoiceBar",
           label    = "Segment",
@@ -94,7 +107,7 @@ shinyUI(navbarPage("octoFLUshow",
         ),
         radioButtons(
           "global_bar",
-          label = "HA nomenclature",
+          label = "Segment nomenclature",
           choices = list("US", "global"),
           inline = TRUE,
           selected = "US"
@@ -122,12 +135,13 @@ shinyUI(navbarPage("octoFLUshow",
           inline = TRUE,
           selected = "quarter"
         ),
-        checkboxInput("collapse_n2_hana_bar", "Collapse N2", value=FALSE),
-        checkboxInput("collapse_gamma_hana_bar", "Collapse Gamma", value=FALSE),
-        checkboxInput("collapse_c4_hana_bar", "Collapse C-IV", value=FALSE),
+        checkboxInput("collapse_h1_hana_bar", "Collapse H1 (alpha, gamma)", value=FALSE),
+        checkboxInput("collapse_h3_hana_bar", "Collapse H3 (cluster IV)", value=FALSE),
+        checkboxInput("collapse_n1_hana_bar", "Collapse N1 (avian, classical)", value=FALSE),
+        checkboxInput("collapse_n2_hana_bar", "Collapse N2 (1998, 2002)", value=FALSE),
         radioButtons(
           "global_hana_bar",
-          label = "HA nomenclature",
+          label = "Segment nomenclature",
           choices = list("US", "global"),
           inline = TRUE,
           selected = "US"
@@ -155,12 +169,13 @@ shinyUI(navbarPage("octoFLUshow",
           inline = TRUE,
           selected = "quarter"
         ),
-        checkboxInput("collapse_n2_triple_bar", "Collapse N2", value=FALSE),
-        checkboxInput("collapse_gamma_triple_bar", "Collapse Gamma", value=FALSE),
-        checkboxInput("collapse_c4_triple_bar", "Collapse C-IV", value=FALSE),
-        radioButtons(
+          checkboxInput("collapse_h1_triple_bar", "Collapse H1 (alpha, gamma)", value=FALSE),
+          checkboxInput("collapse_h3_triple_bar", "Collapse H3 (cluster IV)", value=FALSE),
+          checkboxInput("collapse_n1_triple_bar", "Collapse N1 (avian, classical)", value=FALSE),
+          checkboxInput("collapse_n2_triple_bar", "Collapse N2 (1998, 2002)", value=FALSE),
+          radioButtons(
           "global_triple_bar",
-          label = "HA nomenclature",
+          label = "Segment nomenclature",
           choices = list("US", "global"),
           inline = TRUE,
           selected = "US"
@@ -181,9 +196,10 @@ shinyUI(navbarPage("octoFLUshow",
     "Clades by state",
     sidebarLayout(
      sidebarPanel(
-       checkboxInput("collapse_n2_state", "Collapse N2", value=FALSE),
-       checkboxInput("collapse_gamma_state", "Collapse Gamma", value=FALSE),
-       checkboxInput("collapse_c4_state", "Collapse C-IV", value=FALSE),
+        checkboxInput("collapse_h1_state", "Collapse H1 (alpha, gamma)", value=FALSE),
+        checkboxInput("collapse_h3_state", "Collapse H3 (cluster IV)", value=FALSE),
+        checkboxInput("collapse_n1_state", "Collapse N1 (avian, classical)", value=FALSE),
+        checkboxInput("collapse_n2_state", "Collapse N2 (1998, 2002)", value=FALSE),
        radioButtons(
          "segmentChoiceState",
          label    = "Segment",
@@ -193,7 +209,7 @@ shinyUI(navbarPage("octoFLUshow",
        ),
        radioButtons(
          "global_state",
-         label = "HA nomenclature",
+         label = "Segment nomenclature",
          choices = list("US", "global"),
          inline = TRUE,
          selected = "US"
@@ -222,12 +238,13 @@ shinyUI(navbarPage("octoFLUshow",
     "Clade heatmap",
     sidebarLayout(
       sidebarPanel(
-        checkboxInput("collapse_n2_clade_heatmap", "Collapse N2", value=FALSE),
-        checkboxInput("collapse_gamma_heatmap", "Collapse Gamma", value=FALSE),
-        checkboxInput("collapse_c4_heatmap", "Collapse C-IV", value=FALSE),
+        checkboxInput("collapse_h1_heatmap", "Collapse H1 (alpha, gamma)", value=FALSE),
+        checkboxInput("collapse_h3_heatmap", "Collapse H3 (cluster IV)", value=FALSE),
+        checkboxInput("collapse_n1_heatmap", "Collapse N1 (avian, classical)", value=FALSE),
+        checkboxInput("collapse_n2_heatmap", "Collapse N2 (1998, 2002)", value=FALSE),
         radioButtons(
           "global_heatmap",
-          label = "HA nomenclature",
+          label = "Segment nomenclature",
           choices = list("US", "global"),
           inline = TRUE,
           selected = "US"
@@ -250,7 +267,7 @@ shinyUI(navbarPage("octoFLUshow",
       sidebarPanel(
         radioButtons(
           "global_constellation",
-          label = "HA nomenclature",
+          label = "Segment nomenclature",
           choices = list("US", "global"),
           inline = TRUE,
           selected = "US"
@@ -266,4 +283,4 @@ shinyUI(navbarPage("octoFLUshow",
       )
     )
   )
-  ))
+))
