@@ -28,9 +28,7 @@ toggle_clade_definition <- function(d, global_clade="False") {
   column_list <- list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS")
   for(column in column_list) {
     d[[column]] <- sub(sub_regex, "", d[[column]], perl=TRUE)
-    if(is.factor(d[[column]])) {
-      d[[column]] <- droplevels(d[[column]]) 
-    }
+    d[[column]] <- as.factor(d[[column]]) 
   }
   d
 }
@@ -292,6 +290,7 @@ fixH3names <- function(h3) {
     sub(".*,.*", "mixed", .) %>%
     sub("_", " ", .) %>%
     sub("^C IV", "IV-", .) %>%
+    sub("^IV-\\|", "IV|", .) %>%
     sub("Other-Human.*", "other-human", .)
 }
 

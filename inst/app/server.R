@@ -93,7 +93,7 @@ server <- function(input, output, session) {
   })
   
   constellation_plot_rct <- reactive({
-    plot_munge(d_rct(), TRUE, TRUE, TRUE, input$global_constellation) %>%
+    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation) %>%
     octoflushow::plot_constellation()
   })
 
@@ -179,7 +179,7 @@ server <- function(input, output, session) {
     extensions = c("ColReorder"),
     options = list(
       dom = 'Blfrtip',
-      autoWidth=FALSE,
+      autoWidth=TRUE,
       orderMulti=TRUE,
       searching=TRUE,
       search.regex=TRUE,
@@ -187,6 +187,24 @@ server <- function(input, output, session) {
       pageLength=25
     )
   )
+  
+  # update filter based off of existing selections
+  filterable_sets <- eventReactive(input$raw_data_table_search_columns, {
+    # Get separately filtered indices
+    fi <- Map(doColumnSearch, d_col_rct(), input$raw_data_table_search_columns)
+    
+    # Find what rows others leave available
+    ai <- lapply(seq_along(fi), function(j) Reduce(intersect, fi[-j]))
+    
+    # Get the corresponding data
+    lapply(Map(`[`, d_col_rct(), ai), function(x) {
+      if (is.factor(x)) droplevels(x) else x
+    })
+  })
+  proxy <- DT::dataTableProxy("raw_data_table")
+  observeEvent(filterable_sets(), {
+    updateFilters(proxy, filterable_sets())
+  })
 }
 
 shinyServer(server)
