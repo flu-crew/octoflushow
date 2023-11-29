@@ -191,7 +191,7 @@ server <- function(input, output, session) {
   # update filter based off of existing selections
   filterable_sets <- eventReactive(input$raw_data_table_search_columns, {
     # Get separately filtered indices
-    fi <- Map(doColumnSearch, d_col_rct(), input$raw_data_table_search_columns)
+    fi <- Map(DT::doColumnSearch, d_col_rct(), input$raw_data_table_search_columns)
     
     # Find what rows others leave available
     ai <- lapply(seq_along(fi), function(j) Reduce(intersect, fi[-j]))
@@ -201,9 +201,13 @@ server <- function(input, output, session) {
       if (is.factor(x)) droplevels(x) else x
     })
   })
+# reverse proxy might be an issue?
+#https://github.com/rstudio/DT/pull/982
+#https://stackoverflow.com/questions/38974731/websockets-not-connected-behind-proxy
+#https://stackoverflow.com/questions/29481205/shiny-websocket-error
   proxy <- DT::dataTableProxy("raw_data_table")
   observeEvent(filterable_sets(), {
-    updateFilters(proxy, filterable_sets())
+    DT::updateFilters(proxy, filterable_sets())
   })
 }
 
