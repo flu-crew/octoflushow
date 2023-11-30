@@ -355,7 +355,7 @@ prepGConstData <- function(d){
   hhdata <- rbind(hdata, totdata) %>%
     dplyr::mutate(
       labels=dplyr::case_when(H=="total" ~ "total",
-                              1==1 ~ paste(H, N, sep=".")),
+                              1==1 ~ paste(H, N, sep="/")),
       Subtype=factor(Subtype, subtype_order)
     )
 
@@ -539,10 +539,10 @@ make_heatmap_data_by_interval <- function(d, quarters){
   # Preparing Heatmap data
   removeMixed(d) %>% # Not mixed subtype or no state
     dplyr::mutate(
-      H_Type = dplyr::case_when(!is.na(H1) ~ paste("H1", H1, sep = "."), # H Type
-                                !is.na(H3) ~ paste("H3", H3, sep = ".")),
-      N_Type = dplyr::case_when(!is.na(N1) ~ paste("N1", N1, sep = "."), # N Type
-                                !is.na(N2) ~ paste("N2", N2, sep = "."))
+      H_Type = dplyr::case_when(!is.na(H1) ~ sub("^(H1.|)", "H1.", H1), # H Type
+                                !is.na(H3) ~ sub("^(H3.|)", "H3.", H3)),
+      N_Type = dplyr::case_when(!is.na(N1) ~ sub("^(N1.|)", "N1.", N1), # N Type
+                                !is.na(N2) ~ sub("^(N2.|)", "N2.", N2))
     ) %>%
     # Drop if H or N are NA
     dplyr::filter(!is.na(H_Type)) %>%
@@ -666,12 +666,8 @@ heatmap_hana_diff <- function(d, cquarters, pquarters, font_size=3, totals=FALSE
 
 
 unifyHANA <- function(d, global=FALSE){
-  if(global){
-    d$H = d$GL_Clade
-  } else {
-    d$H = ifelse(is.na(d$H1), paste("H3", d$H3, sep="."), paste("H1", d$H1, sep="."))
-  }
-  d$N = ifelse(is.na(d$N1), paste("N2", d$N2, sep="."), paste("N1", d$N1, sep="."))
+  d$H = ifelse(is.na(d$H1), sub("^(H3.|)", "H3.", d$H3), sub("^(H1.|)", "H1.", d$H1))
+  d$N = ifelse(is.na(d$N1), sub("^(N2.|)", "N2.", d$N2), sub("^(N1.|)", "N1.", d$N1))
   d
 }
 
@@ -695,7 +691,7 @@ hana_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
 triple_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
   d <- d %>%
     unifyHANA(global) %>%
-    dplyr::filter(!is.na(H) & !is.na(N) & grepl("[PTVH]{6}", Constellation, perl=TRUE)) %>%
+    dplyr::filter(!is.na(H) & !is.na(N) & grepl("[A-Z]{6}", Constellation, perl=TRUE)) %>%
     dplyr::mutate(Group = paste(H, N, Constellation, sep="/"))
 
   common_barplot(d, floorDateBy=floorDateBy,

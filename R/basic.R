@@ -38,11 +38,11 @@ toggle_clade_definition <- function(d, global_clade="False") {
 #' @export
 collapse_h1 <- function(d) {
   # alpha
-  d$H1 <- sub("^alpha.*", "alpha", d$H1, perl=TRUE)
-  d$H1 <- sub("^1A.1.*", "1A.1", d$H1, perl=TRUE)
+  d$H1 <- sub("alpha.*", "alpha", d$H1, perl=TRUE)
+  d$H1 <- sub("1A.1.*", "1A.1", d$H1, perl=TRUE)
   # gamma (exclude gamma2)
-  d$H1 <- sub("^gamma[^2].*", "gamma", d$H1, perl=TRUE)
-  d$H1 <- sub("^1A.3.3.3.*", "1A.3.3.3", d$H1, perl=TRUE)
+  d$H1 <- sub("gamma[^2].*", "gamma", d$H1, perl=TRUE)
+  d$H1 <- sub("1A.3.3.3.*", "1A.3.3.3", d$H1, perl=TRUE)
   if(is.factor(d$H1)) {
     d$H1 <- droplevels(d$H1) 
   }
@@ -54,8 +54,8 @@ collapse_h1 <- function(d) {
 #' @export
 collapse_h3 <- function(d) {
   # collapse cluster IV
-  d$H3 <- sub("^IV-[A-Z].*", "IV", d$H3, perl=TRUE)
-  d$H3 <- sub("^1990.4.*", "1990.4", d$H3, perl=TRUE)
+  d$H3 <- sub("IV-[A-Z].*", "IV", d$H3, perl=TRUE)
+  d$H3 <- sub("1990.4.*", "1990.4", d$H3, perl=TRUE)
   if(is.factor(d$H3)) {
     d$H3 <- droplevels(d$H3) 
   }
@@ -70,7 +70,7 @@ collapse_n1 <- function(d) {
   d$N1 <- sub("^N1-avian.*", "N1-avian", d$N1, perl=TRUE)
   d$N1 <- sub("^N1.E.*", "N1.E", d$N1, perl=TRUE)
   # classical
-  d$N1 <- sub("^[Cc]lassical", "Classical", d$N1, perl=TRUE)
+  d$N1 <- sub("[Cc]lassical", "Classical", d$N1, perl=TRUE)
   d$N1 <- sub("^N1.C.*", "N1.C", d$N1, perl=TRUE)
   if(is.factor(d$N1)) {
     d$N1 <- droplevels(d$N1) 
@@ -83,8 +83,8 @@ collapse_n1 <- function(d) {
 #' @export
 collapse_n2 <- function(d) {
   # collapse 1998[AB] and 2002[AB]
-  d$N2 <- sub("^(1998|98).*", "1998", d$N2, perl=TRUE)
-  d$N2 <- sub("^(2002|02).*", "2002", d$N2, perl=TRUE)
+  d$N2 <- sub("(1998|98).*", "1998", d$N2, perl=TRUE)
+  d$N2 <- sub("(2002|02).*", "2002", d$N2, perl=TRUE)
   if(is.factor(d$N2)) {
     d$N2 <- droplevels(d$N2) 
   }
