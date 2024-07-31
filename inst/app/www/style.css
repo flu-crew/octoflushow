@@ -1,0 +1,8 @@
+.navbar-nav > li > a {
+	padding-top:20px !important; 
+  padding-bottom:20 !important;
+}
+
+.navbar-brand {
+  padding-top:0px !important;
+}

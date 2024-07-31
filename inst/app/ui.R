@@ -24,24 +24,12 @@ resize_on_change <- function(elementID){
   tags$script(js)
 }
 
-shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow",
-
-  tags$head(
-    tags$style(HTML('
-      .navbar-nav > li > a {
-      	padding-top:20px !important; 
-        padding-bottom:20 !important;
-      }
-      .navbar-brand {
-        padding-top:0px !important;
-      }
-    '))
-  )),
+shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
 
   tabPanel(
     "About",
     fluidPage(
-      includeHTML("landing-page.html")
+      includeHTML("landing-page.html"), includeCSS("www/style.css")
     )
   ),
 
@@ -292,5 +280,6 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow",
         resize_on_change("constellation_plot")
       )
     )
-  )
+  ),
+  
 ))
