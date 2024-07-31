@@ -24,12 +24,22 @@ resize_on_change <- function(elementID){
   tags$script(js)
 }
 
-#logofile <- system.file("app-data", "logo.png", package="octoflushow")
+shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow",
 
-shinyUI(navbarPage("octoFLUshow",
+  tags$head(
+    tags$style(HTML('
+      .navbar-nav > li > a {
+      	padding-top:20px !important; 
+        padding-bottom:20 !important;
+      }
+      .navbar-brand {
+        padding-top:0px !important;
+      }
+    '))
+  )),
 
   tabPanel(
-    "Landing page",
+    "About",
     fluidPage(
       includeHTML("landing-page.html")
     )
