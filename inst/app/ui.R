@@ -1,6 +1,7 @@
 library(shiny)
 library(shinyBS)
 require(magrittr)
+library(ggstream)
 
 infile <- system.file("app-data", "A0_Master_List.tab", package="octoflushow")
 # Add WGS because that is a column that I add after loading the masterlist
@@ -86,6 +87,13 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     sidebarLayout(
      sidebarPanel(
         radioButtons(
+          "plotType",
+          label = "Plot type",
+          choices = list("bar", "stream"),
+          inline = TRUE,
+          selected = "bar"
+        ),
+        radioButtons(
           "floorDateBy",
           label = "Plot dates by",
           choices = list("month", "quarter", "year"),
@@ -116,7 +124,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         )
       ),
       mainPanel(
-        plotOutput("time_plot"),
+        plotOutput("time_plot", height = "600px"),
         resize_on_change("time_plot")
       )
     )
@@ -126,6 +134,13 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     "HA/NA by time",
     sidebarLayout(
      sidebarPanel(
+        radioButtons(
+          "plotTypeByHanaBar",
+          label = "Plot type",
+          choices = list("bar", "stream"),
+          inline = TRUE,
+          selected = "bar"
+        ),
         radioButtons(
           "floorDateByHanaBar",
           label = "Plot dates by",
@@ -150,7 +165,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         )
       ),
       mainPanel(
-        plotOutput("hana_time_plot"),
+        plotOutput("hana_time_plot", height = "600px"),
         resize_on_change("hana_time_plot")
       )
     )
@@ -160,6 +175,13 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     "HA/NA/Const by time",
     sidebarLayout(
      sidebarPanel(
+        radioButtons(
+          "plotTypeByTripleBar",
+          label = "Plot type",
+          choices = list("bar", "stream"),
+          inline = TRUE,
+          selected = "bar"
+        ),
         radioButtons(
           "floorDateByTripleBar",
           label = "Plot dates by",
@@ -184,7 +206,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         )
       ),
       mainPanel(
-        plotOutput("triple_time_plot"),
+        plotOutput("triple_time_plot", height = "600px"),
         resize_on_change("triple_time_plot")
       )
     )
@@ -226,7 +248,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
        )
       ),
       mainPanel(
-        plotOutput("state_plot"),
+        plotOutput("state_plot", height = "600px"),
         resize_on_change("state_plot")
       )
     )
@@ -253,7 +275,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         )
       ),
       mainPanel(
-        plotOutput("heatmap_plot"),
+        plotOutput("heatmap_plot", height = "600px"),
         resize_on_change("heatmap_plot")
       )
     )
@@ -276,7 +298,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         )
       ),
       mainPanel(
-        plotOutput("constellation_plot"),
+        plotOutput("constellation_plot", height = "600px"),
         resize_on_change("constellation_plot")
       )
     )

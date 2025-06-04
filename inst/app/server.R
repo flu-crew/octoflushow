@@ -69,17 +69,17 @@ server <- function(input, output, session) {
 
   time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_bar, input$collapse_h3_bar, input$collapse_n1_bar, input$collapse_n2_bar, input$global_bar) %>%
-      octoflushow::plot_basic(floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
+      octoflushow::plot_basic(plotType=input$plotType, floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
 
   hana_time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_hana_bar, input$collapse_h3_hana_bar, input$collapse_n1_hana_bar, input$collapse_n2_hana_bar, input$global_hana_bar) %>%
-      octoflushow::hana_barplots(floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
+      octoflushow::hana_barplots(plotType=input$plotTypeByHanaBar, floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
   })
 
   triple_time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_triple_bar, input$collapse_h3_triple_bar, input$collapse_n1_triple_bar, input$collapse_n2_triple_bar, input$global_triple_bar) %>%
-      octoflushow::triple_barplots(floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
+      octoflushow::triple_barplots(plotType=input$plotTypeByTripleBar, floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
   })
 
   state_plot_rct <- reactive({

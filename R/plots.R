@@ -33,7 +33,7 @@ order_data_factors <- function(d, config){
 #' "week", "3 months", "year")
 #' @return ggplot object
 #' @export
-plot_basic <- function(d, segment="H1", floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
+plot_basic <- function(d, segment="H1", plotType="bar", floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
                       title1 = glue::glue("{segment} phylogenetic-clade count by {floorDateBy}"),
                       title2 = glue::glue("{segment} phylogenetic-clade % by {floorDateBy}")
                       ){
@@ -49,8 +49,12 @@ plot_basic <- function(d, segment="H1", floorDateBy="month", xfontsize=10, yfont
        droplevels %>%
        octoflushow::countByTimeUnit(col_names=segment, Date="Date", tunit=floorDateBy)
 
-  unscaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
-  scaled <- octoflushow::barchart_bytime(d, variable=segment, tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
+  if(plotType=="stream") {
+    title2 <- title1
+  }
+
+  unscaled <- octoflushow::barchart_bytime(d, variable=segment, chartype=plotType, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
+  scaled <- octoflushow::barchart_bytime(d, variable=segment, chartype=plotType, bartype="fill", tunit=floorDateBy, limits=limits, title=title2, xfontsize=xfontsize, yfontsize=yfontsize)
   octoflushow::shared_legend_plot(unscaled, scaled)
 }
 
@@ -85,15 +89,15 @@ countByTimeUnit <- function(df, col_names="H1", Date="Date", tunit="month",
     dplyr::group_by(.dots=c(Date, col_names)) %>%
     dplyr::summarise(
       n=dplyr::n()
-    )%>%
+    ) %>%
     dplyr::ungroup() %>%
     tidyr::complete(Date=seq.Date(minDate, maxDate, by=tunit)) # fill in missing dates
   
   # For the missing dates, fill in a placeholder clade label and n=0
-  for(col_i in col_names){
-    placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
-    cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
-  }
+  #for(col_i in col_names){
+  #  placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
+  #  cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
+  #}
 
   cdf$n[is.na(cdf$n)] <- 0
 
@@ -414,6 +418,7 @@ quadcountplot <- function(df, timespan_str) {
 #' @export
 barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::get_palette(variable),
                             title="",
+                            chartype="bar",
                             bartype="stack",
                             limits=NULL,
                             tunit="month",
@@ -438,7 +443,6 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
   palette = palette[levels(df[[variable]])]
 
   p <- ggplot2::ggplot(data = df, ggplot2::aes_string(x = "Date", y = value, fill = variable)) +
-    ggplot2::geom_bar(stat = "identity", position = bartype) +
     ggplot2::scale_fill_manual(values = palette) +
     ggplot2::labs(y=ytitle, x="", title=title) +
     ggplot2::theme_bw() +
@@ -450,7 +454,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
     p <- p + ggplot2::scale_x_date(
       labels = scales::date_format("%b-%y"),
       date_breaks = "1 month",
-      expand=c(0,0),
+      expand=c(0.001,0.001),
       limits=limits
     )
   }
@@ -460,7 +464,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       ggplot2::scale_x_date(
         labels = format_Q,
         breaks = unique(df$Date),
-        expand=c(0,0),
+        expand=c(0.001,0.001),
         limits=limits
       )
   }
@@ -470,14 +474,25 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       ggplot2::scale_x_date(
         labels = scales::date_format("%Y"),
         date_breaks = "year",
-        expand=c(0,0),
+        expand=c(0.001,0.001),
         limits=limits
       )
   }
 
-  if(bartype=="fill"){
-    p <- p + ggplot2::scale_y_continuous(labels = scales::percent)+
-      ggplot2::labs(y="Swine Isolates by %", x="", title=title)
+  if(chartype=="bar") {
+    p <- p + ggplot2::geom_bar(stat = "identity", position = bartype)
+    if(bartype=="fill"){
+      p <- p + ggplot2::scale_y_continuous(labels = scales::percent) +
+        ggplot2::labs(y="Swine Isolates by %", x="", title=title)
+    }
+  }
+  else {
+    if(bartype=="stack"){
+      p <- p + geom_stream(type="ridge")
+    }
+    else if(bartype=="fill"){
+      p <- p + geom_stream(type="mirror")
+    }
   }
   return(p)
 }
@@ -674,13 +689,13 @@ unifyHANA <- function(d, global=FALSE){
 #' Barchart comparing the most common clades over time
 #'
 #' @export
-hana_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
+hana_barplots <- function(d, plotType="bar", floorDateBy="month", global=FALSE, ...){
   d <- d %>%
     unifyHANA(global) %>%
     dplyr::filter(!is.na(H) & !is.na(N)) %>%
     dplyr::mutate(Group = paste(H, N, sep="/"))
 
-  common_barplot(d, floorDateBy=floorDateBy,
+  common_barplot(d, plotType=plotType, floorDateBy=floorDateBy,
     title1 = glue::glue("HA/NA phylogenetic-clade count by {floorDateBy}"),
     title2 = glue::glue("HA/NA phylogenetic-clade % by {floorDateBy}"), ...)
 }
@@ -688,13 +703,13 @@ hana_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
 #' Barchart comparing the most common HA/NA/Constellation triplet
 #'
 #' @export
-triple_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
+triple_barplots <- function(d, plotType="bar", floorDateBy="month", global=FALSE, ...){
   d <- d %>%
     unifyHANA(global) %>%
     dplyr::filter(!is.na(H) & !is.na(N) & grepl("[A-Z]{6}", Constellation, perl=TRUE)) %>%
     dplyr::mutate(Group = paste(H, N, Constellation, sep="/"))
 
-  common_barplot(d, floorDateBy=floorDateBy,
+  common_barplot(d, plotType=plotType, floorDateBy=floorDateBy,
     title1 = glue::glue("HA/NA/Constellation count by {floorDateBy}"),
     title2 = glue::glue("HA/NA/Constellation % by {floorDateBy}"), ...)
 }
@@ -702,7 +717,7 @@ triple_barplots <- function(d, floorDateBy="month", global=FALSE, ...){
 #' Barchart comparing the most common HA/NA/Constellation triplet
 #'
 #' @export
-common_barplot <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
+common_barplot <- function(d, plotType=plotType, floorDateBy="month", xfontsize=10, yfontsize=10, limits=NULL,
                       title1 = glue::glue("count by {floorDateBy}"),
                       title2 = glue::glue("% by {floorDateBy}")){
 
@@ -731,8 +746,12 @@ common_barplot <- function(d, floorDateBy="month", xfontsize=10, yfontsize=10, l
 
   d$Group <- factor(d$Group, levels=c(mostCommon, "Other"))
 
-  unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
-  scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", tunit=floorDateBy, limits=limits, title=title2, bartype = "fill", xfontsize=xfontsize, yfontsize=yfontsize)
+  if(plotType=="stream") {
+    title2 <- title1
+  }
+
+  unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", chartype=plotType, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
+  scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", chartype=plotType, bartype="fill", tunit=floorDateBy, limits=limits, title=title2, xfontsize=xfontsize, yfontsize=yfontsize)
   octoflushow::shared_legend_plot(unscaled, scaled)
 }
 
