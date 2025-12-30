@@ -94,11 +94,7 @@ countByTimeUnit <- function(df, col_names="H1", Date="Date", tunit="month",
     tidyr::complete(Date=seq.Date(minDate, maxDate, by=tunit)) # fill in missing dates
   
   # For the missing dates, fill in a placeholder clade label and n=0
-  #for(col_i in col_names){
-  #  placeholder = cdf[[col_i]][!is.na(cdf[[col_i]])] %>% unique(.) %>% {.[1]}
-  #  cdf[[col_i]][is.na(cdf[[col_i]])]=placeholder
-  #}
-
+  # introduces null value every quarter for x-axis (time) labels
   cdf$n[is.na(cdf$n)] <- 0
 
   return(cdf)
@@ -494,6 +490,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       p <- p + geom_stream(type="mirror")
     }
   }
+
   return(p)
 }
 

@@ -20,6 +20,19 @@ devtools::install()
 octoflushow::launch_app()
 ```
 
+Ensure that the below package versions are installed. Different versions can have unexpected interactions/bugs.
+
+```
+package_url <- "https://cran.r-project.org/src/contrib/Archive/ggplot2/ggplot2_3.4.0.tar.gz"
+install.packages(package_url, repos = NULL, type = "source")
+
+package_url <- "https://cran.r-project.org/src/contrib/Archive/cowplot/cowplot_1.1.1.tar.gz"
+install.packages(package_url, repos = NULL, type = "source")
+
+package_url <- "https://cran.r-project.org/src/contrib/Archive/DT/DT_0.32.tar.gz"
+install.packages(package_url, repos = NULL, type = "source")
+```
+
 ## Updating reference file using octofludb
 Note - file should be a Windows (CRLF) unicode (UTF-8) text file
 ```

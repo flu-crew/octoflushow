@@ -179,7 +179,7 @@ clean_data <- function(d, remove_mixed = TRUE) {
   my.data$M <- droplevels(factor(my.data$M))
   my.data$NS <- droplevels(factor(my.data$NS))
 
-  my.data$WGS <- grepl("^[HVTP]{6}$", my.data$Constellation, perl=TRUE)
+  my.data$WGS <- grepl("^[HVTPA]{6}$", my.data$Constellation, perl=TRUE)
 
   my.data$Constellation <- as.factor(my.data$Constellation)
 
@@ -304,7 +304,7 @@ fixN1names <- function(n1) {
 }
 
 fixN2names <- function(n2) {
-  patTX98 <- "TX1998|TX98|LAIV|LAIV-98"
+  patTX98 <- "TX1998|TX98|LAIV.*"
   n2 %>%
     sub(".*,.*", "mixed", .) %>%
     sub("_", " ", .) %>%
@@ -317,5 +317,6 @@ fixIGnames <- function(ig) {
     sub("_", " ", .) %>%
     sub(".*[Hh]uman.*", "Human-seasonal", .) %>%
     sub(".*(pdm|[Pp]andemic).*", "PDM", .) %>%
-    sub(".*avian.*", "avian", .)
+    sub(".*avian.*", "avian", .) %>%
+    sub("LAIV.*", "LAIV", .)
 }
