@@ -41,8 +41,11 @@ plot_basic <- function(d, segment="H1", plotType="bar", floorDateBy="month", xfo
 
   # Show empty plot if not data is selected
   if(nrow(d) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+    if(plotType == "data") { return(d) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   d <- order_data_factors(d, config) %>%
@@ -55,7 +58,8 @@ plot_basic <- function(d, segment="H1", plotType="bar", floorDateBy="month", xfo
 
   unscaled <- octoflushow::barchart_bytime(d, variable=segment, chartype=plotType, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
   scaled <- octoflushow::barchart_bytime(d, variable=segment, chartype=plotType, bartype="fill", tunit=floorDateBy, limits=limits, title=title2, xfontsize=xfontsize, yfontsize=yfontsize)
-  octoflushow::shared_legend_plot(unscaled, scaled)
+  if (plotType == "data") { return(unscaled) } # scaled/unscaled are identical dataframes
+  else { octoflushow::shared_legend_plot(unscaled, scaled) }
 }
 
 #' Count number of entries by time chunk
@@ -166,7 +170,7 @@ states <- ggplot2::map_data("state")
 #' @param df the input surveyllance data
 #' @param segment the column to facet by
 #' @export
-facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
+facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max", data_out=FALSE){
   df <- df[!is.na(df[[segment]]) & df$State %in% names(abbr2state), ]
 
   # If the input dataset is empty (for example when only H3N2 are selected and
@@ -219,6 +223,7 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
     merge(cdata, all=TRUE, by="region") %>%
     dplyr::mutate(n = ifelse(n == 0, "", n)) %>%
     dplyr::mutate(n = ifelse(is.na(n), "", n))
+  if (data_out) {  return(na.omit(snames)) }
 
   g <- ggplot2::ggplot() +
     ggplot2::geom_polygon(data=data_geo, ggplot2::aes(x=long,y=lat,group=group,fill=r), size=0.2, color="black") +
@@ -245,7 +250,7 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max"){
 #' @param d data.frame swine surveillance data (i.e., output or \code{load_current})
 #' @export
 #' @return ggplot object
-plot_constellation <- function(d){
+plot_constellation <- function(d, data_out=FALSE){
   cdata <- d %>%
     subset(!grepl("-", Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
@@ -297,8 +302,8 @@ plot_constellation <- function(d){
   for (xint in c(-1:length(unique(hhdata$labels))+1)) { # number of unique ha/na pairings
     p <- p + ggplot2::geom_vline(xintercept = xint + 0.5, size = 0.25, color = "gray")
   }
-  return(p)
-
+  if (data_out) { return(hhdata) }
+  else { return(p) }
 }
 
 # ===== prepConstellationData
@@ -432,8 +437,11 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
 
   # Show empty plot if not data is selected
   if(nrow(df) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+    if(plotType == "data") { return(d) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   palette = palette[levels(df[[variable]])]
@@ -491,7 +499,10 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
     }
   }
 
-  return(p)
+  if (chartype == "data") { 
+    return(df %>% dplyr::group_by(Date) %>% dplyr::filter(n > 0) %>% dplyr::mutate(proportion = n / sum(n)) )
+  }
+  else { return(p) }
 }
 
 
@@ -566,7 +577,7 @@ make_heatmap_data_by_interval <- function(d, quarters){
 #' The input is the full dataset which is then reduced to HA/NA counts before building.
 #'
 #' @export
-heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
+heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3, data_out=FALSE) {
 
   # Show empty plot if not data is selected
   if(nrow(df) == 0){
@@ -597,7 +608,7 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
   }
 
   mid.value <- (min(df$percent) + max(df$percent)) / 2
-  df$label <- ifelse(df$percent == 0, "", round(df$percent, 1)) 
+  df$label <- ifelse(df$percent == 0, "", round(df$percent, 1))
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = H_Type)) +
     ggplot2::geom_tile(ggplot2::aes(fill = percent), colour = "black") +
@@ -617,7 +628,8 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3) {
   if(text==TRUE){
     p <- p + ggplot2::geom_text(ggplot2::aes(label = label), size = font_size)
   }
-  return(p)
+  if (data_out) { return(df) }
+  else { return(p) }
 }
 
 
@@ -720,8 +732,11 @@ common_barplot <- function(d, plotType=plotType, floorDateBy="month", xfontsize=
 
   # Show empty plot if not data is selected
   if(nrow(d) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+    if(plotType == "data") { return(d) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   d <- octoflushow::countByTimeUnit(d, col_names="Group", Date="Date", tunit=floorDateBy)
@@ -743,13 +758,14 @@ common_barplot <- function(d, plotType=plotType, floorDateBy="month", xfontsize=
 
   d$Group <- factor(d$Group, levels=c(mostCommon, "Other"))
 
-  if(plotType=="stream") {
-    title2 <- title1
+  if(plotType == "stream") { 
+    title2 <- title1 
   }
 
   unscaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", chartype=plotType, tunit=floorDateBy, limits=limits, title=title1, xfontsize=xfontsize, yfontsize=yfontsize)
   scaled <- octoflushow::barchart_bytime(d, palette=palette, variable="Group", chartype=plotType, bartype="fill", tunit=floorDateBy, limits=limits, title=title2, xfontsize=xfontsize, yfontsize=yfontsize)
-  octoflushow::shared_legend_plot(unscaled, scaled)
+  if (plotType == "data") { return(unscaled) } # scaled/unscaled are identical dataframes
+  else { octoflushow::shared_legend_plot(unscaled, scaled) }
 }
 
 #' Get HANA counts

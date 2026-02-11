@@ -34,13 +34,23 @@ server <- function(input, output, session) {
   data_is_loaded <- reactiveVal(value=FALSE)
 
   d_rct <- reactive({
-      if(data_is_loaded()){
-        # The data table has been loaded, so only view the selected rows
-        d[input$raw_data_table_rows_all, ]
-      } else {
-        # The data table has not been loaded, so view everything
-        d
+    # The data table has been loaded, so only view the selected rows
+    if(data_is_loaded()){
+      # apply strain selection filter
+      if(nchar(input$strain_selection) > 0){
+        pattern <- strsplit(input$strain_selection, "[\n\r]+|[,;]+") %>%
+            unlist %>% 
+            sub(pattern="\\s*([^ \t]*)\\s*", replacement="\\1", perl=TRUE) %>%
+            Filter(f=function(x) nchar(x) > 0) %>%
+            paste0(collapse="|")
+        d = d[grepl(pattern, d$Strain), ]
       }
+      d[input$raw_data_table_rows_all, , drop = F]
+    }
+    # The data table has not been loaded, so view everything
+    else {
+      d
+    }
   })
 
   output$time_plot <- renderPlot({
@@ -66,35 +76,65 @@ server <- function(input, output, session) {
   output$constellation_plot <- renderPlot({
     print(constellation_plot_rct())
   })
-
+  
+  # Clades by time plot
   time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_bar, input$collapse_h3_bar, input$collapse_n1_bar, input$collapse_n2_bar, input$global_bar) %>%
       octoflushow::plot_basic(plotType=input$plotType, floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
   })
+  time_plot_data_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_h1_bar, input$collapse_h3_bar, input$collapse_n1_bar, input$collapse_n2_bar, input$global_bar) %>%
+      octoflushow::plot_basic(plotType="data", floorDateBy=input$floorDateBy, segment=input$segmentChoiceBar)
+  })
 
+  # HA/NA by time plot 
   hana_time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_hana_bar, input$collapse_h3_hana_bar, input$collapse_n1_hana_bar, input$collapse_n2_hana_bar, input$global_hana_bar) %>%
       octoflushow::hana_barplots(plotType=input$plotTypeByHanaBar, floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
   })
+  hana_time_plot_data_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_h1_hana_bar, input$collapse_h3_hana_bar, input$collapse_n1_hana_bar, input$collapse_n2_hana_bar, input$global_hana_bar) %>%
+      octoflushow::hana_barplots(plotType="data", floorDateBy=input$floorDateByHanaBar, global=input$global_hana_bar == "global")
+  })
 
+  # HA/NA/Const by time plot
   triple_time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_triple_bar, input$collapse_h3_triple_bar, input$collapse_n1_triple_bar, input$collapse_n2_triple_bar, input$global_triple_bar) %>%
       octoflushow::triple_barplots(plotType=input$plotTypeByTripleBar, floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
   })
+  triple_time_plot_data_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_h1_triple_bar, input$collapse_h3_triple_bar, input$collapse_n1_triple_bar, input$collapse_n2_triple_bar, input$global_triple_bar) %>%
+      octoflushow::triple_barplots(plotType="data", floorDateBy=input$floorDateByTripleBar, global=input$global_triple_bar == "global")
+  })
 
+  # Clades by state
   state_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state) %>%
       octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts)
   })
+  state_plot_data_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state) %>%
+      octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts, data_out=TRUE)
+  })
   
+  # Clade heatmap
   heatmap_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_heatmap, input$collapse_h3_heatmap, input$collapse_n1_heatmap, input$collapse_n2_heatmap, input$global_heatmap) %>%
       octoflushow::heatmap_HANA(totals=TRUE)
   })
+  heatmap_plot_data_rct <- reactive({
+    plot_munge(d_rct(), input$collapse_h1_heatmap, input$collapse_h3_heatmap, input$collapse_n1_heatmap, input$collapse_n2_heatmap, input$global_heatmap) %>%
+      octoflushow::heatmap_HANA(totals=TRUE, data_out=TRUE)
+  })
   
+  # Constellation heatmap
   constellation_plot_rct <- reactive({
     plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation) %>%
     octoflushow::plot_constellation()
+  })
+  constellation_plot_data_rct <- reactive({
+    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation) %>%
+    octoflushow::plot_constellation(data_out=TRUE)
   })
 
   make_downloader <- function(function_name){
@@ -113,34 +153,45 @@ server <- function(input, output, session) {
     )
   }
 
-  output$download_time_plot <- make_downloader("time_plot")
-  output$download_hana_time_plot <- make_downloader("hana_time_plot")
-  output$download_triple_time_plot <- make_downloader("triple_time_plot")
-  output$download_state_plot <- make_downloader("state_plot")
-  output$download_heatmap_plot <- make_downloader("heatmap_plot")
-  output$download_constellation_plot <- make_downloader("constellation_plot")
+  make_downloader_data <- function(function_name){
+    reactive_function = get(glue::glue("{function_name}_data_rct"))
+    downloadHandler(
+      filename = function(){glue::glue("swine-survey-{function_name}.tsv")},
+      content = function(file){
+        readr::write_tsv(reactive_function(), file=file)
+      }
+    )
+  }
 
-  output$downloadExcel <- downloadHandler(
-    filename = 'swine-surveillance-data.xlsx',
-    content = function(file) {
-      # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
-      # <output id>_rows_all gets all selected rows on all pages
-      # <output id>_rows_current gets only the selected rows on the current page
-      row_indices <- input$raw_data_table_rows_all
-      selected_data <- d[row_indices, input$selected_columns]
-      writexl::write_xlsx(selected_data, path=file)
-    }
-  )
+  # Clades by time plot
+  output$download_time_plot <- make_downloader("time_plot")
+  output$download_time_plot_data <- make_downloader_data("time_plot")
+  # HA/NA by time plot 
+  output$download_hana_time_plot <- make_downloader("hana_time_plot")
+  output$download_hana_time_plot_data <- make_downloader_data("hana_time_plot")
+  # HA/NA/Const by time plot
+  output$download_triple_time_plot <- make_downloader("triple_time_plot")
+  output$download_triple_time_plot_data <- make_downloader_data("triple_time_plot")
+  # Clades by state
+  output$download_state_plot <- make_downloader("state_plot")
+  output$download_state_plot_data <- make_downloader_data("state_plot")
+  # Clade heatmap
+  output$download_heatmap_plot <- make_downloader("heatmap_plot")
+  output$download_heatmap_plot_data <- make_downloader_data("heatmap_plot")
+  # Constellation heatmap
+  output$download_constellation_plot <- make_downloader("constellation_plot")
+  output$download_constellation_plot_data <- make_downloader_data("constellation_plot")
 
   output$downloadTAB <- downloadHandler(
-    filename = 'swine-surveillance-data.txt',
+    filename = 'swine-surveillance-data.tsv',
     content = function(file) {
       # See this example for an explanation: https://yihui.shinyapps.io/DT-info/
       # <output id>_rows_all gets all selected rows on all pages
       # <output id>_rows_current gets only the selected rows on the current page
       row_indices <- input$raw_data_table_rows_all
-      selected_data <- d[row_indices, input$selected_columns]
+      selected_data <- d_col_rct()[row_indices, , drop = F] #d[row_indices, input$selected_columns]
       readr::write_tsv(selected_data, file=file)
+      #writexl::write_xlsx(selected_data, path=file)
     }
   )
 

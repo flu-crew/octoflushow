@@ -39,8 +39,8 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     fluidPage(
       fluidRow(
         column(2, actionButton("go", "Select Columns")),
-        column(6),
-        column(2, align="right", downloadButton("downloadExcel", "Download Excel")),
+        column(8),
+#        column(2, align="right", downloadButton("downloadExcel", "Download Excel")),
         column(2, align="right", downloadButton("downloadTAB", "Download TSV"))
       ),
       fluidRow(column(12, div(style = "height:12px;"))),
@@ -121,6 +121,10 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_time_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_time_plot_data", "Download TSV")
         )
       ),
       mainPanel(
@@ -162,6 +166,10 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_hana_time_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_hana_time_plot_data", "Download TSV")
         )
       ),
       mainPanel(
@@ -203,6 +211,10 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_triple_time_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_triple_time_plot_data", "Download TSV")
         )
       ),
       mainPanel(
@@ -242,10 +254,14 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
          selected = "count"
        ),
        checkboxInput("state_counts", "Show Counts", value=FALSE),
-       div(
-         style="display:inline-block;vertical-align:top; width:150px;",
-         downloadButton("download_state_plot", "Download Figure")
-       )
+        div(
+          style="display:inline-block;vertical-align:top; width:150px;",
+          downloadButton("download_state_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_state_plot_data", "Download TSV")
+        )
       ),
       mainPanel(
         plotOutput("state_plot", height = "600px"),
@@ -272,6 +288,10 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_heatmap_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_heatmap_plot_data", "Download TSV")
         )
       ),
       mainPanel(
@@ -295,6 +315,10 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_constellation_plot", "Download Figure")
+        ),
+        div(
+          style="display:inline-block;vertical-align:top; width:150px; float: right;",
+          downloadButton("download_constellation_plot_data", "Download TSV")
         )
       ),
       mainPanel(
