@@ -21,6 +21,7 @@ order_data_factors <- function(d, config){
   if("H1" %in% names(d)) {d$H1 <- factor(d$H1, ordered=TRUE, levels=names(config$colors$H1)) %>% droplevels }
   if("H3" %in% names(d)) {d$H3 <- factor(d$H3, ordered=TRUE, levels=names(config$colors$H3)) %>% droplevels }
   if("N1" %in% names(d)) {d$N1 <- factor(d$N1, ordered=TRUE, levels=names(config$colors$N1)) %>% droplevels }
+  if("N2" %in% names(d)) {d$N2 <- factor(d$N2, ordered=TRUE, levels=names(config$colors$N2)) %>% droplevels }
   d
 }
 
@@ -175,9 +176,12 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max", data
 
   # If the input dataset is empty (for example when only H3N2 are selected and
   # the user tries to plot H1 data), return an empty figure.
-  if (nrow(df) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+  if(nrow(df) == 0){
+    if(data_out) { return(df) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   title <- glue::glue("{segment}: {nrow(df)} strains collected from {min(df$Date)} to {max(df$Date)} with colors normalized via {normalization}")
@@ -265,9 +269,12 @@ plot_constellation <- function(d, data_out=FALSE){
   hhdata <- prepGConstData(cdata)
 
   # Show empty plot if not data is selected
-  if(nrow(hhdata) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+  if(nrow(d) == 0){
+    if(data_out) { return(d) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   xlabel <- "HA and NA Phylogenetic Clade Pairs"
@@ -581,8 +588,11 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3, d
 
   # Show empty plot if not data is selected
   if(nrow(df) == 0){
-    q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
-    return(q)
+    if(data_out) { return(df) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
   }
 
   df <- octoflushow::make_heatmap_data_by_interval(df, NULL) %>%
