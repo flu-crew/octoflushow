@@ -91,7 +91,7 @@ countByTimeUnit <- function(df, col_names="H1", Date="Date", tunit="month",
     dplyr::mutate(
       Date = zoo::as.Date(lubridate::as_datetime(lubridate::floor_date(zoo::as.Date(Date), unit=tunit)))
     ) %>%
-    dplyr::group_by(.dots=c(Date, col_names)) %>%
+    dplyr::group_by(across(c(Date, col_names))) %>%
     dplyr::summarise(
       n=dplyr::n()
     ) %>%
@@ -207,7 +207,7 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max", data
   }
 
   cdata <- df %>%
-    dplyr::select_(clade=segment, region="State") %>%
+    dplyr::select(clade=segment, region="State") %>%
     dplyr::mutate(region = unname(abbr2state[as.character(region)])) %>%
     order_data_factors(config) %>% droplevels %>%
     dplyr::group_by(region, clade) %>% dplyr::count() %>% dplyr::ungroup() %>%
@@ -255,18 +255,17 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max", data
 #' @export
 #' @return ggplot object
 plot_constellation <- function(d, data_out=FALSE){
-  cdata <- d %>%
+  hhdata <- prepGConstData(d) %>%
     subset(!grepl("-", Constellation)) %>%
+    subset(Constellation!="mixed") %>%
+    subset(!is.na(Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
     subset(Subtype!="mixed") %>%
-    subset(Subtype!="H4N6") %>%
-    subset(!is.na(Constellation))
+    subset(Subtype!="H4N6")
 
   # Get counts
   # ===== Get the counts
-  (tots <- nrow(cdata))
-
-  hhdata <- prepGConstData(cdata)
+  (tots <- nrow(hhdata))
 
   # Show empty plot if not data is selected
   if(nrow(d) == 0){
@@ -303,12 +302,17 @@ plot_constellation <- function(d, data_out=FALSE){
     ) +
     ggplot2::facet_grid(. ~ Subtype, space = "free", scales = "free")
   # Add background lines
-  for (yint in c(-1:length(unique(hhdata$Constellation))+1)) { # number of unique constellations
-    p <- p + ggplot2::geom_hline(yintercept = yint + 0.5, size = 0.25, color = "gray")
+  for (yint in c(0:length(unique(hhdata$Constellation)))) { # number of unique constellations
+    p <- p + ggplot2::geom_hline(yintercept = yint + 0.5, linewidth = 0.25, color = "gray")
   }
-  for (xint in c(-1:length(unique(hhdata$labels))+1)) { # number of unique ha/na pairings
-    p <- p + ggplot2::geom_vline(xintercept = xint + 0.5, size = 0.25, color = "gray")
-  }
+  xlines_df <- hhdata %>%
+    dplyr::group_by(Subtype, labels) %>%
+    dplyr::summarise() %>%
+    # add empty row to each group
+    dplyr::group_modify(~ dplyr::add_row(.x, .before = 0)) %>%
+    dplyr::mutate(xint = dplyr::row_number(Subtype))
+  p <- p + ggplot2::geom_vline(data = xlines_df, ggplot2::aes(xintercept = xint - 0.5), linewidth = 0.25, color = "gray")
+  
   if (data_out) { return(hhdata) }
   else { return(p) }
 }
