@@ -36,6 +36,38 @@ toggle_clade_definition <- function(d, global_clade="False") {
 #' @param The input dataset
 #' @return Data suitable for basic_plot
 #' @export
+subset_subtype <- function(d, select_subtype) {
+  #d[!(d$Subtype %in% select_subtype), "Subtype"] <- NA
+  d <- d[d$Subtype %in% select_subtype,]
+  d
+}
+
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
+collapse_segment <- function(d, select_segment) {
+  if (select_segment[1]) { 
+    d$H1 <- sub(".*", "H1", d$H1, perl=TRUE)
+    if(is.factor(d$H1)) { d$H1 <- droplevels(d$H1) }
+  }
+  if (select_segment[2]) { 
+    d$H3 <- sub(".*", "H3", d$H3, perl=TRUE) 
+    if(is.factor(d$H3)) { d$H3 <- droplevels(d$H3) }
+  }
+  if (select_segment[3]) { 
+    d$N1 <- sub(".*", "N1", d$N1, perl=TRUE) 
+    if(is.factor(d$N1)) { d$N1 <- droplevels(d$N1) }
+  }
+  if (select_segment[4]) { 
+    d$N2 <- sub(".*", "N2", d$N2, perl=TRUE) 
+    if(is.factor(d$N2)) { d$N2 <- droplevels(d$N2) }
+  }
+  d
+}
+
+#' @param The input dataset
+#' @return Data suitable for basic_plot
+#' @export
 collapse_h1 <- function(d) {
   # alpha
   d$H1 <- sub("alpha.*", "alpha", d$H1, perl=TRUE)

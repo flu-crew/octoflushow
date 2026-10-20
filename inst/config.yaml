@@ -49,6 +49,7 @@ colors:
     Other-Human-1B.2: "#546E7A"
     Other-Human: "#546E7A"
     other-human: "#546E7A"
+    Other: "#757575"
   H3:
     1990.1: "#E57373"
     LAIV: "#E57373"
@@ -115,6 +116,7 @@ colors:
     other-human-2010: "#78909C"
     Other-Human-2020: "#546E7A"
     other-human-2020: "#546E7A"
+    Other: "#757575"
   N1:
     LAIV-Classical: "#E57373"
     LAIV: "#E57373"
@@ -136,6 +138,7 @@ colors:
     pandemic: "#EF6C00"
     Pandemic: "#EF6C00"
     N1.P: "#EF6C00"
+    Other: "#757575"
   N2:
     LAIV-98: "#E57373"
     TX98: "#E57373"
@@ -156,6 +159,7 @@ colors:
     humanSeasonal: "#546E7A"
     Human-seasonal: "#546E7A"
     Human-like: "#546E7A"
+    Other: "#757575"
   internal:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -179,6 +183,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   PB2:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -202,6 +207,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   PB1:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -225,6 +231,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   PA:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -248,6 +255,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   NP:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -271,6 +279,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   M:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -294,6 +303,7 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"
   NS:
     LAIV: "#E57373"
     TX98: "#C62828"
@@ -317,3 +327,4 @@ colors:
     PDM: "#7CB342"
     pandemic: "#7CB342"
     Pandemic: "#7CB342"
+    Other: "#757575"

@@ -24,6 +24,8 @@ Imports:
     maps,
     dplyr,
     ggplot2,
+    mapplots,
+    scatterpie,
     glue,
     grid,
     gridExtra,

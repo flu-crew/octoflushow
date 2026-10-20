@@ -30,7 +30,8 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
   tabPanel(
     "About",
     fluidPage(
-      includeHTML("landing-page.html"), includeCSS("www/style.css")
+      includeHTML("landing-page.html"), 
+      includeCSS("www/style.css"),
     )
   ),
 
@@ -85,7 +86,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
   tabPanel(
     "Clades by time",
     sidebarLayout(
-     sidebarPanel(
+      sidebarPanel(
         radioButtons(
           "plotType",
           label = "Plot type",
@@ -137,7 +138,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
   tabPanel(
     "HA/NA by time",
     sidebarLayout(
-     sidebarPanel(
+      sidebarPanel(
         radioButtons(
           "plotTypeByHanaBar",
           label = "Plot type",
@@ -182,7 +183,7 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
   tabPanel(
     "HA/NA/Const by time",
     sidebarLayout(
-     sidebarPanel(
+      sidebarPanel(
         radioButtons(
           "plotTypeByTripleBar",
           label = "Plot type",
@@ -227,33 +228,37 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
   tabPanel(
     "Clades by state",
     sidebarLayout(
-     sidebarPanel(
+      sidebarPanel(
+        radioButtons(
+          "plotTypeByCladeMap",
+          label    = "Plot type",
+          choices = list(
+            "pie" = "pie-map",
+            "facet-clade" = "clade-max",
+            "facet-state" = "state-percentage"
+          ),
+          inline   = TRUE,
+          selected = "pie-map"
+        ),
         checkboxInput("collapse_h1_state", "Collapse H1 (alpha, gamma)", value=FALSE),
         checkboxInput("collapse_h3_state", "Collapse H3 (cluster IV)", value=FALSE),
         checkboxInput("collapse_n1_state", "Collapse N1 (avian, classical)", value=FALSE),
         checkboxInput("collapse_n2_state", "Collapse N2 (1998, 2002)", value=FALSE),
-       radioButtons(
-         "segmentChoiceState",
-         label    = "Segment",
-         choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
-         inline   = TRUE,
-         selected = "H1"
-       ),
-       radioButtons(
-         "global_state",
-         label = "Segment nomenclature",
-         choices = list("US", "global"),
-         inline = TRUE,
-         selected = "US"
-       ),
-       radioButtons(
-         "fillMethodState",
-         label    = "Fill Method",
-         choices  = list("count", "clade-max", "state-percentage"),
-         inline   = TRUE,
-         selected = "count"
-       ),
-       checkboxInput("state_counts", "Show Counts", value=FALSE),
+        radioButtons(
+          "segmentChoiceState",
+          label    = "Segment",
+          choices  = list("H1", "H3", "N1", "N2", "PB2", "PB1", "PA", "NP", "M", "NS"),
+          inline   = TRUE,
+          selected = "H1"
+        ),
+        radioButtons(
+          "global_state",
+          label = "Segment nomenclature",
+          choices = list("US", "global"),
+          inline = TRUE,
+          selected = "US"
+        ),
+        checkboxInput("state_counts", "Show Counts", value=TRUE),
         div(
           style="display:inline-block;vertical-align:top; width:150px;",
           downloadButton("download_state_plot", "Download Figure")
@@ -305,6 +310,17 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     "Constellation heatmap",
     sidebarLayout(
       sidebarPanel(
+        checkboxInput("collapse_h1", "Collapse H1", value=FALSE),
+        checkboxInput("collapse_h3", "Collapse H3", value=FALSE),
+        checkboxInput("collapse_n1", "Collapse N1", value=FALSE),
+        checkboxInput("collapse_n2", "Collapse N2", value=FALSE),
+        checkboxGroupInput(
+          "subtypeChoice_constellation",
+          label = "Subtype",
+          choices  = list("H1N1"="H1N1", "H1N2"="H1N2", "H3N1"="H3N1", "H3N2"="H3N2"),
+          inline=TRUE,
+          selected = c("H1N1", "H1N2", "H3N1", "H3N2")
+        ),
         radioButtons(
           "global_constellation",
           label = "Segment nomenclature",
@@ -327,5 +343,23 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
       )
     )
   ),
-  
+
+  if (FALSE) { # disabled
+  tabPanel(
+    "Tree",
+    fluidPage(
+      tags$head(
+        # Include custom JS to handle messages from R
+        tags$script(HTML("
+          var insert_text = null;
+          Shiny.addCustomMessageHandler('df_to_js', function(message) {
+            console.log('Sending dataframe from R:', message);
+            //alert('Total rows: ' + message.data);
+            insert_text = message;
+          });
+        "))
+      ),
+      uiOutput("taxonium_html")
+    )
+  )}
 ))

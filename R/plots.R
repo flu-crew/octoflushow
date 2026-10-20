@@ -166,6 +166,114 @@ abbr2state = c(
 # get states long and lat values
 states <- ggplot2::map_data("state")
 
+# Compute approximate center coordinates for each state
+#state_centers <- states %>%
+#  dplyr::group_by(region) %>%  # 'region' is the lowercase state name
+#  dplyr::summarise(
+#    center_long=mean(range(long)),  # midpoint of longitude range
+#    center_lat =mean(range(lat))    # midpoint of latitude range
+#  )
+
+state_centers <- data.frame(
+  region=c("alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada", "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota", "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina", "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington", "west virginia", "wisconsin", "wyoming"),
+  long=c(-86.8286, -152.2783, -111.6603, -92.4425, -119.4697, -105.5478, -72.7272, -75.5050, -77.0147, -82.4497, -83.4425, -156.3736, -114.6131, -89.1964, -86.2817, -93.4961, -98.3772, -85.3022, -91.9967, -69.2428, -76.7908, -71.8083, -85.4103, -94.3053, -89.6678, -92.4581, -109.6333, -99.7950, -116.6311, -71.5811, -74.6728, -106.1125, -75.5267, -79.3878, -100.4658, -82.7936, -97.4942, -120.5583, -77.7997, -71.5561, -80.8964, -100.2264, -86.3506, -99.3311, -111.6703, -72.6658, -78.8536, -120.4472, -80.6228, -89.9942, -107.5511),
+  lat=c(32.7794, 64.0686, 34.2744, 34.8939, 37.1842, 38.9972, 41.6219, 38.9897, 38.9100, 28.6306, 32.6414, 20.2928, 44.3508, 40.0417, 39.8942, 42.0750, 38.4939, 37.5347, 31.0689, 45.3694, 39.0550, 42.2597, 44.3467, 46.2808, 32.7364, 38.3567, 47.0528, 41.5378, 39.3289, 43.6806, 40.1908, 34.4072, 42.9539, 35.5558, 47.4500, 40.2861, 35.5889, 43.9336, 40.8781, 41.6761, 33.9169, 44.4442, 35.8581, 31.4758, 39.3056, 44.0686, 37.5214, 47.3825, 38.6408, 44.6242, 42.9958)
+)
+
+#' Make state pie map
+#'
+#' @param df the input surveyllance data
+#' @param segment the column to select
+#' @export
+pieMap <- function(df, segment, counts=FALSE, palette=octoflushow::get_palette(segment), data_out=FALSE){
+  df <- df[!is.na(df[[segment]]) & df$State %in% names(abbr2state), ]
+  #df[[segment]] <- df[[segment]] %>% as.character %>% factor(levels=names(palette)) %>% droplevels
+
+  # If the input dataset is empty (for example when only H3N2 are selected and
+  # the user tries to plot H1 data), return an empty figure.
+  if(nrow(df) == 0){
+    if(data_out) { return(df) }
+    else {
+      q <- ggplot2::ggplot() + ggplot2::geom_blank() + ggplot2::ggtitle("No data selected")
+      return(q)
+    }
+  }
+
+  title <- glue::glue("{segment}: {nrow(df)} strains collected from {min(df$Date)} to {max(df$Date)}")
+
+  cdata <- df %>%
+    dplyr::select(clade=segment, region="State") %>%
+    dplyr::mutate(region=unname(abbr2state[as.character(region)])) %>%
+#    order_data_factors(config) %>% droplevels %>%
+    dplyr::group_by(region, clade) %>% dplyr::count() %>% dplyr::ungroup() %>%
+    dplyr::mutate(region=factor(region, levels=unname(abbr2state))) %>%
+    tidyr::complete(clade, region, fill=list(n=NA))
+
+  data_geo <- merge(state_centers, cdata, all=TRUE, by="region") %>% 
+    tidyr::drop_na(c(clade, n)) %>%
+    #dplyr::mutate(n=ifelse(is.na(n), 0, n)) %>%
+    dplyr::group_by(region) %>%
+    dplyr::mutate(total=sum(n, na.rm=TRUE)) %>%
+    dplyr::mutate(size=floor(log10(total))+1) %>%
+    dplyr::mutate(percent=n / total * 100) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(clade=ifelse(percent < 5, "Other", as.character(clade))) %>%
+    # merge Other
+    dplyr::group_by(region, long, lat, clade, total, size) %>%
+    dplyr::summarise(across(c(n, percent), sum))
+
+  clade_li <- factor(data_geo$clade, ordered=TRUE, levels=names(config$colors[[segment]])) %>% droplevels %>% levels()
+  even_size <- seq(from=0.9, to=1.8, length.out=max(data_geo$size))
+  
+  xyz <- mapplots::make.xyz(x=data_geo$long, y=data_geo$lat, z=data_geo$n, group=data_geo$clade)
+  xyz$df <- as.data.frame(xyz$z)
+
+  # xyz$z has a strange structure, re-build dataframe
+  fix_df <- data.frame()
+  for (row_n in seq_along(xyz$x)) {
+    fix_df[row_n, ] <- NA
+    fix_df[row_n, "long"] <- xyz$x[row_n]
+    fix_df[row_n, "lat"] <- xyz$y[row_n]
+    for (clade in colnames(xyz$df)) {
+      fix_df[row_n, clade] <- as.vector(xyz$df[[clade]])[row_n]
+    }
+  }
+  fix_df <- merge(fix_df, data_geo[c("long", "lat", "region", "total", "size")], all=TRUE, by=c("long", "lat")) %>%
+    dplyr::mutate(size=even_size[size]) %>%
+    dplyr::distinct()
+
+  if (data_out) {  return(na.omit(fix_df)) }
+
+  g <- ggplot2::ggplot(data=states, ggplot2::aes(x=long, y=lat, group=group)) +
+      ggplot2::geom_polygon(fill="light grey", color="white") +
+      ggplot2::coord_fixed(1.3) + 
+      ggplot2::theme_void() +
+      ggplot2::theme(
+        text=ggplot2::element_text(size=12),
+        plot.title=ggplot2::element_text(size=12, hjust=0.5, margin=ggplot2::margin(0,0,10,0)),
+        legend.title=ggplot2::element_blank(), 
+        legend.position="bottom"
+      ) +
+      ggplot2::ggtitle(title) +
+      ggplot2::scale_fill_manual(values=palette)
+    # demo state centers
+    #geom_point(data=state_centers, ggplot2::aes(long, lat, group=region), color="red") +
+
+  if (counts) {
+    g <- g + ggplot2::geom_text(data=fix_df, ggplot2::aes(x=long, y=lat, group=region, label=total), hjust=0.5, vjust=0.5, size=2.5)
+  }
+  g <- g + scatterpie::geom_scatterpie(
+      data=fix_df,
+      mapping=ggplot2::aes(x=long, y=lat, r=size),
+      cols=clade_li, #colnames(xyz$df),
+      color=NA, #"grey",
+      donut_radius=0.4,
+      sorted_by_radius=TRUE,
+      label_radius=NULL
+  )
+}
+
+
 #' Make state map
 #'
 #' @param df the input surveyllance data
@@ -255,17 +363,14 @@ facetMaps <- function(df, segment, counts=FALSE, normalization="clade-max", data
 #' @export
 #' @return ggplot object
 plot_constellation <- function(d, data_out=FALSE){
-  hhdata <- prepGConstData(d) %>%
+  results <- d %>%
     subset(!grepl("-", Constellation)) %>%
     subset(Constellation!="mixed") %>%
     subset(!is.na(Constellation)) %>%
     subset(!grepl(",", Subtype)) %>%
     subset(Subtype!="mixed") %>%
-    subset(Subtype!="H4N6")
-
-  # Get counts
-  # ===== Get the counts
-  (tots <- nrow(hhdata))
+    subset(Subtype!="H4N6") %>%
+    prepGConstData()
 
   # Show empty plot if not data is selected
   if(nrow(d) == 0){
@@ -276,16 +381,22 @@ plot_constellation <- function(d, data_out=FALSE){
     }
   }
 
+  if (data_out) { return(results$hhdata) } # data output
+
+  # remove duplicate const/rows (causes bold text)
+  results$hhdata <- results$hhdata %>%
+    dplyr::select(-c(const, count)) %>%
+    dplyr::distinct()
+
   xlabel <- "HA and NA Phylogenetic Clade Pairs"
   ylabel <- "Gene constellations"
-  title <- paste("Gene Constellations (n=", tots, ")", sep = "")
+  title <- paste("Gene Constellations (n=", results$tots, ")", sep = "")
 
-  p <- ggplot2::ggplot(hhdata, ggplot2::aes(x=labels, y=Constellation, fill=log(nn))) +
+  p <- ggplot2::ggplot(results$hhdata, ggplot2::aes(x=labels, y=Constellation, fill=log(nn))) +
     ggplot2::geom_tile(color="black") +
     ggplot2::scale_fill_gradient2(
-      low="white", mid="#43a2ca",
-      high="#0868ac", na.value="white",
-      midpoint = mean(log(hhdata$nn))
+      low = "white", mid = "#43a2ca", high = "#0281db",
+      na.value = "white", midpoint = log(mean(results$hhdata$nn))
     ) +
     ggplot2::geom_text(ggplot2::aes(label=n)) +
     ggplot2::labs(
@@ -302,19 +413,17 @@ plot_constellation <- function(d, data_out=FALSE){
     ) +
     ggplot2::facet_grid(. ~ Subtype, space = "free", scales = "free")
   # Add background lines
-  for (yint in c(0:length(unique(hhdata$Constellation)))) { # number of unique constellations
+  for (yint in c(0:length(unique(results$hhdata$Constellation)))) { # number of unique constellations
     p <- p + ggplot2::geom_hline(yintercept = yint + 0.5, linewidth = 0.25, color = "gray")
   }
-  xlines_df <- hhdata %>%
+  xlines_df <- results$hhdata %>%
     dplyr::group_by(Subtype, labels) %>%
     dplyr::summarise() %>%
     # add empty row to each group
     dplyr::group_modify(~ dplyr::add_row(.x, .before = 0)) %>%
     dplyr::mutate(xint = dplyr::row_number(Subtype))
   p <- p + ggplot2::geom_vline(data = xlines_df, ggplot2::aes(xintercept = xint - 0.5), linewidth = 0.25, color = "gray")
-  
-  if (data_out) { return(hhdata) }
-  else { return(p) }
+  return(p) # figure output
 }
 
 # ===== prepConstellationData
@@ -336,46 +445,71 @@ prepGConstData <- function(d){
     dplyr::mutate(                      # create a HAtype and NAtype column
       H = factor(dplyr::coalesce(H1, H3)),
       N = factor(dplyr::coalesce(N1, N2))
-    )
+    ) %>%
+    # remove any entries missing HA/NA
+    dplyr::filter(!( is.na(H1) & is.na(H3) )) %>%
+    dplyr::filter(!( is.na(N1) & is.na(N2) ))
 
   # Get counts
   # ===== Get the counts
   (tots <- nrow(cdata))
+  n_min <- floor(tots/1000/2)
 
   hdata <- cdata %>%
     dplyr::group_by(Subtype, H, N, Constellation) %>%
     dplyr::summarise(
-      n = (dplyr::n()/tots*100) %>% round(., digits=1),
-      nn = n
+      count=dplyr::n(),
     ) %>%
-    dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
+    dplyr::mutate(const=Constellation) %>% # save original const value
+    dplyr::mutate(
+      Constellation=dplyr::case_when(count>n_min ~ Constellation,
+                                     count<=n_min ~ " Other")) %>%
+#    aggregate(count ~ Subtype + H + N + Constellation, FUN = sum) %>%
+    dplyr::group_by(Subtype, H, N, Constellation) %>% 
+    dplyr::summarise(
+      group_count=sum(count),
+      const, count
+    ) %>%
+    dplyr::mutate(
+      n = (group_count/tots*100) %>% round(., digits=1),
+      nn = group_count/3
+    ) %>%
+    dplyr::select(Constellation, const, Subtype, H, N, n, nn, count, group_count) %>%
     dplyr::ungroup(.)
 
-  totdata <- cdata %>%
-    dplyr::group_by(Constellation) %>%
+  totdata <- hdata %>%
+#    aggregate(group_count ~ Constellation, FUN = sum) %>%
+    dplyr::select(-c(const, count)) %>%
+    dplyr::distinct() %>%
+    dplyr::group_by(Constellation) %>% 
     dplyr::summarise(
+      group_count=sum(group_count),
+    ) %>%
+    dplyr::mutate(
+      n = (group_count/tots*100) %>% round(., digits=1),
+      nn = group_count/3,
+      #nn = dplyr::case_when(nn<0.5 ~ 0.5, 1==1 ~ nn),
       Subtype="total",
       H="total",
       N="total",
-      n = (dplyr::n()/tots*100) %>% round(., digits=1),
-      nn = n/3,
-      nn = dplyr::case_when(nn<0.5 ~ 0.5,
-                            1==1 ~ nn),
-      labels="total"
+      const="total",
+      count="total"
     ) %>%
-    dplyr::select(Constellation, Subtype, H, N, n, nn) %>%
+    dplyr::select(Constellation, const, Subtype, H, N, n, nn, count, group_count) %>%
     dplyr::ungroup(.)
 
   subtype_order <- c("total", "H1N1", "H1N2", "H3N1", "H3N2", "mixed")
 
   hhdata <- rbind(hdata, totdata) %>%
+    # remove rows with n=0
+    dplyr::filter(n > 0) %>%
     dplyr::mutate(
       labels=dplyr::case_when(H=="total" ~ "total",
                               1==1 ~ paste(H, N, sep="/")),
       Subtype=factor(Subtype, subtype_order)
     )
 
-  return(hhdata)
+  return(list(hhdata=hhdata, tots=tots))
 }
 
 #' Make a count plot from a column
@@ -445,6 +579,7 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
   }
 
   df[[variable]] <- df[[variable]] %>% as.character %>% factor(levels=names(palette)) %>% droplevels
+  data <- df %>% dplyr::group_by(Date) %>% dplyr::filter(n > 0) %>% dplyr::mutate(proportion = n / sum(n))
 
   # Show empty plot if not data is selected
   if(nrow(df) == 0){
@@ -506,12 +641,16 @@ barchart_bytime <- function(df, value="n", variable="H1", palette=octoflushow::g
       p <- p + geom_stream(type="ridge")
     }
     else if(bartype=="fill"){
-      p <- p + geom_stream(type="mirror")
+      p <- p + geom_stream(type="mirror") +
+        ggplot2::scale_y_continuous(
+          breaks = pretty( c(max(data$n/data$proportion)/2, -max(data$n/data$proportion)/2) ),
+          labels = abs(pretty( c(max(data$n/data$proportion)/2, -max(data$n/data$proportion)/2) ))
+        )
     }
   }
 
   if (chartype == "data") { 
-    return(df %>% dplyr::group_by(Date) %>% dplyr::filter(n > 0) %>% dplyr::mutate(proportion = n / sum(n)) )
+    return(data)
   }
   else { return(p) }
 }
@@ -626,7 +765,7 @@ heatmap_HANA <- function(df, dates=NULL, text=TRUE, totals=FALSE, font_size=3, d
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = H_Type)) +
     ggplot2::geom_tile(ggplot2::aes(fill = percent), colour = "black") +
-    ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", high = "#0868ac",
+    ggplot2::scale_fill_gradient2(low = "white", mid = "#43a2ca", high = "#0281db",
                                   space = "Lab", midpoint = mid.value, guide = "colorbar") +
     ggplot2::theme_bw() +
     ggplot2::labs(y="HA Clade", x="NA Clade", title=title) +

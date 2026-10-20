@@ -2,5 +2,5 @@
 #'
 #' @export
 launch_app <- function(){
-  shiny::runApp(system.file("app", package='octoflushow'))
+  shiny::runApp(system.file("app", package='octoflushow')) #, port=4420)
 }

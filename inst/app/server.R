@@ -5,7 +5,7 @@ require(magrittr)
 d <- octoflushow::load_current()
 
 # update data in various ways prior to plotting
-plot_munge <- function(d, collapse_h1_clade, collapse_h3_clade, collapse_n1_clade, collapse_n2_clade, global_ha="us"){
+plot_munge <- function(d, collapse_h1_clade, collapse_h3_clade, collapse_n1_clade, collapse_n2_clade, global_ha="us", select_subtype=NaN, select_segment=NaN){
   global_clade<-FALSE
   if(global_ha == "global"){
     global_clade<-TRUE
@@ -23,6 +23,12 @@ plot_munge <- function(d, collapse_h1_clade, collapse_h3_clade, collapse_n1_clad
   }
   if(collapse_n2_clade){
     d = octoflushow::collapse_n2(d)
+  }
+  if(!is.numeric(select_subtype)){
+    d = octoflushow::subset_subtype(d, select_subtype)
+  }
+  if(!is.numeric(select_segment)){
+    d = octoflushow::collapse_segment(d, select_segment)
   }
   d
 }
@@ -76,7 +82,25 @@ server <- function(input, output, session) {
   output$constellation_plot <- renderPlot({
     print(constellation_plot_rct())
   })
-  
+
+  # Only render taxonium when "Tree" tab is selected
+  output$taxonium_html <- renderUI({
+    df <- d_rct()
+    # Convert dataframe to list for JSON serialization
+    session$sendCustomMessage(
+      type = "df_to_js",
+      #message = list(data = jsonlite::toJSON(df, dataframe = "rows", auto_unbox = TRUE))
+      message = list(data = jsonlite::toJSON(nrow(df), dataframe = "rows", auto_unbox = TRUE))
+    )
+
+    #includeHTML("www/react-app/taxonium.html")
+    tags$iframe(
+#      id = "message_target",
+      src = "react-app/taxonium-iframe.html",
+      style = "width:100%; height: calc(100vh - 90px); border:none;",
+    )
+  })
+
   # Clades by time plot
   time_plot_rct <- reactive({
     plot_munge(d_rct(), input$collapse_h1_bar, input$collapse_h3_bar, input$collapse_n1_bar, input$collapse_n2_bar, input$global_bar) %>%
@@ -109,12 +133,20 @@ server <- function(input, output, session) {
 
   # Clades by state
   state_plot_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state) %>%
-      octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts)
+    df <- plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state)
+    if(input$plotTypeByCladeMap == "pie-map"){
+      octoflushow::pieMap(df, segment=input$segmentChoiceState, counts=input$state_counts)
+    } else {
+      octoflushow::facetMaps(df, segment=input$segmentChoiceState, normalization=input$plotTypeByCladeMap, counts=input$state_counts)
+    }
   })
   state_plot_data_rct <- reactive({
-    plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state) %>%
-      octoflushow::facetMaps(segment=input$segmentChoiceState, normalization=input$fillMethodState, count=input$state_counts, data_out=TRUE)
+    df <- plot_munge(d_rct(), input$collapse_h1_state, input$collapse_h3_state, input$collapse_n1_state, input$collapse_n2_state, input$global_state)
+    if(input$plotTypeByCladeMap == "pie-map"){
+      octoflushow::pieMap(df, segment=input$segmentChoiceState, counts=input$state_counts, data_out=TRUE)
+    } else {
+      octoflushow::facetMaps(df, segment=input$segmentChoiceState, normalization=input$plotTypeByCladeMap, counts=input$state_counts, data_out=TRUE)
+    }
   })
   
   # Clade heatmap
@@ -129,12 +161,14 @@ server <- function(input, output, session) {
   
   # Constellation heatmap
   constellation_plot_rct <- reactive({
-    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation) %>%
-    octoflushow::plot_constellation()
+    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation, input$subtypeChoice_constellation, 
+      c(input$collapse_h1, input$collapse_h3, input$collapse_n1, input$collapse_n2)) %>%
+      octoflushow::plot_constellation()
   })
   constellation_plot_data_rct <- reactive({
-    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation) %>%
-    octoflushow::plot_constellation(data_out=TRUE)
+    plot_munge(d_rct(), TRUE, TRUE, TRUE, TRUE, input$global_constellation, input$subtypeChoice_constellation, 
+      c(input$collapse_h1, input$collapse_h3, input$collapse_n1, input$collapse_n2)) %>%
+      octoflushow::plot_constellation(data_out=TRUE)
   })
 
   make_downloader <- function(function_name){
@@ -252,10 +286,10 @@ server <- function(input, output, session) {
       if (is.factor(x)) droplevels(x) else x
     })
   })
-# reverse proxy might be an issue?
-#https://github.com/rstudio/DT/pull/982
-#https://stackoverflow.com/questions/38974731/websockets-not-connected-behind-proxy
-#https://stackoverflow.com/questions/29481205/shiny-websocket-error
+  # reverse proxy might be an issue?
+  #https://github.com/rstudio/DT/pull/982
+  #https://stackoverflow.com/questions/38974731/websockets-not-connected-behind-proxy
+  #https://stackoverflow.com/questions/29481205/shiny-websocket-error
   proxy <- DT::dataTableProxy("raw_data_table")
   observeEvent(filterable_sets(), {
     DT::updateFilters(proxy, filterable_sets())
