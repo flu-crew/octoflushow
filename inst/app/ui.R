@@ -25,6 +25,14 @@ resize_on_change <- function(elementID){
   tags$script(js)
 }
 
+message_js <- "
+var insert_text = null;
+Shiny.addCustomMessageHandler('df_to_js', function(message) {
+  //console.log('Sending dataframe from R:', message);
+  insert_text = message;
+});
+"
+
 shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
 
   tabPanel(
@@ -344,22 +352,36 @@ shinyUI(navbarPage(title=div(img(src="logo-none.png"), "octoFLUshow"),
     )
   ),
 
-  if (FALSE) { # disabled
-  tabPanel(
-    "Tree",
-    fluidPage(
-      tags$head(
-        # Include custom JS to handle messages from R
-        tags$script(HTML("
-          var insert_text = null;
-          Shiny.addCustomMessageHandler('df_to_js', function(message) {
-            console.log('Sending dataframe from R:', message);
-            //alert('Total rows: ' + message.data);
-            insert_text = message;
-          });
-        "))
-      ),
-      uiOutput("taxonium_html")
+  #if (FALSE) { # disabled
+  navbarMenu(
+    "Phylogenetic Trees",
+    tabPanel(
+      "H1",
+      fluidPage(
+        tags$head(tags$script(HTML(message_js))),
+        uiOutput("taxonium_h1")
+      )
+    ),
+    tabPanel(
+      "H3",
+      fluidPage(
+        tags$head(tags$script(HTML(message_js))),
+        uiOutput("taxonium_h3")
+      )
+    ),
+    tabPanel(
+      "N1",
+      fluidPage(
+        tags$head(tags$script(HTML(message_js))),
+        uiOutput("taxonium_n1")
+      )
+    ),
+    tabPanel(
+      "N2",
+      fluidPage(
+        tags$head(tags$script(HTML(message_js))),
+        uiOutput("taxonium_n2")
+      )
     )
-  )}
+  )#}
 ))

@@ -246,7 +246,7 @@ pieMap <- function(df, segment, counts=FALSE, palette=octoflushow::get_palette(s
 
   g <- ggplot2::ggplot(data=states, ggplot2::aes(x=long, y=lat, group=group)) +
       ggplot2::geom_polygon(fill="light grey", color="white") +
-      ggplot2::coord_fixed(1.3) + 
+      ggplot2::coord_fixed(1) + 
       ggplot2::theme_void() +
       ggplot2::theme(
         text=ggplot2::element_text(size=12),
@@ -457,7 +457,7 @@ prepGConstData <- function(d){
 
   hdata <- cdata %>%
     dplyr::group_by(Subtype, H, N, Constellation) %>%
-    dplyr::summarise(
+    dplyr::reframe(
       count=dplyr::n(),
     ) %>%
     dplyr::mutate(const=Constellation) %>% # save original const value
@@ -466,7 +466,7 @@ prepGConstData <- function(d){
                                      count<=n_min ~ " Other")) %>%
 #    aggregate(count ~ Subtype + H + N + Constellation, FUN = sum) %>%
     dplyr::group_by(Subtype, H, N, Constellation) %>% 
-    dplyr::summarise(
+    dplyr::reframe(
       group_count=sum(count),
       const, count
     ) %>%

@@ -83,23 +83,32 @@ server <- function(input, output, session) {
     print(constellation_plot_rct())
   })
 
-  # Only render taxonium when "Tree" tab is selected
-  output$taxonium_html <- renderUI({
-    df <- d_rct()
-    # Convert dataframe to list for JSON serialization
-    session$sendCustomMessage(
-      type = "df_to_js",
-      #message = list(data = jsonlite::toJSON(df, dataframe = "rows", auto_unbox = TRUE))
-      message = list(data = jsonlite::toJSON(nrow(df), dataframe = "rows", auto_unbox = TRUE))
-    )
+  # Only render taxonium when tree selected from navbar
+  render_tree <- function(segment_subtype){
+    renderUI({
+      df <- d_rct()
+      # Convert dataframe to list for JSON serialization
+      session$sendCustomMessage(
+        type = "df_to_js",
+        #message = list(data = jsonlite::toJSON(df, dataframe="rows", auto_unbox=TRUE))
+        message = list(
+          data = jsonlite::toJSON(df$Strain, dataframe="rows", auto_unbox=TRUE),
+          segment = segment_subtype
+        )
+      )
 
-    #includeHTML("www/react-app/taxonium.html")
-    tags$iframe(
-#      id = "message_target",
-      src = "react-app/taxonium-iframe.html",
-      style = "width:100%; height: calc(100vh - 90px); border:none;",
-    )
-  })
+      #includeHTML("www/react-app/taxonium.html")
+      tags$iframe(
+  #      id = "message_target",
+        src = "react-app/taxonium-iframe.html",
+        style = "width:100%; height: calc(100vh - 90px); border:none;",
+      )
+    })
+  }
+  output$taxonium_h1 <- render_tree("H1")
+  output$taxonium_h3 <- render_tree("H3")
+  output$taxonium_n1 <- render_tree("N1")
+  output$taxonium_n2 <- render_tree("N2")
 
   # Clades by time plot
   time_plot_rct <- reactive({

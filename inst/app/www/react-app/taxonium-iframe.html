@@ -2,18 +2,48 @@
 <html>
   <div id="taxonium_root" style = "width:100%; height: calc(100vh - 90px); border:none;"></div>
 
+  <script src="./scripts/patristic.js"></script>
+  <script src="./scripts/utils.js"></script>
   <script type="module">
-
-    alert('Total rows: ' + parent.insert_text.data); //test
-    console.log('Received dataframe from R:', parent.insert_text.data); // test
-
+    
+    const patristic = window.patristic;
     import React from 'https://esm.sh/react@19';
     import { createRoot } from 'https://esm.sh/react-dom@19/client';
     import Taxonium from 'https://esm.sh/taxonium-component';
-    
+    /**
+    function pruneTree(branch, allowedLeafIds) {
+      // If it's a leaf, check if it's in the allowed list
+      if (branch.isLeaf()) {
+        return allowedLeafIds.includes(branch.id);
+      }
+      // Recursively process children
+      if (branch.children) {
+        branch.children = branch.children.filter(child => pruneTree(child, allowedLeafIds));
+      }
+      // Keep this internal branch only if it still has remaining children
+      return branch.children && branch.children.length > 0;
+    }
+    **/
+
+    //console.log('Total rows: ' + parent.insert_text.data.length); // test
+    //console.log('Received data from R:', parent.insert_text); // test
+
     // tree data
-    const metadata_text = await fetch('./tree/test.tsv').then(r => r.text());  //console.log(metadata_text);
-    const nwk = await fetch('./tree/test.fna.tre').then(r => r.text());        //console.log(nwk);
+    const metadata_text = await fetch('./tree/octoflushow-'+parent.insert_text.segment+'.tsv').then(r => r.text());
+    const original_nwk = await fetch('./tree/octoflushow-'+parent.insert_text.segment+'.fna.tre').then(r => r.text());
+    const strain_list = parent.insert_text.data;
+    let patristic_tree = patristic.parseNewick(subsampleTree(original_nwk, strain_list));
+    const nwk = patristic_tree.simplify().toNewick();
+    //console.log(nwk); //?
+    /**
+    let patristic_tree = patristic.parseNewick(original_nwk);
+    alert(patristic_tree.getLeaves().length); // test
+    pruneTree(patristic_tree, strain_list);
+    alert(patristic_tree.getLeaves().length); // test
+    const nwk = patristic_tree.simplify().toNewick();
+    console.log(nwk);
+    **/
+
 
     const { createElement } = React;
 
@@ -29,10 +59,10 @@
       };
 
       const sourceData = {
-        data: nwk,
+        data: nwk, //nex,
         status: "loaded",
-        filename: "temp.nwk",
-        filetype: "nwk",
+        filename: "temp.nwk", //"temp.nex",
+        filetype: "nwk", //"nexus",
         metadata: metadata,
       };
       
